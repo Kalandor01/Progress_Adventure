@@ -1,73 +1,28 @@
-﻿import random
+﻿import random as r
 import logging
 import time
+import classes as cl
 
 # variables
 game = True
 # SEED
 # seed = 100
-seed = random.randint(-1000000, 1000000)
-random.seed(seed)
-r = random
-name = "You"
-life = r.randint(1, 6) + r.randint(1, 6) + 12
-skill = r.randint(1, 6) + 6
-luck = round(r.random() * 100 / 5, 1)
+seed = r.randint(-1000000, 1000000)
+r.seed(seed)
+
+player = cl.Player()
+# name = "You"
+# life = r.randint(1, 6) + r.randint(1, 6) + 12
+# skill = r.randint(1, 6) + 6
+# luck = round(r.random() * 100 / 5, 1)
 gold = 0
 no = False
 page = 1
 
 
-def monster_master(m_name, m_life, m_attack, m_deff, m_speed, m_small=-2, m_big=3, m_rare=0.05, small_l=None, big_l=None, small_a=None, big_a=None, small_d=None, big_d=None, small_s=None, big_s=None):
-    if small_l is None:
-        small_l = m_small
-    if big_l is None:
-        big_l = m_big
-    if small_a is None:
-        small_a = m_small
-    if big_a is None:
-        big_a = m_big
-    if small_d is None:
-        small_d = m_small
-    if big_d is None:
-        big_d = m_big
-    if small_s is None:
-        small_s = m_small
-    if big_s is None:
-        big_s = m_big
-
-    # stat fluctuation
-    m_life += round(r.triangular(small_l, big_l))
-    m_attack += round(r.triangular(small_a, big_a))
-    m_deff += round(r.triangular(small_d, big_d))
-    m_speed += round(r.triangular(small_s, big_s))
-    # rare
-    rare = False
-    if r.random() < m_rare:
-        rare = True
-        m_name = "Rare " + m_name
-        m_life *= 2
-        m_attack *= 2
-        m_deff *= 2
-        m_speed *= 2
-    # write
-    return [m_name, m_life, m_attack, m_deff, m_speed, rare]
-
-
-# MONSTERS
-def caveman():
-    return monster_master("Caveman", 7, 7, 7, 7)
-
-
-def ghoul():
-    return monster_master("Ghoul", 11, 9, 9, 9)
-
-
-def troll():
-    return monster_master("Troll", 13, 11, 11, 5)
-
-
+# Monster cheat sheet: name, life, attack, deff, speed, rare, team, switched
 def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=True):
+    global player
     monsters = []
     monster = None
     for x in range(num):
@@ -93,19 +48,19 @@ def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=True):
             monster_n = r.randint(0, 0)
             match monster_n:
                 case 0:
-                    monster = troll()
+                    monster = cl.Troll()
             cost -= 3
         elif monster_cost >= 2:
             monster_n = r.randint(0, 0)
             match monster_n:
                 case 0:
-                    monster = ghoul()
+                    monster = cl.Ghoul()
             cost -= 2
         else:
             monster_n = r.randint(0, 0)
             match monster_n:
                 case 0:
-                    monster = caveman()
+                    monster = cl.Caveman()
             cost -= 1
         num -= 1
         monsters.append(monster)
@@ -113,7 +68,8 @@ def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=True):
     fight(monsters)
 
 
-def fight(monster_l=[["test", 1, 1, 1, 1, False]]):
+def fight(monster_l=[cl.Test()]):
+    global player
     # name, life, skill
     global name, life, skill, luck
     # variables
@@ -125,15 +81,26 @@ def fight(monster_l=[["test", 1, 1, 1, 1, False]]):
             break
     attacking_m = ""
     # enemys
-    print("\nEnemys:")
+    max_team_n = 0
     for m in monster_l:
-        print(f"\n{m[0]}\nHP: {m[1]}\nAttack: {m[2]}\nDefence: {m[3]}\nSpeed: {m[4]}")
+        if m.team > max_team_n:
+            max_team_n = m.team
+    for x in range(max_team_n + 1):
+        print(f"\nTeam {x}:\n")
+        if x == 0:
+            print(f"{player.name}\nHP: {player.hp}\nAttack: {player.attack}\nDefence: {player.defence}\nSpeed: {player.speed}\n")
+        for m in monster_l:
+            if m.team == x:
+                print(f"{m.name}", end="")
+                if m.switched:
+                    print(f" (Switched to this side!)", end="")
+                print(f"\nHP: {m.hp}\nAttack: {m.attack}\nDefence: {m.defence}\nSpeed: {m.speed}\n")
     print()
     while life > 0 and szum > 0:
         for m in monster_l:
             if m[1] > 0:
-                attack = r.randint(1, 6) + skill
-                attack_e = r.randint(1, 6) + m[2]
+                attack = r.randint(1, 6) + player.attack
+                attack_e = r.randint(1, 6) + m.attack
                 # clash
                 if attack == attack_e:
                     print("\nCLASH!")
@@ -203,9 +170,6 @@ def stats(won=0):
         game = False
 
 
-fight_ran(7, 15)
-
-
 # + extra: full heal...
 def modify(stat, value, write=True):
     global life, skill, luck, gold
@@ -261,30 +225,14 @@ def pages(p):
             stats()
         case 9:
             print("\nHallod, hogy elölről súlyos lépések közelednek. Egy széles, állatbőrökbe öltözött, kőbaltás, primitívlény lép elő. Ahogy meglát, morog, a földre köp, majd a kőbaltát felemelve közeledik, és mindennek kinéz, csak barátságosnak nem. Előhúzod kardodat, és felkészülsz, hogy megküzdj a Barlangi Emberrel.")
-            fight([["Caveman", 7, 7]])
+            fight([cl.Caveman()])
             stats(1)
         case _:
             no = True
             logging.warning("Wrong page number!!!")
 
 
-# main
-"""
-    
-    olalak:
-    1   -> 3, 6 -> 3
-    2   -> 5, 8
-    3   -> 2, 7
-    4   -> vége
-    5   -> vége
-    7   -> 4, 9
-    8   -> vége
-    9   -> fight
-
-igazi könyvekben nem így van a fight?
-"""
-
-
+# page choice
 def page_turning():
     global game, seed, name, life, skill, luck, gold, no, page
     page_old = page
@@ -338,4 +286,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    fight_ran(7, 15)
+    # main()
