@@ -2,6 +2,7 @@
 import logging
 import time
 import classes as cl
+import sys
 
 # variables
 game = True
@@ -286,5 +287,15 @@ def main():
 
 
 if __name__ == "__main__":
-    fight_ran(7, 15)
-    # main()
+    # ultimate error handlind (release only)
+    exit_game = False
+    while not exit_game:
+        try:
+            # main function
+            # main()
+            fight_ran(7, 15)
+        except:
+            print(f"ERROR: {sys.exc_info()[1]}")
+            ans = input("Restart?(Y/N): ")
+            if ans.upper() == "N":
+                exit_game = True
