@@ -1,6 +1,6 @@
 ﻿import logging
 import os
-import random as r
+import numpy as np
 import sys
 import time
 from datetime import datetime
@@ -22,9 +22,9 @@ def imput(ask="Num: ", type=int):
 # variables
 game = True
 # SEED
-# seed = 100
-seed = r.randint(-1000000, 1000000)
-r.seed(seed)
+r_seed = np.random.RandomState()
+seed = r_seed.randint(0, 1000000000)
+r = np.random.RandomState(seed)
 
 player = cl.Player()
 # name = "You"
@@ -50,7 +50,7 @@ def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=True):
             costnum = power_min
         # cost calculation
         if num > 1:
-            monster_cost = r.randint(power_min, costnum)
+            monster_cost = r.randint(power_min, costnum + 1)
         else:
             monster_cost = cost
         # cost adjustment
@@ -61,19 +61,19 @@ def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=True):
 
         # monster choice
         if monster_cost >= 3:
-            monster_n = r.randint(0, 0)
+            monster_n = r.randint(0, 1)
             match monster_n:
                 case 0:
                     monster = cl.Troll()
             cost -= 3
         elif monster_cost >= 2:
-            monster_n = r.randint(0, 0)
+            monster_n = r.randint(0, 1)
             match monster_n:
                 case 0:
                     monster = cl.Ghoul()
             cost -= 2
         else:
-            monster_n = r.randint(0, 0)
+            monster_n = r.randint(0, 1)
             match monster_n:
                 case 0:
                     monster = cl.Caveman()
@@ -114,8 +114,8 @@ def fight(monster_l=[cl.Test()]):
     while player.hp > 0 and szum > 0:
         for m in monster_l:
             if m.hp > 0:
-                attack = r.randint(1, 6) + player.attack
-                attack_e = r.randint(1, 6) + m.attack
+                attack = r.randint(1, 7) + player.attack
+                attack_e = r.randint(1, 7) + m.attack
                 # clash
                 if attack == attack_e:
                     print("\nCLASH!")
@@ -318,10 +318,10 @@ def load_save(save_num=1, save_name="save*"):
     # player
     player_data = datas[1].split(", ")
     player.name = player_data[0]
-    player.hp = player_data[1]
-    player.attack = player_data[2]
-    player.defence = player_data[3]
-    player.speed = player_data[4]
+    player.hp = int(player_data[1])
+    player.attack = int(player_data[2])
+    player.defence = int(player_data[3])
+    player.speed = float(player_data[4])
     stats(-1)
     data = []
     game_loop(data)
