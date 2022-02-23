@@ -1,8 +1,23 @@
-﻿import random as r
-import logging
-import time
-import classes as cl
+﻿import logging
+import os
+import random as r
 import sys
+import time
+from datetime import datetime
+
+import random_sentance as rs
+import save_file_manager as sfm
+
+import classes as cl
+
+
+def imput(ask="Num: ", type=int):
+    """
+    Only returns int/float.
+    """
+    while True:
+        try: return type(input(ask))
+        except ValueError: print(f'Not{" whole" if type == int else ""} number!')
 
 # variables
 game = True
@@ -69,10 +84,9 @@ def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=True):
     fight(monsters)
 
 
+# attacking with oop functions
 def fight(monster_l=[cl.Test()]):
     global player
-    # name, life, skill
-    global name, life, skill, luck
     # variables
     szum = 0
     for m in monster_l:
@@ -97,9 +111,9 @@ def fight(monster_l=[cl.Test()]):
                     print(f" (Switched to this side!)", end="")
                 print(f"\nHP: {m.hp}\nAttack: {m.attack}\nDefence: {m.defence}\nSpeed: {m.speed}\n")
     print()
-    while life > 0 and szum > 0:
+    while player.hp > 0 and szum > 0:
         for m in monster_l:
-            if m[1] > 0:
+            if m.hp > 0:
                 attack = r.randint(1, 6) + player.attack
                 attack_e = r.randint(1, 6) + m.attack
                 # clash
@@ -107,73 +121,72 @@ def fight(monster_l=[cl.Test()]):
                     print("\nCLASH!")
                 # damage
                 elif attack < attack_e:
-                    print(f"\n{m[0]} attacked {name}: ", end="")
-                    if r.random() * 100 > luck:
-                        life -= 2
-                        if life < 0:
-                            life = 0
-                        print(f"-2 HP({life})")
-                        if life <= 0:
-                            attacking_m = m[0]
+                    print(f"\n{m.name} attacked {player.name}: ", end="")
+                    if r.random() > player.speed:
+                        player.hp -= 2
+                        if player.hp < 0:
+                            player.hp = 0
+                        print(f"-2 HP({player.hp})")
+                        if player.hp <= 0:
+                            attacking_m = m.name
                             break
                     else:
                         print("BLOCKED!")
                 # attack
                 else:
-                    print(f"\n{name} attacked {m[0]}: ", end="")
-                    if r.random() * 100 > luck:
-                        m[1] -= 2
-                        if m[1] < 0:
-                            m[1] = 0
-                        print(f"-2 HP({m[1]})")
+                    print(f"\n{player.name} attacked {m.name}: ", end="")
+                    if r.random() > player.speed:
+                        m.hp -= 2
+                        if m.hp < 0:
+                            m.hp = 0
+                        print(f"-2 HP({m.hp})")
                     else:
-                        m[1] -= 4
-                        if m[1] < 0:
-                            m[1] = 0
-                        print(f"CRITICAL HIT: -4 HP({m[1]})")
-                    if m[1] <= 0:
-                        print(f"{name} defeated {m[0]}")
+                        m.hp -= 4
+                        if m.hp < 0:
+                            m.hp = 0
+                        print(f"CRITICAL HIT: -4 HP({m.hp})")
+                    if m.hp <= 0:
+                        print(f"{player.name} defeated {m.name}")
                 time.sleep(0.5)
         # sum life
         szum = 0
         for m in monster_l:
-            if m[1] > 0:
+            if m.hp > 0:
                 szum += 1
     # outcome
-    if life <= 0:
-        life = 0
-        print(f"\n{attacking_m} defeated {name}!")
+    if player.hp <= 0:
+        player.hp = 0
+        print(f"\n{attacking_m} defeated {player.name}!")
         stats()
     else:
         monsters_n = ""
         for x in range(len(monster_l)):
-            monsters_n += monster_l[x][0]
+            monsters_n += monster_l[x].name
             if len(monster_l) - 2 == x:
                 monsters_n += " and "
             elif len(monster_l) - 2 > x:
                 monsters_n += ", "
-        print(f"\n{name} defeated {monsters_n}!\n")
+        print(f"\n{player.name} defeated {monsters_n}!\n")
 
 
 # stats
 def stats(won=0):
-    global game
+    global player
     if won == 1:
         print("\nYou Win!!!")
     elif won == 0:
         print("\nYou lost!!!")
-    print(f"\nName: {name}\n\nSTATS:")
+    print(f"\nName: {player.name}\n\nSTATS:")
     if won != 0:
-        print(f"HP: {life}")
-    print(f"Skill: {skill}\nLuck: {luck}%\n")
-    if 0 <= won <= 1:
+        print(f"HP: {player.hp}")
+    print(f"Attack: {player.attack}\nDefence: {player.defence}\nSpeed: {player.speed}\n")
+    if won == 0 or won == 1:
         print(f"OTHER:\nGold: {gold}")
-        game = False
 
 
-# + extra: full heal...
-def modify(stat, value, write=True):
-    global life, skill, luck, gold
+# + extra: full heal...                     DEPRECATED?
+def modify(stat, value=0, write=True):
+    global life, gold
     match stat:
         case "life":
             life += value
@@ -195,7 +208,7 @@ def modify(stat, value, write=True):
             logging.warning(f"{stat} is not a valid stat!!!")
 
 
-# pages
+# pages                                     DEPRECATED
 def pages(p):
     global page, life, gold, no
     page = p
@@ -233,12 +246,12 @@ def pages(p):
             logging.warning("Wrong page number!!!")
 
 
-# page choice
+# page choice                                   DEPRECATED
 def page_turning():
-    global game, seed, name, life, skill, luck, gold, no, page
+    global game, seed, name, life, gold, no, page
     page_old = page
     try:
-        page = int(input("\nWhich page do you want to go to?: "))
+        page = int(imput("\nWhich page do you want to go to?: "))
     except ValueError:
         page = -1
     if page == 1:
@@ -272,9 +285,50 @@ def page_turning():
         print("Wrong page number!")
         page = page_old
         no = False
+    
+
+def game_loop(data=[]):
+    fight_ran(7, 15)
+
+    
+def new_save(save_num=1, save_name="save*"):
+    new_save_data = []
+    # get new save data
+    global game, name
+    name = input("What is your name?: ")
+    if name == "":
+        name = "You"
+    player.name = name
+    stats(-1)
+    today = datetime.today()
+    new_save_data.append(f"{today.year}, {today.month}, {today.day}, {today.hour}, {today.minute}, {today.second}")
+    new_save_data.append(f"{player.name}, {player.hp}, {player.attack}, {player.defence}, {player.speed}")
+    # write new save
+    sfm.encode_save(new_save_data, save_num, save_name)
+    data = []
+    game_loop(data)
+
+
+def load_save(save_num=1, save_name="save*"):
+    # read data
+    datas = sfm.decode_save(save_num, save_name)
+    # last access
+    last_acces = datas[0].split(", ")
+    print(f"\nLast opened: {last_acces[0]}.{'0' if int(last_acces[1]) < 10 else ''}{last_acces[1]}.{last_acces[2]} {last_acces[3]}:{last_acces[4]}:{last_acces[5]}")
+    # player
+    player_data = datas[1].split(", ")
+    player.name = player_data[0]
+    player.hp = player_data[1]
+    player.attack = player_data[2]
+    player.defence = player_data[3]
+    player.speed = player_data[4]
+    stats(-1)
+    data = []
+    game_loop(data)
 
 
 def main():
+    """
     global game, name
     name = input("What is your name?: ")
     if name == "":
@@ -284,18 +338,46 @@ def main():
     print("\nMiután öt percet haladtál lassan az alagútban, egy kőasztalhoz érsz, amely a bal oldali fal mellett áll. Hat doboz van rajta, egyikükre a te neved festették.\n1: Ha kiakarod nyitni a dobozt.\n2: Ha inkább tovább haladsz észak felé.")
     while game:
         page_turning()
+    """
+
+    save_name = os.path.dirname(os.path.abspath(__file__)) + "/save*"
+    max_saves = 5
+
+    options_status = True
+    while options_status:
+        # get save datas
+        datas = sfm.file_reader(max_saves, save_name=save_name)
+        # write id data
+        for data in datas:
+            print(f"Save file {data[0]}: {data[1][1].split(', ')[0]}")
+            last_acces = data[1][0].split(", ")
+            print(f"Last opened: {last_acces[0]}.{'0' if int(last_acces[1]) < 10 else ''}{last_acces[1]}.{last_acces[2]} {last_acces[3]}:{last_acces[4]}:{last_acces[5]}\n")
+        # manage saves
+        status = sfm.manage_saves(datas, max_saves, save_name)
+        if status[0] == 1 or status[0] == 0:
+            options_status = False
+        else:
+            print(f"Deleted save in slot {status[1]}!")
+    if status[0] == 1:
+        input(f"New game in slot {status[1]}!")
+        new_save(status[1], save_name)
+    elif status[0] == 0:
+        input(f"Loading slot {status[1]}!")
+        load_save(status[1], save_name)
 
 
 if __name__ == "__main__":
+    error_handling = False
     # ultimate error handlind (release only)
-    exit_game = False
-    while not exit_game:
-        try:
-            # main function
-            # main()
-            fight_ran(7, 15)
-        except:
-            print(f"ERROR: {sys.exc_info()[1]}")
-            ans = input("Restart?(Y/N): ")
-            if ans.upper() == "N":
-                exit_game = True
+    if error_handling:
+        exit_game = False
+        while not exit_game:
+            try:
+                main()
+            except:
+                print(f"ERROR: {sys.exc_info()[1]}")
+                ans = input("Restart?(Y/N): ")
+                if ans.upper() == "N":
+                    exit_game = True
+    else:
+        main()
