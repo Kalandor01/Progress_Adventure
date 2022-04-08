@@ -85,7 +85,9 @@ def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=True):
 
 
 # attacking with oop functions
-def fight(monster_l=[cl.Test()]):
+def fight(monster_l=None):
+    if monster_l == None:
+        monster_l = [cl.Test()]
     global player
     # variables
     szum = 0
@@ -287,7 +289,9 @@ def page_turning():
         no = False
     
 
-def game_loop(data=[]):
+def game_loop(data=None):
+    if data == None:
+        data = []
     fight_ran(7, 15)
 
     
