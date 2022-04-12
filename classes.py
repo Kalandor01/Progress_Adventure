@@ -2,29 +2,25 @@ import numpy as np
 r = np.random.RandomState()
 
 
-def entity_master(name, life, attack, deff, speed, d_small=-2, d_big=3, c_rare=0.05, team=1, c_team_change=0.005, small_l=None, big_l=None, small_a=None, big_a=None, small_d=None, big_d=None, small_s=None, big_s=None):
-    if small_l is None:
-        small_l = d_small
-    if big_l is None:
-        big_l = d_big
-    if small_a is None:
-        small_a = d_small
-    if big_a is None:
-        big_a = d_big
-    if small_d is None:
-        small_d = d_small
-    if big_d is None:
-        big_d = d_big
-    if small_s is None:
-        small_s = d_small
-    if big_s is None:
-        big_s = d_big
-
-    # stat fluctuation
-    life += round(r.triangular(small_l, (small_l + big_l) / 2, big_l))
-    attack += round(r.triangular(small_a, (small_a + big_a) / 2, big_a))
-    deff += round(r.triangular(small_d, (small_d + big_d) / 2, big_d))
-    speed += round(r.triangular(small_s, (small_s + big_s) / 2, big_s))
+def entity_master(name:str, life:int|range, attack:int|range, deff:int|range, speed:int|range, fluc_small=2, fluc_big=3, c_rare=0.05, team=1, c_team_change=0.005):
+    
+    def configure_stat(stat_value:int|range):
+        # int or range
+        if type(stat_value) == int:
+            stat_value = range(stat_value - fluc_small, stat_value + fluc_big)
+        # fluctuation
+        if stat_value.start == stat_value.stop:
+            stat_value = stat_value.start
+        else:
+            stat_value = round(r.triangular(stat_value.start, (stat_value.start + stat_value.stop) / 2, stat_value.stop))
+        if stat_value < 0:
+            stat_value = 0
+        return stat_value
+    
+    life = configure_stat(life)
+    attack = configure_stat(attack)
+    deff = configure_stat(deff)
+    speed = configure_stat(speed)
     # rare
     rare = False
     if r.random() < c_rare:
@@ -53,6 +49,9 @@ class Entity:
         self.rare = traits[5]
         self.team = traits[6]
         self.switched = traits[7]
+    
+    def __str__(self):
+        return f'Name: {self.name}\nHp: {self.hp}\nAttack: {self.attack}\nDefence: {self.defence}\nSpeed: {self.speed}\nRare: {self.rare}\nTeam: {"Player" if self.team==0 else self.team}\nSwitched sides: {self.switched}'
 
 
     def attack_entity(self, target):
@@ -61,14 +60,15 @@ class Entity:
 
 class Player(Entity):
     def __init__(self):
-        self.name = "You"
-        self.hp = r.randint(1, 7) + r.randint(1, 7) + 12
-        self.attack = r.randint(1, 7) + 6
-        self.defence = r.randint(1, 7) + 6
-        self.speed = round(r.random() * 100 / 5, 1)
-        self.rare = False
-        self.team = 0
-        self.switched = False
+        super().__init__(entity_master("You", range(14, 26), range(7, 13), range(7, 13), range(1, 20), 0, 0, 0, 0, 0))
+        # self.name = "You"
+        # self.hp = r.randint(1, 7) + r.randint(1, 7) + 12
+        # self.attack = r.randint(1, 7) + 6
+        # self.defence = r.randint(1, 7) + 6
+        # self.speed = round(r.random() * 100 / 5, 1)
+        # self.rare = False
+        # self.team = 0
+        # self.switched = False
 
 
 class Caveman(Entity):

@@ -85,7 +85,7 @@ def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=True):
 
 
 # attacking with oop functions
-def fight(monster_l=None):
+def fight(monster_l:list=None):
     if monster_l == None:
         monster_l = [cl.Test()]
     global player
@@ -289,7 +289,7 @@ def page_turning():
         no = False
     
 
-def game_loop(data=None):
+def game_loop(data:list=None):
     if data == None:
         data = []
     fight_ran(7, 15)
@@ -369,6 +369,7 @@ def main():
         input(f"Loading slot {status[1]}!")
         load_save(status[1], save_name)
 
+# print(cl.Player())
 
 if __name__ == "__main__":
     error_handling = False
