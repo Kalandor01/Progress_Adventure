@@ -1,2 +1,0 @@
-last accesed
-player data (name, hp, attack, deff, speed)
