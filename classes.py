@@ -1,5 +1,6 @@
+from __future__ import annotations
 import numpy as np
-r = np.random.RandomState()
+from tools import r
 
 
 def entity_master(name:str, life:int|range, attack:int|range, deff:int|range, speed:int|range, fluc_small=2, fluc_big=3, c_rare=0.05, team=1, c_team_change=0.005):
@@ -54,7 +55,7 @@ class Entity:
         return f'Name: {self.name}\nHp: {self.hp}\nAttack: {self.attack}\nDefence: {self.defence}\nSpeed: {self.speed}\nRare: {self.rare}\nTeam: {"Player" if self.team==0 else self.team}\nSwitched sides: {self.switched}'
 
 
-    def attack_entity(self, target):
+    def attack_entity(self, target:Entity):
         target.hp -= self.attack
 
 

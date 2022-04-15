@@ -8,8 +8,9 @@ from datetime import datetime
 import random_sentance as rs
 import save_file_manager as sfm
 
+from tools import r
+import tools as ts
 import classes as cl
-from classes import r
 
 
 def imput(ask="Num: ", type=int):
@@ -183,8 +184,6 @@ def game_loop(data:list=None):
     
 def new_save(save_num=1, save_name="save*"):
     # make player
-    # cl.r.set_state(r.get_state())
-    print(r.get_state())
     name = input("What is your name?: ")
     if name == "":
         name = "You"
@@ -195,7 +194,7 @@ def new_save(save_num=1, save_name="save*"):
     today = datetime.today()
     new_save_data.append(f"{today.year}, {today.month}, {today.day}, {today.hour}, {today.minute}, {today.second}")
     new_save_data.append(f"{player.name}, {player.hp}, {player.attack}, {player.defence}, {player.speed}")
-    new_save_data.append(random_state_converter(r))
+    new_save_data.append(ts.random_state_converter(r))
     # write new save
     sfm.encode_save(new_save_data, save_num, save_name)
     data = []
@@ -205,9 +204,6 @@ def new_save(save_num=1, save_name="save*"):
 def load_save(save_num=1, save_name="save*"):
     # read data
     datas = sfm.decode_save(save_num, save_name)
-    # last access
-    last_acces = datas[0].split(", ")
-    print(f"\nLast opened: {last_acces[0]}.{'0' if int(last_acces[1]) < 10 else ''}{last_acces[1]}.{last_acces[2]} {last_acces[3]}:{last_acces[4]}:{last_acces[5]}")
     # player
     player_data = datas[1].split(", ")
     player.name = player_data[0]
@@ -216,8 +212,8 @@ def load_save(save_num=1, save_name="save*"):
     player.defence = int(player_data[3])
     player.speed = float(player_data[4])
     stats(-1)
-    r.set_state(random_state_converter(datas[2]))
-    print(r.get_state())
+    r.set_state(ts.random_state_converter(datas[2]))
+    # print(r.get_state())
     data = []
     game_loop(data)
 
@@ -267,7 +263,7 @@ def manage_saves(file_data, max_saves=5, save_name="save*", save_ext="sav", can_
                                 remove(f'{save_name.replace("*", str(file_data[option][0]))}.{save_ext}')
                                 if option == len(file_data) - 1:
                                     max_saves -= 1
-                                    metadata_manager(0, max_saves)
+                                    ts.metadata_manager(0, max_saves)
                                 list_data.pop(option * 2)
                                 list_data.pop(option * 2)
                                 file_data.pop(option)
@@ -281,54 +277,7 @@ def manage_saves(file_data, max_saves=5, save_name="save*", save_ext="sav", can_
             return [1, 1]
 
 
-def metadata_manager(line_num:int, write_value=None):
-    """
-    STRUCTURE:\n
-    0 = max_saves
-    """
-    # default values
-    max_saves = 5
-    try:
-        metadata = sfm.decode_save(0, "metadata")
-    except FileNotFoundError:
-        metadata = [max_saves]
-        sfm.encode_save(metadata, 0, "metadata")
-    # formating
-    metadata[0] = int(metadata[0])
-    if write_value == None:
-        return metadata[line_num]
-    else:
-        metadata[line_num] = write_value
-        sfm.encode_save(metadata, 0, "metadata")
-
-
-def random_state_converter(random_state:np.random.RandomState | tuple | str):
-    """
-    Can convert a numpy RandomState.getstate() into an easily storable string and back.
-    """
-    if type(random_state) == str:
-        lines = random_state.split(";")
-        states = [int(num) for num in lines[1].split("|")]
-        return (str(lines[0]), np.array(states, dtype=np.uint32), int(lines[2]), int(lines[3]), float(lines[4]))
-    else:
-        if type(random_state) == tuple:
-            state = random_state
-        else:
-            state = random_state.get_state()
-        state_txt = state[0] + ";"
-        for num in state[1]:
-            state_txt += str(num) + "|"
-        return f"{state_txt[:-1]};{str(state[2])};{str(state[3])};{str(state[4])}"
-
-
-def decode_save_file(save_num=1, save_name="save*", save_ext="sav"):
-    save_data = sfm.decode_save(save_num, save_name, save_ext)
-    f = open(f'{save_name.replace("*", str(save_num))}.decoded.txt', "w")
-    for line in save_data:
-        f.write(line + "\n")
-    f.close()
-
-decode_save_file()
+# ts.decode_save_file()
 
 def main():
     """
@@ -346,7 +295,7 @@ def main():
     save_name = os.path.dirname(os.path.abspath(__file__)) + "/save*"
 
     # get max saves
-    max_saves = metadata_manager(0)
+    max_saves = ts.metadata_manager(0)
 
     # get save datas
     datas = sfm.file_reader(max_saves, save_name=save_name)
@@ -362,18 +311,17 @@ def main():
     status = manage_saves(datas_processed, max_saves, save_name, "sav", True)
     # new save
     if status[0] == 1:
-        input(f"\nNew game in slot {status[1]}!")
+        input(f"\nNew game in slot {status[1]}!\n")
         # new slot?
         if status[1] > max_saves:
             max_saves += 1
-            metadata_manager(0, max_saves)
+            ts.metadata_manager(0, max_saves)
         new_save(status[1], save_name)
     # load
     elif status[0] == 0:
         input(f"\nLoading slot {status[1]}!")
         load_save(status[1], save_name)
 
-# print(cl.Player())
 
 if __name__ == "__main__":
     error_handling = False
