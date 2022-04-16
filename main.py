@@ -1,11 +1,7 @@
-﻿import logging
-import os
-import numpy as np
-import sys
+﻿import os
 import time
 from datetime import datetime
 
-import random_sentance as rs
 import save_file_manager as sfm
 
 from tools import r
@@ -179,6 +175,7 @@ def stats(won=0):
 def game_loop(data:list=None):
     if data == None:
         data = []
+    stats(-1)
     fight_ran(7, 15)
 
     
@@ -188,15 +185,16 @@ def new_save(save_num=1, save_name="save*"):
     if name == "":
         name = "You"
     player.name = name
-    stats(-1)
     # get new save data
     new_save_data = []
     today = datetime.today()
-    new_save_data.append(f"{today.year}, {today.month}, {today.day}, {today.hour}, {today.minute}, {today.second}")
-    new_save_data.append(f"{player.name}, {player.hp}, {player.attack}, {player.defence}, {player.speed}")
+    new_save_data.append(f"{today.year}¤{today.month}¤{today.day}¤{today.hour}¤{today.minute}¤{today.second}")
+    new_save_data.append(f"{player.name}¤{player.hp}¤{player.attack}¤{player.defence}¤{player.speed}")
     new_save_data.append(ts.random_state_converter(r))
     # write new save
     sfm.encode_save(new_save_data, save_num, save_name)
+    # log
+    ts.log_info(f'|Created save| slot number: {save_num}, player name: "{player.name}"')
     data = []
     game_loop(data)
 
@@ -205,15 +203,17 @@ def load_save(save_num=1, save_name="save*"):
     # read data
     datas = sfm.decode_save(save_num, save_name)
     # player
-    player_data = datas[1].split(", ")
+    player_data = datas[1].split("¤")
     player.name = player_data[0]
     player.hp = int(player_data[1])
     player.attack = int(player_data[2])
     player.defence = int(player_data[3])
     player.speed = float(player_data[4])
-    stats(-1)
+    # log
+    last_accessed = datas[0].split("¤")
+    ts.log_info(f'|Loaded save| slot number: {save_num}, hero name: "{player.name}", last saved: {last_accessed[0]}-{last_accessed[1]}-{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}')
+    # load random state
     r.set_state(ts.random_state_converter(datas[2]))
-    # print(r.get_state())
     data = []
     game_loop(data)
 
@@ -260,10 +260,17 @@ def manage_saves(file_data, max_saves=5, save_name="save*", save_ext="sav", can_
                         if option != -1 and option != len(list_data) - 1:
                             option = int(option / 2)
                             if sfm.UI_list(["No", "Yes"], f" Are you sure you want to remove Save file {file_data[option][0]}?", can_esc=True).display():
+                                # log
+                                datas = sfm.decode_save(file_data[option][0])
+                                last_accessed = datas[0].split("¤")
+                                ts.log_info(f'|Deleted save| slot number: {file_data[option][0]}, hero name: "{datas[1].split("¤")[0]}", last saved: {last_accessed[0]}-{last_accessed[1]}-{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}')
+                                # remove
                                 remove(f'{save_name.replace("*", str(file_data[option][0]))}.{save_ext}')
                                 if option == len(file_data) - 1:
                                     max_saves -= 1
                                     ts.metadata_manager(0, max_saves)
+                                    # log
+                                    ts.log_info(f"|Decremented max saves in metadata| {max_saves}")
                                 list_data.pop(option * 2)
                                 list_data.pop(option * 2)
                                 file_data.pop(option)
@@ -280,17 +287,9 @@ def manage_saves(file_data, max_saves=5, save_name="save*", save_ext="sav", can_
 # ts.decode_save_file()
 
 def main():
-    """
-    global game, name
-    name = input("What is your name?: ")
-    if name == "":
-        name = "You"
-    stats(-1)
-    print("Kezdés:\nEgy versenyre nevezel, aminek a lényege, hogy át kell kelni a halállabirintuson. A labirintusban tárgyakat találhatsz és szörnyekkel kell harcoljál.")
-    print("\nMiután öt percet haladtál lassan az alagútban, egy kőasztalhoz érsz, amely a bal oldali fal mellett áll. Hat doboz van rajta, egyikükre a te neved festették.\n1: Ha kiakarod nyitni a dobozt.\n2: Ha inkább tovább haladsz észak felé.")
-    while game:
-        page_turning()
-    """
+    # begin log
+    ts.threading.current_thread().name = "Main"
+    ts.log_info("|Beginning new instance|")
 
     save_name = os.path.dirname(os.path.abspath(__file__)) + "/save*"
 
@@ -299,13 +298,13 @@ def main():
 
     # get save datas
     datas = sfm.file_reader(max_saves, save_name=save_name)
-    # write id data
+    # process file data
     datas_processed = []
     for data in datas:
         data_processed = ""
-        data_processed += f"Save file {data[0]}: {data[1][1].split(', ')[0]}\n"
-        last_acces = data[1][0].split(", ")
-        data_processed += f"Last opened: {last_acces[0]}.{'0' if int(last_acces[1]) < 10 else ''}{last_acces[1]}.{last_acces[2]} {last_acces[3]}:{last_acces[4]}:{last_acces[5]}"
+        data_processed += f"Save file {data[0]}: {data[1][1].split('¤')[0]}\n"
+        last_accessed = data[1][0].split("¤")
+        data_processed += f"Last opened: {last_accessed[0]}.{'0' if int(last_accessed[1]) < 10 else ''}{last_accessed[1]}.{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}"
         datas_processed.append([data[0], data_processed])
     # manage saves
     status = manage_saves(datas_processed, max_saves, save_name, "sav", True)
@@ -316,17 +315,24 @@ def main():
         if status[1] > max_saves:
             max_saves += 1
             ts.metadata_manager(0, max_saves)
+            # log
+            ts.log_info(f"|Incremented max saves in metadata| {max_saves}")
         new_save(status[1], save_name)
     # load
     elif status[0] == 0:
         input(f"\nLoading slot {status[1]}!")
         load_save(status[1], save_name)
+    
+    # end log
+    ts.log_info("|Instance ended succesfuly|")
 
 
 if __name__ == "__main__":
     error_handling = False
     # ultimate error handelind (release only)
     if error_handling:
+        import sys
+
         exit_game = False
         while not exit_game:
             try:

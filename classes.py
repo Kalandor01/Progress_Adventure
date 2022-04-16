@@ -1,6 +1,7 @@
 from __future__ import annotations
-import numpy as np
 from tools import r
+
+import random_sentance as rs
 
 
 def entity_master(name:str, life:int|range, attack:int|range, deff:int|range, speed:int|range, fluc_small=2, fluc_big=3, c_rare=0.05, team=1, c_team_change=0.005):
