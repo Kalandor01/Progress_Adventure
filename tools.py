@@ -20,7 +20,7 @@ def metadata_manager(line_num:int, write_value=None):
         metadata = [max_saves]
         sfm.encode_save(metadata, 0, "metadata")
         # log
-        log_info("|Recreated metadata|")
+        log_info("Recreated metadata", f"max_saves: {max_saves}")
     # formating
     metadata[0] = int(metadata[0])
     if write_value == None:
@@ -57,7 +57,7 @@ def decode_save_file(save_num=1, save_name="save*", save_ext="sav"):
     f.close()
 
 
-def log_info(message:str, message_type="INFO", write_out=False):
+def log_info(message:str, detail="", message_type="INFO", write_out=False):
     zero = lambda num: ("0" if num < 10 else "") + str(num)
 
     current_date = f"{zero(dtime.now().year)}-{zero(dtime.now().month)}-{zero(dtime.now().day)}"
@@ -66,11 +66,13 @@ def log_info(message:str, message_type="INFO", write_out=False):
         f = open(f"logs/{current_date}.txt", "a")
     except FileNotFoundError:
         os.mkdir("logs")
+        # log
+        log_info("Recreating logs folder")
         f = open(f"logs/{current_date}.txt", "a")
-    f.write(f"[{current_time}] [{threading.current_thread().name}/{message_type}]\t: {message}\n")
+    f.write(f"[{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}\n")
     f.close()
     if write_out:
-        print(f'logs/{current_date}.txt -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: {message}')
+        print(f'logs/{current_date}.txt -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
 
 
 # thread_1 = threading.Thread(target="function", name="Thread name", args=["argument list"])

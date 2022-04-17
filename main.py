@@ -192,9 +192,16 @@ def new_save(save_num=1, save_name="save*"):
     new_save_data.append(f"{player.name}¤{player.hp}¤{player.attack}¤{player.defence}¤{player.speed}")
     new_save_data.append(ts.random_state_converter(r))
     # write new save
+    try:
+        f = open(f'{save_name.replace("*", str(save_num))}.sav', "w")
+        f.close()
+    except FileNotFoundError:
+        os.mkdir("saves")
+        # log
+        ts.log_info("Recreating saves folder")
     sfm.encode_save(new_save_data, save_num, save_name)
     # log
-    ts.log_info(f'|Created save| slot number: {save_num}, player name: "{player.name}"')
+    ts.log_info("Created save", f'slot number: {save_num}, player name: "{player.name}"')
     data = []
     game_loop(data)
 
@@ -211,7 +218,7 @@ def load_save(save_num=1, save_name="save*"):
     player.speed = float(player_data[4])
     # log
     last_accessed = datas[0].split("¤")
-    ts.log_info(f'|Loaded save| slot number: {save_num}, hero name: "{player.name}", last saved: {last_accessed[0]}-{last_accessed[1]}-{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}')
+    ts.log_info("Loaded save", f'slot number: {save_num}, hero name: "{player.name}", last saved: {last_accessed[0]}-{last_accessed[1]}-{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}')
     # load random state
     r.set_state(ts.random_state_converter(datas[2]))
     data = []
@@ -219,7 +226,6 @@ def load_save(save_num=1, save_name="save*"):
 
 
 def manage_saves(file_data, max_saves=5, save_name="save*", save_ext="sav", can_exit=False):
-    from os import remove
 
     in_main_menu = True
     while True:
@@ -261,16 +267,16 @@ def manage_saves(file_data, max_saves=5, save_name="save*", save_ext="sav", can_
                             option = int(option / 2)
                             if sfm.UI_list(["No", "Yes"], f" Are you sure you want to remove Save file {file_data[option][0]}?", can_esc=True).display():
                                 # log
-                                datas = sfm.decode_save(file_data[option][0])
+                                datas = sfm.decode_save(file_data[option][0], save_name)
                                 last_accessed = datas[0].split("¤")
-                                ts.log_info(f'|Deleted save| slot number: {file_data[option][0]}, hero name: "{datas[1].split("¤")[0]}", last saved: {last_accessed[0]}-{last_accessed[1]}-{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}')
+                                ts.log_info("Deleted save", f'slot number: {file_data[option][0]}, hero name: "{datas[1].split("¤")[0]}", last saved: {last_accessed[0]}-{last_accessed[1]}-{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}')
                                 # remove
-                                remove(f'{save_name.replace("*", str(file_data[option][0]))}.{save_ext}')
+                                os.remove(f'{save_name.replace("*", str(file_data[option][0]))}.{save_ext}')
                                 if option == len(file_data) - 1:
                                     max_saves -= 1
                                     ts.metadata_manager(0, max_saves)
                                     # log
-                                    ts.log_info(f"|Decremented max saves in metadata| {max_saves}")
+                                    ts.log_info("Decremented max saves in metadata", f"max saves: {max_saves}")
                                 list_data.pop(option * 2)
                                 list_data.pop(option * 2)
                                 file_data.pop(option)
@@ -284,14 +290,15 @@ def manage_saves(file_data, max_saves=5, save_name="save*", save_ext="sav", can_
             return [1, 1]
 
 
-# ts.decode_save_file()
 
 def main():
     # begin log
     ts.threading.current_thread().name = "Main"
-    ts.log_info("|Beginning new instance|")
+    ts.log_info("Beginning new instance")
 
-    save_name = os.path.dirname(os.path.abspath(__file__)) + "/save*"
+    save_name = os.path.dirname(os.path.abspath(__file__)) + "/saves/save*"
+    # ts.decode_save_file(0, "metadata")
+    # ts.decode_save_file(1, save_name)
 
     # get max saves
     max_saves = ts.metadata_manager(0)
@@ -316,7 +323,7 @@ def main():
             max_saves += 1
             ts.metadata_manager(0, max_saves)
             # log
-            ts.log_info(f"|Incremented max saves in metadata| {max_saves}")
+            ts.log_info("Incremented max saves in metadata", f"max saves: {max_saves}")
         new_save(status[1], save_name)
     # load
     elif status[0] == 0:
@@ -324,7 +331,7 @@ def main():
         load_save(status[1], save_name)
     
     # end log
-    ts.log_info("|Instance ended succesfuly|")
+    ts.log_info("Instance ended succesfuly")
 
 
 if __name__ == "__main__":
