@@ -10,17 +10,17 @@ r = np.random.RandomState()
 def metadata_manager(line_num:int, write_value=None):
     """
     STRUCTURE:\n
-    0 = max_saves
+    
     """
     # default values
-    max_saves = 5
+    
     try:
         metadata = sfm.decode_save(0, "metadata")
     except FileNotFoundError:
-        metadata = [max_saves]
+        metadata = []
         sfm.encode_save(metadata, 0, "metadata")
         # log
-        log_info("Recreated metadata", f"max_saves: {max_saves}")
+        log_info("Recreated metadata")
     # formating
     metadata[0] = int(metadata[0])
     if write_value == None:

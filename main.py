@@ -225,7 +225,7 @@ def load_save(save_num=1, save_name="save*"):
     game_loop(data)
 
 
-def manage_saves(file_data, max_saves=5, save_name="save*", save_ext="sav", can_exit=False):
+def manage_saves(file_data, save_name="save*", save_ext="sav", can_exit=False):
 
     in_main_menu = True
     while True:
@@ -272,11 +272,6 @@ def manage_saves(file_data, max_saves=5, save_name="save*", save_ext="sav", can_
                                 ts.log_info("Deleted save", f'slot number: {file_data[option][0]}, hero name: "{datas[1].split("¤")[0]}", last saved: {last_accessed[0]}-{last_accessed[1]}-{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}')
                                 # remove
                                 os.remove(f'{save_name.replace("*", str(file_data[option][0]))}.{save_ext}')
-                                if option == len(file_data) - 1:
-                                    max_saves -= 1
-                                    ts.metadata_manager(0, max_saves)
-                                    # log
-                                    ts.log_info("Decremented max saves in metadata", f"max saves: {max_saves}")
                                 list_data.pop(option * 2)
                                 list_data.pop(option * 2)
                                 file_data.pop(option)
@@ -296,34 +291,38 @@ def main():
     ts.threading.current_thread().name = "Main"
     ts.log_info("Beginning new instance")
 
+    save_location = os.path.dirname(os.path.abspath(__file__)) + "/saves"
     save_name = os.path.dirname(os.path.abspath(__file__)) + "/saves/save*"
     # ts.decode_save_file(0, "metadata")
     # ts.decode_save_file(1, save_name)
 
-    # get max saves
-    max_saves = ts.metadata_manager(0)
-
     # get save datas
-    datas = sfm.file_reader(max_saves, save_name=save_name)
+    datas = sfm.file_reader(-1, dir_name=save_location)
     # process file data
     datas_processed = []
     for data in datas:
-        data_processed = ""
-        data_processed += f"Save file {data[0]}: {data[1][1].split('¤')[0]}\n"
-        last_accessed = data[1][0].split("¤")
-        data_processed += f"Last opened: {last_accessed[0]}.{'0' if int(last_accessed[1]) < 10 else ''}{last_accessed[1]}.{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}"
-        datas_processed.append([data[0], data_processed])
+        if data[1] == -1:
+            ts.log_info("Decode error", f"Slot number: {data[0]}", "ERROR")
+            input(f"Save file {data[0]} is corrupted!")
+        else:
+            try:
+                data_processed = ""
+                data_processed += f"Save file {data[0]}: {data[1][1].split('¤')[0]}\n"
+                last_accessed = data[1][0].split("¤")
+                data_processed += f"Last opened: {last_accessed[0]}.{'0' if int(last_accessed[1]) < 10 else ''}{last_accessed[1]}.{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}"
+                datas_processed.append([data[0], data_processed])
+            except TypeError:
+                ts.log_info("Parse error", f"Slot number: {data[0]}", "ERROR")
+                input(f"Save file {data[0]} could not be parsed!")
+            except IndexError:
+                ts.log_info("Parse error", f"Slot number: {data[0]}", "ERROR")
+                input(f"Save file {data[0]} could not be parsed!")
     # manage saves
-    status = manage_saves(datas_processed, max_saves, save_name, "sav", True)
+    status = manage_saves(datas_processed, save_name, "sav", True)
     # new save
     if status[0] == 1:
         input(f"\nNew game in slot {status[1]}!\n")
         # new slot?
-        if status[1] > max_saves:
-            max_saves += 1
-            ts.metadata_manager(0, max_saves)
-            # log
-            ts.log_info("Incremented max saves in metadata", f"max saves: {max_saves}")
         new_save(status[1], save_name)
     # load
     elif status[0] == 0:
