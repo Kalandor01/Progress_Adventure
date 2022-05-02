@@ -178,18 +178,27 @@ def game_loop(data:list=None):
     stats(-1)
     fight_ran(7, 15)
 
+
+def filtered_input(text:str):
+    while True:
+        ans = input(text)
+        if ans.find(SPLIT_TEXT) != -1:
+            print(f'This text cannot contain "{SPLIT_TEXT}"!')
+        else:
+            return ans
+
     
 def new_save(save_num=1, save_name="save*"):
     # make player
-    name = input("What is your name?: ")
+    name = filtered_input("What is your name?: ")
     if name == "":
         name = "You"
     player.name = name
     # get new save data
     new_save_data = []
     today = datetime.today()
-    new_save_data.append(f"{today.year}¤{today.month}¤{today.day}¤{today.hour}¤{today.minute}¤{today.second}")
-    new_save_data.append(f"{player.name}¤{player.hp}¤{player.attack}¤{player.defence}¤{player.speed}")
+    new_save_data.append(f"{today.year}{SPLIT_TEXT}{today.month}{SPLIT_TEXT}{today.day}{SPLIT_TEXT}{today.hour}{SPLIT_TEXT}{today.minute}{SPLIT_TEXT}{today.second}")
+    new_save_data.append(f"{player.name}{SPLIT_TEXT}{player.hp}{SPLIT_TEXT}{player.attack}{SPLIT_TEXT}{player.defence}{SPLIT_TEXT}{player.speed}")
     new_save_data.append(ts.random_state_converter(r))
     # write new save
     try:
@@ -210,14 +219,14 @@ def load_save(save_num=1, save_name="save*"):
     # read data
     datas = sfm.decode_save(save_num, save_name)
     # player
-    player_data = datas[1].split("¤")
+    player_data = datas[1].split(SPLIT_TEXT)
     player.name = player_data[0]
     player.hp = int(player_data[1])
     player.attack = int(player_data[2])
     player.defence = int(player_data[3])
     player.speed = float(player_data[4])
     # log
-    last_accessed = datas[0].split("¤")
+    last_accessed = datas[0].split(SPLIT_TEXT)
     ts.log_info("Loaded save", f'slot number: {save_num}, hero name: "{player.name}", last saved: {last_accessed[0]}-{last_accessed[1]}-{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}')
     # load random state
     r.set_state(ts.random_state_converter(datas[2]))
@@ -268,8 +277,8 @@ def manage_saves(file_data, save_name="save*", save_ext="sav", can_exit=False):
                             if sfm.UI_list(["No", "Yes"], f" Are you sure you want to remove Save file {file_data[option][0]}?", can_esc=True).display():
                                 # log
                                 datas = sfm.decode_save(file_data[option][0], save_name)
-                                last_accessed = datas[0].split("¤")
-                                ts.log_info("Deleted save", f'slot number: {file_data[option][0]}, hero name: "{datas[1].split("¤")[0]}", last saved: {last_accessed[0]}-{last_accessed[1]}-{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}')
+                                last_accessed = datas[0].split(SPLIT_TEXT)
+                                ts.log_info("Deleted save", f'slot number: {file_data[option][0]}, hero name: "{datas[1].split(SPLIT_TEXT)[0]}", last saved: {last_accessed[0]}-{last_accessed[1]}-{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}')
                                 # remove
                                 os.remove(f'{save_name.replace("*", str(file_data[option][0]))}.{save_ext}')
                                 list_data.pop(option * 2)
@@ -287,9 +296,6 @@ def manage_saves(file_data, save_name="save*", save_ext="sav", can_exit=False):
 
 
 def main():
-    # begin log
-    ts.threading.current_thread().name = "Main"
-    ts.log_info("Beginning new instance")
 
     save_location = os.path.dirname(os.path.abspath(__file__)) + "/saves"
     save_name = os.path.dirname(os.path.abspath(__file__)) + "/saves/save*"
@@ -315,8 +321,8 @@ def main():
         else:
             try:
                 data_processed = ""
-                data_processed += f"Save file {data[0]}: {data[1][1].split('¤')[0]}\n"
-                last_accessed = data[1][0].split("¤")
+                data_processed += f"Save file {data[0]}: {data[1][1].split(SPLIT_TEXT)[0]}\n"
+                last_accessed = data[1][0].split(SPLIT_TEXT)
                 data_processed += f"Last opened: {last_accessed[0]}.{'0' if int(last_accessed[1]) < 10 else ''}{last_accessed[1]}.{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}"
                 datas_processed.append([data[0], data_processed])
             except (TypeError, IndexError):
@@ -333,25 +339,37 @@ def main():
     elif status[0] == 0:
         input(f"\nLoading slot {status[1]}!")
         load_save(status[1], save_name)
-    
-    # end log
-    ts.log_info("Instance ended succesfuly")
+
+
+# constants
+SPLIT_TEXT = " || "
 
 
 if __name__ == "__main__":
-    error_handling = False
-    # ultimate error handelind (release only)
-    if error_handling:
-        import sys
+    import sys
 
-        exit_game = False
-        while not exit_game:
-            try:
-                main()
-            except:
+    # ultimate error handlind (release only)
+    error_handling = False
+
+    # begin log
+    ts.threading.current_thread().name = "Main"
+    ts.log_info("Beginning new instance")
+
+    exit_game = False
+    while not exit_game:
+        exit_game = True
+        try:
+            main()
+        except:
+            ts.log_info("Instance crahed", sys.exc_info(), "ERROR")
+            if error_handling:
                 print(f"ERROR: {sys.exc_info()[1]}")
                 ans = input("Restart?(Y/N): ")
-                if ans.upper() == "N":
-                    exit_game = True
-    else:
-        main()
+                if ans.upper() == "Y":
+                    ts.log_info("Restarting instance")
+                    exit_game = False
+            else:
+                raise
+        else:
+            # end log
+            ts.log_info("Instance ended succesfuly")
