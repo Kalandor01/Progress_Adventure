@@ -319,10 +319,7 @@ def main():
                 last_accessed = data[1][0].split("¤")
                 data_processed += f"Last opened: {last_accessed[0]}.{'0' if int(last_accessed[1]) < 10 else ''}{last_accessed[1]}.{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}"
                 datas_processed.append([data[0], data_processed])
-            except TypeError:
-                ts.log_info("Parse error", f"Slot number: {data[0]}", "ERROR")
-                input(f"Save file {data[0]} could not be parsed!")
-            except IndexError:
+            except (TypeError, IndexError):
                 ts.log_info("Parse error", f"Slot number: {data[0]}", "ERROR")
                 input(f"Save file {data[0]} could not be parsed!")
     # manage saves
