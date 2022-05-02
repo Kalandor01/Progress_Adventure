@@ -297,6 +297,14 @@ def main():
     # ts.decode_save_file(1, save_name)
 
     # get save datas
+    try:
+        f = open(f'{save_name.replace("*", str(0))}.sav', "w")
+        f.close()
+        os.remove(f'{save_name.replace("*", str(0))}.sav')
+    except FileNotFoundError:
+        os.mkdir("saves")
+        # log
+        ts.log_info("Recreating saves folder")
     datas = sfm.file_reader(-1, dir_name=save_location)
     # process file data
     datas_processed = []
