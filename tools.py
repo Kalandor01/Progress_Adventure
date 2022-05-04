@@ -50,11 +50,15 @@ def random_state_converter(random_state:np.random.RandomState | tuple | str):
 
 
 def decode_save_file(save_num=1, save_name="save*", save_ext="sav"):
-    save_data = sfm.decode_save(save_num, save_name, save_ext)
-    f = open(f'{save_name.replace("*", str(save_num))}.decoded.txt', "w")
-    for line in save_data:
-        f.write(line + "\n")
-    f.close()
+    try:
+        save_data = sfm.decode_save(save_num, save_name, save_ext)
+    except FileNotFoundError:
+        print("FILE NOT FOUND!")
+    else:
+        f = open(f'{save_name.replace("*", str(save_num))}.decoded.txt', "w")
+        for line in save_data:
+            f.write(line + "\n")
+        f.close()
 
 
 def log_info(message:str, detail="", message_type="INFO", write_out=False):
