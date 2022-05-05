@@ -345,8 +345,21 @@ def main():
 # constants
 SPLIT_TEXT = " || "
 
+f = open("test.json", "r")
+json_p = json.load(f)
+print(type(json_p))
+f.close()
+# f = open("test2.json", "w")
+# json.dump(json_p, f)
+# f.close()
 
-if __name__ == "__main__":
+# somrhow change ' to "
+sfm.encode_save([str(json_p)], 1, "testtt")
+print(sfm.decode_save(1, "testtt")[0])
+json_j = json.loads(sfm.decode_save(1, "testtt")[0])
+print(type(json_j))
+
+if __name__ == "__main__" and False:
     import sys
 
     # ultimate error handlind (release only)
