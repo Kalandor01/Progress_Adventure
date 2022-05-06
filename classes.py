@@ -61,8 +61,10 @@ class Entity:
 
 
 class Player(Entity):
-    def __init__(self):
-        super().__init__(entity_master("You", range(14, 26), range(7, 13), range(7, 13), range(1, 20), 0, 0, 0, 0, 0))
+    def __init__(self, name=""):
+        if name == "":
+            name = "You"
+        super().__init__(entity_master(name, range(14, 26), range(7, 13), range(7, 13), range(1, 20), 0, 0, 0, 0, 0))
         # self.name = "You"
         # self.hp = r.randint(1, 7) + r.randint(1, 7) + 12
         # self.attack = r.randint(1, 7) + 6

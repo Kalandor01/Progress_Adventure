@@ -173,69 +173,66 @@ def stats(won=0):
         print(f"OTHER:")
     
 
-def game_loop(data:list=None):
+def game_loop(data=None):
     if data == None:
-        data = []
+        data = {}
     stats(-1)
     fight_ran(7, 15)
 
-
-def filtered_input(text:str):
-    while True:
-        ans = input(text)
-        if ans.find(SPLIT_TEXT) != -1:
-            print(f'This text cannot contain "{SPLIT_TEXT}"!')
-        else:
-            return ans
-
     
-def new_save(save_num=1, save_name="save*"):
+def new_save(save_num=1):
     # make player
-    name = filtered_input("What is your name?: ")
-    if name == "":
-        name = "You"
-    player.name = name
-    # get new save data
-    new_save_data = []
-    today = datetime.today()
-    new_save_data.append(f"{today.year}{SPLIT_TEXT}{today.month}{SPLIT_TEXT}{today.day}{SPLIT_TEXT}{today.hour}{SPLIT_TEXT}{today.minute}{SPLIT_TEXT}{today.second}")
-    new_save_data.append(f"{player.name}{SPLIT_TEXT}{player.hp}{SPLIT_TEXT}{player.attack}{SPLIT_TEXT}{player.defence}{SPLIT_TEXT}{player.speed}")
-    new_save_data.append(ts.random_state_converter(r))
-    # write new save
+    global player
+    player = cl.Player(input("What is your name?: "))
+    # make new save data
+    new_display_data = {}
+    new_save_data = {}
+    # last_acces
+    now = datetime.now()
+    last_access = {"last_access": [now.year, now.month, now.day, now.hour, now.minute, now.second]}
+    new_display_data.update(last_access)
+    new_save_data.update(last_access)
+    # player
+    player_data = {"player": {"name": player.name, "hp": player.hp, "attack": player.attack, "defence": player.defence, "speed": player.speed}}
+    new_display_data.update({"player_name": player.name})
+    new_save_data.update(player_data)
+    # randomstate
+    new_save_data.update(ts.random_state_converter(r))
+    # create new save
     try:
-        f = open(f'{save_name.replace("*", str(save_num))}.sav', "w")
+        f = open(f'{SAVE_NAME.replace("*", str(save_num))}.sav', "w")
         f.close()
     except FileNotFoundError:
         os.mkdir("saves")
         # log
         ts.log_info("Recreating saves folder")
-    sfm.encode_save(new_save_data, save_num, save_name)
+    sfm.encode_save([json.dumps(new_display_data), json.dumps(new_save_data)], save_num, SAVE_NAME, SAVE_EXT)
     # log
     ts.log_info("Created save", f'slot number: {save_num}, player name: "{player.name}"')
-    data = []
-    game_loop(data)
+    game_loop(new_save_data)
 
+# json_j = json.loads(sfm.decode_save()[0])
 
-def load_save(save_num=1, save_name="save*"):
+def load_save(save_num=1):
     # read data
-    datas = sfm.decode_save(save_num, save_name)
+    datas = json.loads(sfm.decode_save(save_num, SAVE_NAME, SAVE_EXT)[1])
     # player
-    player_data = datas[1].split(SPLIT_TEXT)
-    player.name = player_data[0]
-    player.hp = int(player_data[1])
-    player.attack = int(player_data[2])
-    player.defence = int(player_data[3])
-    player.speed = float(player_data[4])
+    player_data = datas["player"]
+    player.name = player_data["name"]
+    player.hp = int(player_data["hp"])
+    player.attack = int(player_data["attack"])
+    player.defence = int(player_data["defence"])
+    player.speed = float(player_data["speed"])
     # log
-    last_accessed = datas[0].split(SPLIT_TEXT)
-    ts.log_info("Loaded save", f'slot number: {save_num}, hero name: "{player.name}", last saved: {last_accessed[0]}-{last_accessed[1]}-{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}')
+    last_accessed = datas["last_access"]
+    ts.log_info("Loaded save", f'slot number: {save_num}, hero name: "{player.name}", last saved: {ts.make_date(last_accessed)} {ts.make_time(last_accessed[3:])}')
     # load random state
-    r.set_state(ts.random_state_converter(datas[2]))
+    r.set_state(ts.random_state_converter(datas["seed"]))
     data = []
     game_loop(data)
 
 
-def manage_saves(file_data, save_name="save*", save_ext="sav", can_exit=False):
+def manage_saves(file_data, can_exit=False):
 
     in_main_menu = True
     while True:
@@ -277,11 +274,11 @@ def manage_saves(file_data, save_name="save*", save_ext="sav", can_exit=False):
                             option = int(option / 2)
                             if sfm.UI_list(["No", "Yes"], f" Are you sure you want to remove Save file {file_data[option][0]}?", can_esc=True).display():
                                 # log
-                                datas = sfm.decode_save(file_data[option][0], save_name)
-                                last_accessed = datas[0].split(SPLIT_TEXT)
-                                ts.log_info("Deleted save", f'slot number: {file_data[option][0]}, hero name: "{datas[1].split(SPLIT_TEXT)[0]}", last saved: {last_accessed[0]}-{last_accessed[1]}-{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}')
+                                datas = json.loads(sfm.decode_save(file_data[option][0], SAVE_NAME, SAVE_EXT, decode_until=1)[0])
+                                last_accessed = datas["last_access"]
+                                ts.log_info("Deleted save", f'slot number: {file_data[option][0]}, hero name: "{datas["player_name"]}", last saved: {ts.make_date(last_accessed)} {ts.make_time(last_accessed[3:])}')
                                 # remove
-                                os.remove(f'{save_name.replace("*", str(file_data[option][0]))}.{save_ext}')
+                                os.remove(f'{SAVE_NAME.replace("*", str(file_data[option][0]))}.{SAVE_EXT}')
                                 list_data.pop(option * 2)
                                 list_data.pop(option * 2)
                                 file_data.pop(option)
@@ -297,22 +294,19 @@ def manage_saves(file_data, save_name="save*", save_ext="sav", can_exit=False):
 
 
 def main():
-
-    save_location = os.path.dirname(os.path.abspath(__file__)) + "/saves"
-    save_name = os.path.dirname(os.path.abspath(__file__)) + "/saves/save*"
     # ts.decode_save_file(0, "metadata")
-    # ts.decode_save_file(1, save_name)
+    # ts.decode_save_file(1, SAVE_NAME)
 
     # get save datas
     try:
-        f = open(f'{save_name.replace("*", str(0))}.sav', "w")
+        f = open(f'{SAVE_NAME.replace("*", str(0))}.sav', "w")
         f.close()
-        os.remove(f'{save_name.replace("*", str(0))}.sav')
+        os.remove(f'{SAVE_NAME.replace("*", str(0))}.sav')
     except FileNotFoundError:
         os.mkdir("saves")
         # log
         ts.log_info("Recreating saves folder")
-    datas = sfm.file_reader(-1, dir_name=save_location)
+    datas = sfm.file_reader(-1, dir_name=SAVE_LOCATION, decode_until=1)
     # process file data
     datas_processed = []
     for data in datas:
@@ -321,45 +315,34 @@ def main():
             input(f"Save file {data[0]} is corrupted!")
         else:
             try:
+                data[1] = json.loads(data[1][0])
                 data_processed = ""
-                data_processed += f"Save file {data[0]}: {data[1][1].split(SPLIT_TEXT)[0]}\n"
-                last_accessed = data[1][0].split(SPLIT_TEXT)
-                data_processed += f"Last opened: {last_accessed[0]}.{'0' if int(last_accessed[1]) < 10 else ''}{last_accessed[1]}.{last_accessed[2]} {last_accessed[3]}:{last_accessed[4]}:{last_accessed[5]}"
+                data_processed += f"Save file {data[0]}: {data[1]['player_name']}\n"
+                last_accessed = data[1]["last_access"]
+                data_processed += f"Last opened: {ts.make_date(last_accessed, '.')} {ts.make_time(last_accessed[3:])}"
                 datas_processed.append([data[0], data_processed])
             except (TypeError, IndexError):
                 ts.log_info("Parse error", f"Slot number: {data[0]}", "ERROR")
                 input(f"Save file {data[0]} could not be parsed!")
     # manage saves
-    status = manage_saves(datas_processed, save_name, "sav", True)
+    status = manage_saves(datas_processed, True)
     # new save
     if status[0] == 1:
         input(f"\nNew game in slot {status[1]}!\n")
         # new slot?
-        new_save(status[1], save_name)
+        new_save(status[1])
     # load
     elif status[0] == 0:
         input(f"\nLoading slot {status[1]}!")
-        load_save(status[1], save_name)
+        load_save(status[1])
 
 
 # constants
-SPLIT_TEXT = " || "
+SAVE_LOCATION = os.path.dirname(os.path.abspath(__file__)) + "/saves"
+SAVE_NAME = os.path.dirname(os.path.abspath(__file__)) + "/saves/save*"
+SAVE_EXT = "sav"
 
-f = open("test.json", "r")
-json_p = json.load(f)
-print(type(json_p))
-f.close()
-# f = open("test2.json", "w")
-# json.dump(json_p, f)
-# f.close()
-
-# somrhow change ' to "
-sfm.encode_save([str(json_p)], 1, "testtt")
-print(sfm.decode_save(1, "testtt")[0])
-json_j = json.loads(sfm.decode_save(1, "testtt")[0])
-print(type(json_j))
-
-if __name__ == "__main__" and False:
+if __name__ == "__main__":
     import sys
 
     # ultimate error handlind (release only)
