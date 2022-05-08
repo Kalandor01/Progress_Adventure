@@ -1,3 +1,4 @@
+import json
 import os
 import threading
 from datetime import datetime as dtime
@@ -7,27 +8,49 @@ import save_file_manager as sfm
 
 r = np.random.RandomState()
 
-def metadata_manager(line_num:int, write_value=None):
+ENCODING = "windows-1250"
+
+
+def encode_keybinds(settings:dict):
+    for x in settings["keybinds"]:
+        settings['keybinds'][x][0] = settings['keybinds'][x][0].decode(ENCODING)
+    return settings
+
+
+def decode_keybinds(settings:dict):
+    for x in settings["keybinds"]:
+        settings['keybinds'][x][0] = bytes(settings['keybinds'][x][0], ENCODING)
+    return settings
+
+
+def settings_manager(line_name:str, write_value=None):
     """
     STRUCTURE:\n
-    
+    - auto_save
+    - keybinds
+    \t- esc
+    \t- up
+    \t- down
+    \t- left
+    \t- right
+    \t- enter
     """
     # default values
-    
     try:
-        metadata = sfm.decode_save(0, "metadata")
+        settings = decode_keybinds(json.loads(sfm.decode_save(0, "settings")[0]))
     except FileNotFoundError:
-        metadata = []
-        sfm.encode_save(metadata, 0, "metadata")
+        settings = {"auto_save": True, "keybinds": {"esc": [b"\x1b"], "up": [b"H", 1], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
+        sfm.encode_save(json.dumps(encode_keybinds(settings)), 0, "settings")
         # log
-        log_info("Recreated metadata")
-    # formating
-    metadata[0] = int(metadata[0])
+        log_info("Recreated settings")
     if write_value == None:
-        return metadata[line_num]
+        if line_name == None:
+            return settings
+        else:
+            return settings[line_name]
     else:
-        metadata[line_num] = write_value
-        sfm.encode_save(metadata, 0, "metadata")
+        settings[line_name] = write_value
+        sfm.encode_save(json.dumps(encode_keybinds(settings)), 0, "settings")
 
 
 def pad_zero(num:int|str):
@@ -70,7 +93,7 @@ def decode_save_file(save_num=1, save_name="save*", save_ext="sav"):
     try:
         save_data = sfm.decode_save(save_num, save_name, save_ext)
     except FileNotFoundError:
-        print("FILE NOT FOUND!")
+        print("decode_save_file: FILE NOT FOUND!")
     else:
         f = open(f'{save_name.replace("*", str(save_num))}.decoded.txt', "w")
         for line in save_data:
@@ -78,9 +101,7 @@ def decode_save_file(save_num=1, save_name="save*", save_ext="sav"):
         f.close()
 
 
-def log_info(message:str, detail="", message_type="INFO", write_out=False):
-    zero = lambda num: ("0" if num < 10 else "") + str(num)
-
+def log_info(message:str, detail="", message_type="INFO", write_out=False, new_line=False):
     current_date = make_date(dtime.now())
     current_time = make_time(dtime.now())
     try:
@@ -90,9 +111,13 @@ def log_info(message:str, detail="", message_type="INFO", write_out=False):
         # log
         log_info("Recreating logs folder")
         f = open(f"logs/{current_date}.txt", "a")
+    if new_line:
+        f.write("\n")
     f.write(f"[{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}\n")
     f.close()
     if write_out:
+        if new_line:
+            print("\n")
         print(f'logs/{current_date}.txt -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
 
 

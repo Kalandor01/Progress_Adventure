@@ -1,38 +1,73 @@
-﻿import os
+﻿import json
+import math
+import os
+import sys
+import threading as thr
 import time
 from datetime import datetime
-import json
+from msvcrt import getch
 
 import save_file_manager as sfm
 
-from tools import r
-import tools as ts
 import classes as cl
+import tools as ts
+from tools import r
+
+try:
+    ts.threading.current_thread().name = "Main"
+    ts.log_info("Preloading global variables", new_line=True)
+    # ts.decode_save_file(0, "settings")
+
+    # CONSTANTS
+    SAVE_FOLDER = os.path.dirname(os.path.abspath(__file__)) + "/saves"
+    SAVE_NAME = "save*"
+    SAVE_EXT = "sav"
+    SAVE_FILE_PATH = os.path.join(SAVE_FOLDER, SAVE_NAME)
+
+    # GLOBAL VARIABLES
+    _is_game_loop = False
+    settings = cl.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
+    settings.save_keybind_mapping()
+
+    # GLOBAL MODIFIERS
 
 
-def imput(ask="Num: ", type=int):
-    """
-    Only returns int/float.
-    """
-    while True:
-        try: return type(input(ask))
-        except ValueError: print(f'Not{" whole" if type == int else ""} number!')
+    def mod_is_game_loop(val=None):
+        global _is_game_loop
+        if val==None:
+            return _is_game_loop
+        else:
+            _is_game_loop = val
+            ts.settings_manager("auto_save", val)
 
 
-# dummy player for global
-player = cl.Player()
+    def imput(ask="Num: ", type=int):
+        """
+        Only returns int/float.
+        """
+        while True:
+            try: return type(input(ask))
+            except ValueError: print(f'Not{" whole" if type == int else ""} number!')
+
+
+    # dummy player for global
+    player = cl.Player()
+except:
+    ts.log_info("Instance crahed", sys.exc_info(), "ERROR")
+    raise
 
 
 # Monster cheat sheet: name, life, attack, deff, speed, rare, team, switched
-def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=True):
+def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=False):
     global player
     monsters = []
     monster = None
-    for x in range(num):
+    for _ in range(num):
         # max cost calculation
-        costnum = round(cost / num)
-        if round_up and 0 < ((cost / num) % 1) <= 0.5:
-            costnum += 1
+        if round_up:
+            costnum = math.ceil(cost / num)
+        else:
+            costnum = round(cost / num)
         if costnum < power_min:
             costnum = power_min
         # cost calculation
@@ -171,13 +206,37 @@ def stats(won=0):
     print(f"Attack: {player.attack}\nDefence: {player.defence}\nSpeed: {player.speed}\n")
     if won == 0 or won == 1:
         print(f"OTHER:")
+
+
+# Auto save thread
+def auto_saver():
+    while True:
+        time.sleep(5)
+        if mod_is_game_loop():
+            ts.log_info("Beggining auto save", f"slot number: {None}")
+            save_game()
+        else:
+            break
+
+
+def save_game():
+    pass
     
 
 def game_loop(data=None):
+    mod_is_game_loop(True)
+    ts.log_info("Game loop started")
     if data == None:
         data = {}
+    # auto saver
+    if settings.auto_save:
+        thread_save = thr.Thread(target=auto_saver, name="Auto saver", daemon=True)
+        thread_save.start()
+    # game
     stats(-1)
-    fight_ran(7, 15)
+    fight_ran(3, 5)
+    mod_is_game_loop(False)
+    ts.log_info("Game loop ended")
 
     
 def new_save(save_num=1):
@@ -200,13 +259,13 @@ def new_save(save_num=1):
     new_save_data.update(ts.random_state_converter(r))
     # create new save
     try:
-        f = open(f'{SAVE_NAME.replace("*", str(save_num))}.sav', "w")
+        f = open(f'{SAVE_FILE_PATH.replace("*", str(save_num))}.{SAVE_EXT}', "w")
         f.close()
     except FileNotFoundError:
         os.mkdir("saves")
         # log
         ts.log_info("Recreating saves folder")
-    sfm.encode_save([json.dumps(new_display_data), json.dumps(new_save_data)], save_num, SAVE_NAME, SAVE_EXT)
+    sfm.encode_save([json.dumps(new_display_data), json.dumps(new_save_data)], save_num, SAVE_FILE_PATH, SAVE_EXT)
     # log
     ts.log_info("Created save", f'slot number: {save_num}, player name: "{player.name}"')
     game_loop(new_save_data)
@@ -215,10 +274,10 @@ def new_save(save_num=1):
 
 def load_save(save_num=1):
     # read data
-    datas = json.loads(sfm.decode_save(save_num, SAVE_NAME, SAVE_EXT)[1])
+    datas = json.loads(sfm.decode_save(save_num, SAVE_FILE_PATH, SAVE_EXT)[1])
     # player
     player_data = datas["player"]
-    player.name = player_data["name"]
+    player.name = str(player_data["name"])
     player.hp = int(player_data["hp"])
     player.attack = int(player_data["attack"])
     player.defence = int(player_data["defence"])
@@ -228,85 +287,19 @@ def load_save(save_num=1):
     ts.log_info("Loaded save", f'slot number: {save_num}, hero name: "{player.name}", last saved: {ts.make_date(last_accessed)} {ts.make_time(last_accessed[3:])}')
     # load random state
     r.set_state(ts.random_state_converter(datas["seed"]))
-    data = []
-    game_loop(data)
+    game_loop(datas)
 
 
-def manage_saves(file_data, can_exit=False):
-
-    in_main_menu = True
-    while True:
-        if len(file_data):
-            if in_main_menu:
-                in_main_menu = False
-                option = sfm.UI_list(["New save", "Load/Delete save"], " Main menu", can_esc=can_exit).display()
-            else:
-                option = 1
-            # new file
-            if option == 0:
-                new_slot = 1
-                for data in file_data:
-                    if data[0] == new_slot:
-                        new_slot += 1
-                return [1, new_slot]
-            elif option == -1:
-                return [-1, -1]
-            # load/delete
-            else:
-                # get data from file_data
-                list_data = []
-                for data in file_data:
-                    list_data.append(data[1])
-                    list_data.append(None)
-                list_data.append("Delete file")
-                list_data.append("Back")
-                option = sfm.UI_list(list_data, " Level select", multiline=True, can_esc=True).display()
-                # load
-                if option != -1 and option / 2 < len(file_data):
-                    return [0, file_data[int(option / 2)][0]]
-                # delete
-                elif option / 2 == len(file_data):
-                    list_data.pop(len(list_data) - 2)
-                    delete_mode = True
-                    while delete_mode and len(file_data) > 0:
-                        option = sfm.UI_list(list_data, " Delete mode!", "X ", "  ", multiline=True, can_esc=True).display()
-                        if option != -1 and option != len(list_data) - 1:
-                            option = int(option / 2)
-                            if sfm.UI_list(["No", "Yes"], f" Are you sure you want to remove Save file {file_data[option][0]}?", can_esc=True).display():
-                                # log
-                                datas = json.loads(sfm.decode_save(file_data[option][0], SAVE_NAME, SAVE_EXT, decode_until=1)[0])
-                                last_accessed = datas["last_access"]
-                                ts.log_info("Deleted save", f'slot number: {file_data[option][0]}, hero name: "{datas["player_name"]}", last saved: {ts.make_date(last_accessed)} {ts.make_time(last_accessed[3:])}')
-                                # remove
-                                os.remove(f'{SAVE_NAME.replace("*", str(file_data[option][0]))}.{SAVE_EXT}')
-                                list_data.pop(option * 2)
-                                list_data.pop(option * 2)
-                                file_data.pop(option)
-                        else:
-                            delete_mode = False
-                # back
-                else:
-                    in_main_menu = True
-        else:
-            input(f"\n No save files detected!")
-            return [1, 1]
-
-
-
-def main():
-    # ts.decode_save_file(0, "metadata")
-    # ts.decode_save_file(1, SAVE_NAME)
-
-    # get save datas
+def get_saves_data():
     try:
-        f = open(f'{SAVE_NAME.replace("*", str(0))}.sav', "w")
+        f = open(f'{SAVE_FILE_PATH.replace("*", "0")}.{SAVE_EXT}', "w")
         f.close()
-        os.remove(f'{SAVE_NAME.replace("*", str(0))}.sav')
+        os.remove(f'{SAVE_FILE_PATH.replace("*", "0")}.{SAVE_EXT}')
     except FileNotFoundError:
         os.mkdir("saves")
         # log
         ts.log_info("Recreating saves folder")
-    datas = sfm.file_reader(-1, dir_name=SAVE_LOCATION, decode_until=1)
+    datas = sfm.file_reader(-1, dir_name=SAVE_FOLDER, decode_until=1)
     # process file data
     datas_processed = []
     for data in datas:
@@ -324,32 +317,136 @@ def main():
             except (TypeError, IndexError):
                 ts.log_info("Parse error", f"Slot number: {data[0]}", "ERROR")
                 input(f"Save file {data[0]} could not be parsed!")
-    # manage saves
-    status = manage_saves(datas_processed, True)
-    # new save
-    if status[0] == 1:
-        input(f"\nNew game in slot {status[1]}!\n")
-        # new slot?
-        new_save(status[1])
-    # load
-    elif status[0] == 0:
-        input(f"\nLoading slot {status[1]}!")
-        load_save(status[1])
+    return datas_processed
 
 
-# constants
-SAVE_LOCATION = os.path.dirname(os.path.abspath(__file__)) + "/saves"
-SAVE_NAME = os.path.dirname(os.path.abspath(__file__)) + "/saves/save*"
-SAVE_EXT = "sav"
+def main_menu():
+    # action functions
+    def other_options():
+        auto_save = sfm.Toggle(settings.auto_save, "Auto save: ")
+        sfm.options_ui([auto_save], " Other options", key_mapping=settings.keybind_mapping)
+        settings.auto_save = bool(auto_save.value)
+        ts.settings_manager("auto_save", settings.auto_save)
+
+    def set_keybind(name:"str"):
+        print("\n\nPress any key\n\n", end="")
+        key = getch()
+        if key in [b"\xe0", b"\x00"]:
+            key = getch()
+            key = [key, 1]
+        else:
+            key = [key]
+        settings.keybinds[name].change(key)
+
+    def keybind_setting():
+        while True:
+            ans = sfm.UI_list_s([
+            f"Escape: {settings.keybinds['esc'].name}",
+            f"Up: {settings.keybinds['up'].name}",
+            f"Down: {settings.keybinds['down'].name}",
+            f"Left: {settings.keybinds['left'].name}",
+            f"Right: {settings.keybinds['right'].name}",
+            f"Enter: {settings.keybinds['enter'].name}",
+            None, "Done"
+            ], " Keybinds", False, True).display(settings.keybind_mapping)
+            # exit
+            if ans == -1:
+                keybinds = ts.settings_manager("keybinds")
+                for x in keybinds:
+                    keybinds[x] = cl.Key(keybinds[x])
+                settings.keybinds = keybinds
+                break
+            # done
+            elif ans > 5:
+                settings.save_keybind_mapping()
+                break
+            else:
+                set_keybind(list(settings.keybinds)[ans])
+
+    files_data = get_saves_data()
+    in_main_menu = True
+    while True:
+        status = [-1, -1]
+        if len(files_data):
+            if in_main_menu:
+                in_main_menu = False
+                option = sfm.UI_list(["New save", "Load/Delete save", "Options"], " Main menu", can_esc=True).display(settings.keybind_mapping)
+            else:
+                option = 1
+            # new file
+            if option == 0:
+                new_slot = 1
+                for data in files_data:
+                    if data[0] == new_slot:
+                        new_slot += 1
+                status = [1, new_slot]
+            elif option == -1:
+                break
+            # load/delete
+            elif option == 1:
+                # get data from file_data
+                list_data = []
+                for data in files_data:
+                    list_data.append(data[1])
+                    list_data.append(None)
+                list_data.append("Delete file")
+                list_data.append("Back")
+                option = sfm.UI_list_s(list_data, " Level select", True, True, exclude_none=True).display(settings.keybind_mapping)
+                # load
+                if option != -1 and option < len(files_data):
+                    status = [0, files_data[int(option)][0]]
+                # delete
+                elif option == len(files_data):
+                    # remove "delete file"
+                    list_data.pop(len(list_data) - 2)
+                    while len(files_data) > 0:
+                        option = sfm.UI_list(list_data, " Delete mode!", "X ", "  ", multiline=True, can_esc=True, exclude_none=True).display(settings.keybind_mapping)
+                        if option != -1 and option < (len(list_data) - 1) / 2:
+                            if sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(settings.keybind_mapping):
+                                # log
+                                datas = json.loads(sfm.decode_save(files_data[option][0], SAVE_FILE_PATH, SAVE_EXT, decode_until=1)[0])
+                                last_accessed = datas["last_access"]
+                                ts.log_info("Deleted save", f'slot number: {files_data[option][0]}, hero name: "{datas["player_name"]}", last saved: {ts.make_date(last_accessed)} {ts.make_time(last_accessed[3:])}')
+                                # remove
+                                os.remove(f'{SAVE_FILE_PATH.replace("*", str(files_data[option][0]))}.{SAVE_EXT}')
+                                list_data.pop(option * 2)
+                                list_data.pop(option * 2)
+                                files_data.pop(option)
+                        else:
+                            break
+                # back
+                else:
+                    in_main_menu = True
+            elif option == 2:
+                sfm.UI_list_s(["Keybinds", "Other", None, "Back"], " Options", False, True, [keybind_setting, other_options], True).display(settings.keybind_mapping)
+                in_main_menu = True
+        else:
+            input(f"\n No save files detected!")
+            status = [1, 1]
+
+        # action
+        # new save
+        if status[0] == 1:
+            input(f"\nNew game in slot {status[1]}!\n")
+            # new slot?
+            new_save(status[1])
+        # load
+        elif status[0] == 0:
+            input(f"\nLoading slot {status[1]}!")
+            load_save(status[1])
+
+
+def main():
+    # ts.decode_save_file(0, "settings")
+    # ts.decode_save_file(1, SAVE_FILE_PATH)
+    main_menu()
+
 
 if __name__ == "__main__":
-    import sys
-
     # ultimate error handlind (release only)
     error_handling = False
 
     # begin log
-    ts.threading.current_thread().name = "Main"
     ts.log_info("Beginning new instance")
 
     exit_game = False

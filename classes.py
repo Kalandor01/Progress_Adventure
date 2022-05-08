@@ -1,7 +1,77 @@
 from __future__ import annotations
 from tools import r
+import tools as ts
 
 import random_sentance as rs
+
+ENCODING = "windows-1250"
+
+class Key:
+    def __init__(self, value:list):
+        self.value = value
+        self.name = self.value[0].decode(ENCODING)
+        self.set_name()
+    
+    def set_name(self):
+        match self.value:
+            case [(b"H"|b"P"|b"K"|b"M"), 1]:
+                match self.value[0]:
+                    case b"H":
+                        self.name = "up"
+                    case b"P":
+                        self.name = "down"
+                    case b"K":
+                        self.name = "left"
+                    case b"M":
+                        self.name = "right"
+                self.name += " arrow"
+            case _:
+                match self.value[0]:
+                    case b"\r":
+                        self.name = "enter"
+                    case b"\x1b":
+                        self.name = "escape"
+                    case _:
+                        self.name = self.value[0].decode(ENCODING)
+    
+    def change(self, key):
+        self.value = key
+        self.set_name()
+
+class Settings:
+
+    def __init__(self, auto_save:bool, keybinds):
+        self.auto_save = auto_save
+        for x in keybinds:
+            keybinds[x] = Key(keybinds[x])
+        self.keybinds = keybinds
+        self.keybind_mapping = []
+        self.save_keybind_mapping()
+    
+    def encode_keybinds(self):
+        return {"esc": self.keybinds["esc"].value.copy(),
+        "up": self.keybinds["up"].value.copy(),
+        "down": self.keybinds["down"].value.copy(),
+        "left": self.keybinds["left"].value.copy(),
+        "right": self.keybinds["right"].value.copy(),
+        "enter": self.keybinds["enter"].value.copy()}
+    
+    def save_keybind_mapping(self):
+        # [[keybinds["esc"], keybinds["up"], keybinds["down"], keybinds["left"], keybinds["right"], keybinds["enter"]], [b"\xe0", b"\x00"]]
+        self.keybind_mapping = [[self.keybinds["esc"].value,
+        self.keybinds["up"].value,
+        self.keybinds["down"].value,
+        self.keybinds["left"].value,
+        self.keybinds["right"].value,
+        self.keybinds["enter"].value], [b"\xe0", b"\x00"]]
+        ts.settings_manager("keybinds", self.encode_keybinds())
+
+
+class Save_data:
+    def __init__(self, last_access:list, player:Player, seed):
+        self.last_access = last_access
+        self.player = player
+        self.seed = seed
 
 
 def entity_master(name:str, life:int|range, attack:int|range, deff:int|range, speed:int|range, fluc_small=2, fluc_big=3, c_rare=0.05, team=1, c_team_change=0.005):
