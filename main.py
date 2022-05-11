@@ -25,9 +25,11 @@ try:
     SAVE_FILE_PATH = os.path.join(SAVE_FOLDER, SAVE_NAME)
 
     # GLOBAL VARIABLES
-    _is_game_loop = False
     settings = cl.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
     settings.save_keybind_mapping()
+
+    _is_game_loop = False
+    _in_fight = False
 
     # GLOBAL MODIFIERS
 
@@ -38,7 +40,13 @@ try:
             return _is_game_loop
         else:
             _is_game_loop = val
-            ts.settings_manager("auto_save", val)
+    
+    def mod_in_fight(val=None):
+        global _in_fight
+        if val==None:
+            return _in_fight
+        else:
+            _in_fight = val
 
 
     def imput(ask="Num: ", type=int):
@@ -208,6 +216,16 @@ def stats(won=0):
         print(f"OTHER:")
 
 
+def prepair_fight(data):
+    mod_in_fight(True)
+    fight_ran(3, 5)
+    mod_in_fight(True)
+
+
+def save_game():
+    pass
+
+
 # Auto save thread
 def auto_saver():
     while True:
@@ -219,22 +237,36 @@ def auto_saver():
             break
 
 
-def save_game():
-    pass
+# quit thread
+def quit_game():
+    while True:
+        if sfm.get_key(2, settings.keybind_mapping) == 0:
+            if not mod_in_fight():
+                ts.log_info("Beggining manual save", f"slot number: {None}")
+                save_game()
+                break
+            else:
+                print("You can't exit while a fight happening!")
     
 
-def game_loop(data=None):
+def game_loop(data):
+    ts.log_info("Preparing game data")
+    # load random state
+    r.set_state(ts.random_state_converter(data["seed"]))
+    # load to class
+    save_data = cl.Save_data(data["last_access"], data["player"], r.get_state())
     mod_is_game_loop(True)
     ts.log_info("Game loop started")
-    if data == None:
-        data = {}
+    # manual quit
+    # thread_quit = thr.Thread(target=quit_game, name="Quit manager", daemon=True)
+    # thread_quit.start()
     # auto saver
     if settings.auto_save:
         thread_save = thr.Thread(target=auto_saver, name="Auto saver", daemon=True)
         thread_save.start()
     # game
     stats(-1)
-    fight_ran(3, 5)
+    prepair_fight(save_data)
     mod_is_game_loop(False)
     ts.log_info("Game loop ended")
 
@@ -268,6 +300,7 @@ def new_save(save_num=1):
     sfm.encode_save([json.dumps(new_display_data), json.dumps(new_save_data)], save_num, SAVE_FILE_PATH, SAVE_EXT)
     # log
     ts.log_info("Created save", f'slot number: {save_num}, player name: "{player.name}"')
+    new_save_data["player"] = player
     game_loop(new_save_data)
 
 # json_j = json.loads(sfm.decode_save()[0])
@@ -285,8 +318,7 @@ def load_save(save_num=1):
     # log
     last_accessed = datas["last_access"]
     ts.log_info("Loaded save", f'slot number: {save_num}, hero name: "{player.name}", last saved: {ts.make_date(last_accessed)} {ts.make_time(last_accessed[3:])}')
-    # load random state
-    r.set_state(ts.random_state_converter(datas["seed"]))
+    datas["player"] = player
     game_loop(datas)
 
 
