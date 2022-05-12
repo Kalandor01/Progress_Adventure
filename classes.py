@@ -40,6 +40,8 @@ class Key:
 
 class Settings:
 
+    DOUBLE_KEYS = [b"\xe0", b"\x00"]
+
     def __init__(self, auto_save:bool, keybinds):
         self.auto_save = auto_save
         for x in keybinds:
@@ -63,12 +65,13 @@ class Settings:
         self.keybinds["down"].value,
         self.keybinds["left"].value,
         self.keybinds["right"].value,
-        self.keybinds["enter"].value], [b"\xe0", b"\x00"]]
+        self.keybinds["enter"].value], self.DOUBLE_KEYS]
         ts.settings_manager("keybinds", self.encode_keybinds())
 
 
 class Save_data:
-    def __init__(self, last_access:list, player:Player, seed):
+    def __init__(self, save_num, last_access:list, player:Player, seed):
+        self.save_num = save_num
         self.last_access = last_access
         self.player = player
         self.seed = seed

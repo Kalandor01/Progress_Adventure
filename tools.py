@@ -3,6 +3,7 @@ import os
 import threading
 from datetime import datetime as dtime
 import numpy as np
+from msvcrt import getch
 
 import save_file_manager as sfm
 
@@ -21,6 +22,16 @@ def decode_keybinds(settings:dict):
     for x in settings["keybinds"]:
         settings['keybinds'][x][0] = bytes(settings['keybinds'][x][0], ENCODING)
     return settings
+
+
+def is_key(key_array:list):
+    # key array, exept [[key], [double checker]]
+    key = getch()
+    arrow = False
+    if key in key_array[1]:
+        arrow = True
+        key = getch()
+    return ((len(key_array[0]) == 1 and not arrow) or (len(key_array[0]) > 1 and arrow)) and key == key_array[0][0]
 
 
 def settings_manager(line_name:str, write_value=None):

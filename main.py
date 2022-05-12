@@ -27,6 +27,7 @@ try:
     # GLOBAL VARIABLES
     settings = cl.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
     settings.save_keybind_mapping()
+    save_data = cl.Save_data(None, None, None, None)
 
     _is_game_loop = False
     _in_fight = False
@@ -219,7 +220,7 @@ def stats(won=0):
 def prepair_fight(data):
     mod_in_fight(True)
     fight_ran(3, 5)
-    mod_in_fight(True)
+    mod_in_fight(False)
 
 
 def save_game():
@@ -228,46 +229,65 @@ def save_game():
 
 # Auto save thread
 def auto_saver():
-    while True:
-        time.sleep(5)
-        if mod_is_game_loop():
-            ts.log_info("Beggining auto save", f"slot number: {None}")
-            save_game()
-        else:
-            break
+    try:
+        while True:
+            time.sleep(5)
+            if mod_is_game_loop():
+                ts.log_info("Beggining auto save", f"slot number: {save_data.save_num}")
+                save_game()
+            else:
+                break
+    except:
+        ts.log_info("thread crahed", sys.exc_info(), "ERROR")
+        raise
 
 
 # quit thread
 def quit_game():
-    while True:
-        if sfm.get_key(2, settings.keybind_mapping) == 0:
-            if not mod_in_fight():
-                ts.log_info("Beggining manual save", f"slot number: {None}")
-                save_game()
-                break
+    try:
+        while True:
+            if mod_is_game_loop():
+                if ts.is_key([settings.keybinds["esc"].value, settings.DOUBLE_KEYS]):
+                    if not mod_in_fight():
+                        ts.log_info("Beggining manual save", f"slot number: {save_data.save_num}")
+                        save_game()
+                        break
+                    else:
+                        print("You can't exit while a fight happening!")
             else:
-                print("You can't exit while a fight happening!")
+                break
+    except:
+        ts.log_info("thread crahed", sys.exc_info(), "ERROR")
+        raise
     
 
 def game_loop(data):
+    # PREPARING
     ts.log_info("Preparing game data")
     # load random state
     r.set_state(ts.random_state_converter(data["seed"]))
     # load to class
-    save_data = cl.Save_data(data["last_access"], data["player"], r.get_state())
+    global save_data
+    save_data = cl.Save_data(data["save_num"], data["last_access"], data["player"], r.get_state())
     mod_is_game_loop(True)
+    # GAME LOOP
     ts.log_info("Game loop started")
+    # TRHEADS
     # manual quit
-    # thread_quit = thr.Thread(target=quit_game, name="Quit manager", daemon=True)
-    # thread_quit.start()
+    thread_quit = thr.Thread(target=quit_game, name="Quit manager", daemon=True)
+    thread_quit.start()
     # auto saver
     if settings.auto_save:
         thread_save = thr.Thread(target=auto_saver, name="Auto saver", daemon=True)
         thread_save.start()
-    # game
+    # GAME
     stats(-1)
+    print("Wandering...")
+    time.sleep(5)
     prepair_fight(save_data)
+    # ENDING
     mod_is_game_loop(False)
+    input("Exiting...Press keys!")
     ts.log_info("Game loop ended")
 
     
@@ -300,6 +320,8 @@ def new_save(save_num=1):
     sfm.encode_save([json.dumps(new_display_data), json.dumps(new_save_data)], save_num, SAVE_FILE_PATH, SAVE_EXT)
     # log
     ts.log_info("Created save", f'slot number: {save_num}, player name: "{player.name}"')
+    # extra data
+    new_save_data["save_num"] = save_num
     new_save_data["player"] = player
     game_loop(new_save_data)
 
@@ -318,6 +340,8 @@ def load_save(save_num=1):
     # log
     last_accessed = datas["last_access"]
     ts.log_info("Loaded save", f'slot number: {save_num}, hero name: "{player.name}", last saved: {ts.make_date(last_accessed)} {ts.make_time(last_accessed[3:])}')
+    # extra data
+    datas["save_num"] = save_num
     datas["player"] = player
     game_loop(datas)
 
@@ -331,7 +355,7 @@ def get_saves_data():
         os.mkdir("saves")
         # log
         ts.log_info("Recreating saves folder")
-    datas = sfm.file_reader(-1, dir_name=SAVE_FOLDER, decode_until=1)
+    datas = sfm.file_reader_s(SAVE_NAME, SAVE_FOLDER, 1)
     # process file data
     datas_processed = []
     for data in datas:
