@@ -1,4 +1,5 @@
 from __future__ import annotations
+import inspect
 from tools import r
 import tools as ts
 
@@ -77,7 +78,7 @@ class Save_data:
         self.seed = seed
 
 
-def entity_master(name:str, life:int|range, attack:int|range, deff:int|range, speed:int|range, fluc_small=2, fluc_big=3, c_rare=0.05, team=1, c_team_change=0.005):
+def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|range, fluc_small=2, fluc_big=3, c_rare=0.05, team=1, c_team_change=0.005, name:str=None):
     
     def configure_stat(stat_value:int|range):
         # int or range
@@ -92,6 +93,10 @@ def entity_master(name:str, life:int|range, attack:int|range, deff:int|range, sp
             stat_value = 0
         return stat_value
     
+    if name == None:
+        stack = inspect.stack()
+        name = stack[1][0].f_locals["self"].__class__.__name__
+    name = name.replace("_", " ")
     life = configure_stat(life)
     attack = configure_stat(attack)
     deff = configure_stat(deff)
@@ -105,6 +110,8 @@ def entity_master(name:str, life:int|range, attack:int|range, deff:int|range, sp
         attack *= 2
         deff *= 2
         speed *= 2
+    if life == 0:
+        life = 1
     # team
     switched = False
     if r.random() < c_team_change:
@@ -115,7 +122,9 @@ def entity_master(name:str, life:int|range, attack:int|range, deff:int|range, sp
 
 
 class Entity:
-    def __init__ (self, traits=entity_master("test", 1, 1, 1, 1)):
+    def __init__ (self, traits:list=None):
+        if traits == None:
+            traits = entity_master(1, 1, 1, 1, name="test")
         self.name = traits[0]
         self.hp = traits[1]
         self.attack = traits[2]
@@ -137,7 +146,7 @@ class Player(Entity):
     def __init__(self, name=""):
         if name == "":
             name = "You"
-        super().__init__(entity_master(name, range(14, 26), range(7, 13), range(7, 13), range(1, 20), 0, 0, 0, 0, 0))
+        super().__init__(entity_master(range(14, 26), range(7, 13), range(7, 13), range(1, 20), 0, 0, 0, 0, 0, name))
         # self.name = "You"
         # self.hp = r.randint(1, 7) + r.randint(1, 7) + 12
         # self.attack = r.randint(1, 7) + 6
@@ -150,17 +159,17 @@ class Player(Entity):
 
 class Caveman(Entity):
     def __init__(self):
-        super().__init__(entity_master(__class__.__name__, 7, 7, 7, 7))
+        super().__init__(entity_master(7, 7, 7, 7))
 
 
 class Ghoul(Entity):
     def __init__(self):
-        super().__init__(entity_master(__class__.__name__, 11, 9, 9, 9))
+        super().__init__(entity_master(11, 9, 9, 9))
 
 
 class Troll(Entity):
     def __init__(self):
-        super().__init__(entity_master(__class__.__name__, 13, 11, 11, 5))
+        super().__init__(entity_master(13, 11, 11, 5))
 
 
 class Test(Entity):

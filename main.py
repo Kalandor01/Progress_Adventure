@@ -380,11 +380,11 @@ def main_menu():
     # action functions
     def other_options():
         auto_save = sfm.Toggle(settings.auto_save, "Auto save: ")
-        sfm.options_ui([auto_save], " Other options", key_mapping=settings.keybind_mapping)
+        sfm.options_ui([auto_save, None, sfm.UI_list(["Back"])], " Other options", key_mapping=settings.keybind_mapping)
         settings.auto_save = bool(auto_save.value)
         ts.settings_manager("auto_save", settings.auto_save)
 
-    def set_keybind(name:"str"):
+    def set_keybind(name:str):
         print("\n\nPress any key\n\n", end="")
         key = getch()
         if key in [b"\xe0", b"\x00"]:
