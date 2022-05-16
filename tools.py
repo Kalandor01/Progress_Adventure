@@ -12,6 +12,45 @@ r = np.random.RandomState()
 ENCODING = "windows-1250"
 
 
+def pad_zero(num:int|str):
+    return ('0' if int(num) < 10 else '') + str(num)
+
+
+def make_date(date_lis:list|dtime, sep="-"):
+    if type(date_lis) == dtime:
+        return f"{pad_zero(date_lis.year)}{sep}{pad_zero(date_lis.month)}{sep}{pad_zero(date_lis.day)}"
+    else:
+        return f"{pad_zero(date_lis[0])}{sep}{pad_zero(date_lis[1])}{sep}{pad_zero(date_lis[2])}"
+
+
+def make_time(time_lis:list|dtime, sep=":"):
+    if type(time_lis) == dtime:
+        return f"{pad_zero(time_lis.hour)}{sep}{pad_zero(time_lis.minute)}{sep}{pad_zero(time_lis.second)}"
+    else:
+        return f"{pad_zero(time_lis[0])}{sep}{pad_zero(time_lis[1])}{sep}{pad_zero(time_lis[2])}"
+
+
+def log_info(message:str, detail="", message_type="INFO", write_out=False, new_line=False):
+    current_date = make_date(dtime.now())
+    current_time = make_time(dtime.now())
+    try:
+        f = open(f"logs/{current_date}.txt", "a")
+    except FileNotFoundError:
+        os.mkdir("logs")
+        # log
+        log_info("Recreating logs folder")
+        f = open(f"logs/{current_date}.txt", "a")
+    if new_line:
+        f.write("\n")
+    f.write(f"[{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}\n")
+    f.close()
+    if write_out:
+        if new_line:
+            print("\n")
+        print(f'logs/{current_date}.txt -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
+
+
+
 def encode_keybinds(settings:dict):
     for x in settings["keybinds"]:
         settings['keybinds'][x][0] = settings['keybinds'][x][0].decode(ENCODING)
@@ -64,24 +103,6 @@ def settings_manager(line_name:str, write_value=None):
         sfm.encode_save(json.dumps(encode_keybinds(settings)), 0, "settings")
 
 
-def pad_zero(num:int|str):
-    return ('0' if int(num) < 10 else '') + str(num)
-
-
-def make_date(date_lis:list|dtime, sep="-"):
-    if type(date_lis) == dtime:
-        return f"{pad_zero(date_lis.year)}{sep}{pad_zero(date_lis.month)}{sep}{pad_zero(date_lis.day)}"
-    else:
-        return f"{pad_zero(date_lis[0])}{sep}{pad_zero(date_lis[1])}{sep}{pad_zero(date_lis[2])}"
-
-
-def make_time(time_lis:list|dtime, sep=":"):
-    if type(time_lis) == dtime:
-        return f"{pad_zero(time_lis.hour)}{sep}{pad_zero(time_lis.minute)}{sep}{pad_zero(time_lis.second)}"
-    else:
-        return f"{pad_zero(time_lis[0])}{sep}{pad_zero(time_lis[1])}{sep}{pad_zero(time_lis[2])}"
-
-
 def random_state_converter(random_state:np.random.RandomState | dict | tuple):
     """
     Can convert a numpy RandomState.getstate() into an easily storable string and back.
@@ -110,26 +131,6 @@ def decode_save_file(save_num=1, save_name="save*", save_ext="sav"):
         for line in save_data:
             f.write(line + "\n")
         f.close()
-
-
-def log_info(message:str, detail="", message_type="INFO", write_out=False, new_line=False):
-    current_date = make_date(dtime.now())
-    current_time = make_time(dtime.now())
-    try:
-        f = open(f"logs/{current_date}.txt", "a")
-    except FileNotFoundError:
-        os.mkdir("logs")
-        # log
-        log_info("Recreating logs folder")
-        f = open(f"logs/{current_date}.txt", "a")
-    if new_line:
-        f.write("\n")
-    f.write(f"[{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}\n")
-    f.close()
-    if write_out:
-        if new_line:
-            print("\n")
-        print(f'logs/{current_date}.txt -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
 
 
 # thread_1 = threading.Thread(target="function", name="Thread name", args=["argument list"])
