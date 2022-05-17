@@ -1,11 +1,12 @@
 from __future__ import annotations
 import inspect
-from tools import r
-import tools as ts
 
 import random_sentance as rs
 
-ENCODING = "windows-1250"
+import tools as ts
+
+from tools import ENCODING, r
+
 
 class Key:
     def __init__(self, value:list):

@@ -1,0 +1,77 @@
+
+[22:37:33] [Main/INFO]	: |Preloading global variables| 
+[22:37:33] [Main/INFO]	: |Beginning new instance| 
+[22:37:43] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "2", last saved: 2022-05-12 21:01:37
+[22:37:43] [Main/INFO]	: |Preparing game data| 
+[22:37:43] [Main/INFO]	: |Game loop started| 
+[22:37:48] [Auto saver/INFO]	: |Beggining auto save| slot number: 2
+[22:37:53] [Auto saver/INFO]	: |Beggining auto save| slot number: 2
+
+[22:39:19] [Main/INFO]	: |Preloading global variables| 
+[22:39:19] [Main/INFO]	: |Beginning new instance| 
+[22:39:22] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "h", last saved: 2022-05-11 20:21:08
+[22:39:22] [Main/INFO]	: |Preparing game data| 
+[22:39:22] [Main/INFO]	: |Game loop started| 
+[22:39:27] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[22:39:32] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[22:39:37] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[22:39:38] [Quit manager/INFO]	: |Beggining manual save| slot number: 1
+[22:39:44] [Main/INFO]	: |Game loop ended| 
+[22:39:46] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:40:22] [Main/INFO]	: |Preloading global variables| 
+
+[22:40:50] [Main/INFO]	: |Preloading global variables| 
+
+[22:41:11] [Main/INFO]	: |Preloading global variables| 
+
+[22:42:09] [Main/INFO]	: |Preloading global variables| 
+
+[22:43:11] [Main/INFO]	: |Preloading global variables| 
+
+[22:45:20] [Main/INFO]	: |Preloading global variables| 
+
+[22:47:40] [Main/INFO]	: |Preloading global variables| 
+[22:47:40] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'int' object has no attribute 'replace'"), <traceback object at 0x000000418CC4B980>)
+
+[22:48:42] [Main/INFO]	: |Preloading global variables| 
+
+[22:51:04] [Main/INFO]	: |Preloading global variables| 
+
+[22:53:25] [Main/INFO]	: |Preloading global variables| 
+
+[22:53:28] [Main/INFO]	: |Preloading global variables| 
+
+[22:53:29] [Main/INFO]	: |Preloading global variables| 
+
+[22:53:30] [Main/INFO]	: |Preloading global variables| 
+
+[22:53:31] [Main/INFO]	: |Preloading global variables| 
+
+[22:53:31] [Main/INFO]	: |Preloading global variables| 
+
+[22:53:32] [Main/INFO]	: |Preloading global variables| 
+
+[22:53:34] [Main/INFO]	: |Preloading global variables| 
+
+[22:53:35] [Main/INFO]	: |Preloading global variables| 
+
+[22:54:05] [Main/INFO]	: |Preloading global variables| 
+[22:54:05] [Main/INFO]	: |Beginning new instance| 
+[22:54:10] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "h", last saved: 2022-05-11 20:21:08
+[22:54:10] [Main/INFO]	: |Preparing game data| 
+[22:54:10] [Main/INFO]	: |Game loop started| 
+[22:54:15] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[22:54:20] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[22:54:25] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[22:54:32] [Main/INFO]	: |Game loop ended| 
+[22:55:07] [Main/INFO]	: |Deleted save| slot number: 2, hero name: "2", last saved: 2022-05-12 21:01:37
+[22:55:11] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:56:43] [Main/INFO]	: |Preloading global variables| 
+[22:56:43] [Main/INFO]	: |Beginning new instance| 
+[22:57:18] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:58:14] [Main/INFO]	: |Preloading global variables| 
+[22:58:14] [Main/INFO]	: |Beginning new instance| 
+[22:58:24] [Main/INFO]	: |Instance ended succesfuly| 

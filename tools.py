@@ -2,14 +2,15 @@ import json
 import os
 import threading
 from datetime import datetime as dtime
-import numpy as np
 from msvcrt import getch
+import numpy as np
 
 import save_file_manager as sfm
 
 r = np.random.RandomState()
 
 ENCODING = "windows-1250"
+MAIN_THREAD_NAME = "Main"
 
 
 def pad_zero(num:int|str):

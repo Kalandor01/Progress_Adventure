@@ -1,0 +1,23 @@
+[23:38:42] [Main/INFO]	: |Beginning new instance| 
+[23:39:04] [Main/INFO]	: |Beginning new instance| 
+[23:39:24] [Main/INFO]	: |Beginning new instance| 
+[23:40:12] [Main/INFO]	: |Beginning new instance| 
+[23:41:37] [Main/INFO]	: |Beginning new instance| 
+[23:42:05] [Main/INFO]	: |Beginning new instance| 
+[23:43:17] [Main/INFO]	: |Beginning new instance| 
+[23:44:16] [Main/INFO]	: |Beginning new instance| 
+[23:45:44] [Main/INFO]	: |Beginning new instance| 
+[23:45:51] [Main/INFO]	: |Beginning new instance| 
+[23:46:10] [Main/INFO]	: |Beginning new instance| 
+[23:46:36] [Main/INFO]	: |Beginning new instance| 
+[23:48:24] [Main/INFO]	: |Beginning new instance| 
+[23:48:47] [Main/INFO]	: |Beginning new instance| 
+[23:50:30] [Main/INFO]	: |Beginning new instance| 
+[23:50:45] [Main/INFO]	: |Beginning new instance| 
+[23:50:51] [Main/INFO]	: |Created save| slot number: 1, player name: "k"
+[23:51:04] [Main/INFO]	: |Beginning new instance| 
+[23:51:12] [Main/INFO]	: |Created save| slot number: 2, player name: "j"
+[23:51:34] [Main/INFO]	: |Instance ended succesfuly| 
+[23:51:49] [Main/INFO]	: |Beginning new instance| 
+[23:52:03] [Main/INFO]	: |Deleted save| slot number: 2, hero name: "j", last saved: 2022-5-1 23:51:12
+[23:52:07] [Main/INFO]	: |Instance ended succesfuly| 

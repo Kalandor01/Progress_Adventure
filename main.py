@@ -1,4 +1,5 @@
-﻿import json
+﻿import copy
+import json
 import math
 import os
 import sys
@@ -11,10 +12,11 @@ import save_file_manager as sfm
 
 import classes as cl
 import tools as ts
-from tools import r
+
+from tools import MAIN_THREAD_NAME, r
 
 try:
-    ts.threading.current_thread().name = "Main"
+    ts.threading.current_thread().name = MAIN_THREAD_NAME
     ts.log_info("Preloading global variables", new_line=True)
     # ts.decode_save_file(0, "settings")
 
@@ -29,18 +31,18 @@ try:
     settings.save_keybind_mapping()
     save_data = cl.Save_data(None, None, None, None)
 
-    _is_game_loop = False
+    _in_game_loop = False
     _in_fight = False
 
     # GLOBAL MODIFIERS
 
 
-    def mod_is_game_loop(val=None):
-        global _is_game_loop
+    def mod_in_game_loop(val=None):
+        global _in_game_loop
         if val==None:
-            return _is_game_loop
+            return _in_game_loop
         else:
-            _is_game_loop = val
+            _in_game_loop = val
     
     def mod_in_fight(val=None):
         global _in_fight
@@ -62,7 +64,7 @@ try:
     # dummy player for global
     player = cl.Player()
 except:
-    ts.log_info("Instance crahed", sys.exc_info(), "ERROR")
+    ts.log_info("Preloading crahed", sys.exc_info(), "ERROR")
     raise
 
 
@@ -224,7 +226,7 @@ def prepair_fight(data):
 
 
 def save_game():
-    pass
+    frozen_data = copy.deepcopy(save_data)
 
 
 # Auto save thread
@@ -232,13 +234,13 @@ def auto_saver():
     try:
         while True:
             time.sleep(5)
-            if mod_is_game_loop():
+            if mod_in_game_loop():
                 ts.log_info("Beggining auto save", f"slot number: {save_data.save_num}")
                 save_game()
             else:
                 break
     except:
-        ts.log_info("thread crahed", sys.exc_info(), "ERROR")
+        ts.log_info("Thread crahed", sys.exc_info(), "ERROR")
         raise
 
 
@@ -246,7 +248,7 @@ def auto_saver():
 def quit_game():
     try:
         while True:
-            if mod_is_game_loop():
+            if mod_in_game_loop():
                 if ts.is_key([settings.keybinds["esc"].value, settings.DOUBLE_KEYS]):
                     if not mod_in_fight():
                         ts.log_info("Beggining manual save", f"slot number: {save_data.save_num}")
@@ -257,7 +259,7 @@ def quit_game():
             else:
                 break
     except:
-        ts.log_info("thread crahed", sys.exc_info(), "ERROR")
+        ts.log_info("Thread crahed", sys.exc_info(), "ERROR")
         raise
     
 
@@ -269,7 +271,7 @@ def game_loop(data):
     # load to class
     global save_data
     save_data = cl.Save_data(data["save_num"], data["last_access"], data["player"], r.get_state())
-    mod_is_game_loop(True)
+    mod_in_game_loop(True)
     # GAME LOOP
     ts.log_info("Game loop started")
     # TRHEADS
@@ -286,7 +288,7 @@ def game_loop(data):
     time.sleep(5)
     prepair_fight(save_data)
     # ENDING
-    mod_is_game_loop(False)
+    mod_in_game_loop(False)
     input("Exiting...Press keys!")
     ts.log_info("Game loop ended")
 

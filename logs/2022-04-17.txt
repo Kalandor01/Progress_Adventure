@@ -1,0 +1,55 @@
+[10:06:54] [Main/INFO]	: |Beginning new instance|
+[10:15:32] [Main/INFO]	: |Beginning new instance|
+[10:15:42] [Main/INFO]	: |Created save| slot number: 1, player name: "work?"
+[10:21:33] [Main/INFO]	: |Recreating logs folder|
+[10:21:33] [Main/INFO]	: |Beginning new instance|
+[10:22:18] [Main/INFO]	: |Recreating saves folder|
+[10:22:18] [Main/INFO]	: |Created save| slot number: 1, player name: "new"
+[10:22:58] [Main/INFO]	: |Instance ended succesfuly|
+[10:29:42] [Main/INFO]	: |Beginning new instance| 
+[10:33:35] [Main/INFO]	: |Beginning new instance| 
+[10:33:45] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "new", last saved: 2022-4-17 10:22:18
+[10:33:45] [Main/INFO]	: |Decremented max saves in metadata| 3
+[10:36:10] [Main/INFO]	: |Beginning new instance| 
+[10:36:14] [Main/INFO]	: |Created save| slot number: 1, player name: "You"
+[10:36:22] [Main/INFO]	: |Beginning new instance| 
+[10:38:41] [Main/INFO]	: |Beginning new instance| 
+[10:38:45] [Main/INFO]	: |Created save| slot number: 2, player name: "k"
+[10:38:49] [Main/INFO]	: |Beginning new instance| 
+[10:38:53] [Main/INFO]	: |Created save| slot number: 3, player name: "j"
+[10:39:06] [Main/INFO]	: |Beginning new instance| 
+[10:39:12] [Main/INFO]	: |Incremented max saves in metadata| max saves: 4
+[10:39:13] [Main/INFO]	: |Created save| slot number: 4, player name: "h"
+[10:39:26] [Main/INFO]	: |Instance ended succesfuly| 
+[10:40:07] [Main/INFO]	: |Beginning new instance| 
+[10:40:14] [Main/INFO]	: |Deleted save| slot number: 3, hero name: "j", last saved: 2022-4-17 10:38:53
+[10:40:17] [Main/INFO]	: |Deleted save| slot number: 4, hero name: "h", last saved: 2022-4-17 10:39:13
+[10:40:17] [Main/INFO]	: |Decremented max saves in metadata| max saves: 3
+[10:40:25] [Main/INFO]	: |Deleted save| slot number: 2, hero name: "k", last saved: 2022-4-17 10:38:45
+[10:40:25] [Main/INFO]	: |Decremented max saves in metadata| max saves: 2
+[10:40:31] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "You", last saved: 2022-4-17 10:36:14
+[10:40:31] [Main/INFO]	: |Decremented max saves in metadata| max saves: 1
+[10:40:35] [Main/INFO]	: |Created save| slot number: 1, player name: "You"
+[19:55:31] [Main/INFO]	: |Beginning new instance| 
+[19:55:37] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "You", last saved: 2022-4-17 10:40:35
+[19:57:25] [Main/INFO]	: |Beginning new instance| 
+[20:01:04] [Main/INFO]	: |Beginning new instance| 
+[20:02:09] [Main/INFO]	: |Beginning new instance| 
+[20:02:26] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "You", last saved: 2022-4-17 10:40:35
+[20:02:26] [Main/INFO]	: |Decremented max saves in metadata| max saves: 0
+[20:03:18] [Main/INFO]	: |Created save| slot number: 1, player name: "h"
+[20:07:15] [Main/INFO]	: |Beginning new instance| 
+[20:07:56] [Main/INFO]	: |Beginning new instance| 
+[20:08:34] [Main/INFO]	: |Beginning new instance| 
+[20:08:51] [Main/INFO]	: |Beginning new instance| 
+[20:08:53] [Main/INFO]	: |Incremented max saves in metadata| max saves: 1
+[20:08:55] [Main/INFO]	: |Created save| slot number: 1, player name: "kk"
+[20:09:00] [Main/INFO]	: |Beginning new instance| 
+[20:09:13] [Main/INFO]	: |Incremented max saves in metadata| max saves: 2
+[20:09:15] [Main/INFO]	: |Created save| slot number: 2, player name: "k"
+[20:09:21] [Main/INFO]	: |Beginning new instance| 
+[20:09:44] [Main/INFO]	: |Beginning new instance| 
+[20:09:44] [Main/INFO]	: |Recreated metadata| 
+[20:10:05] [Main/INFO]	: |Beginning new instance| 
+[20:11:32] [Main/INFO]	: |Beginning new instance| 
+[20:11:32] [Main/INFO]	: |Recreated metadata| max_saves: 5
