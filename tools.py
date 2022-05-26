@@ -35,12 +35,12 @@ def log_info(message:str, detail="", message_type="INFO", write_out=False, new_l
     current_date = make_date(dtime.now())
     current_time = make_time(dtime.now())
     try:
-        f = open(f"logs/{current_date}.txt", "a")
+        f = open(f"logs/{current_date}.log", "a")
     except FileNotFoundError:
         os.mkdir("logs")
         # log
         log_info("Recreating logs folder")
-        f = open(f"logs/{current_date}.txt", "a")
+        f = open(f"logs/{current_date}.log", "a")
     if new_line:
         f.write("\n")
     f.write(f"[{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}\n")
@@ -48,7 +48,7 @@ def log_info(message:str, detail="", message_type="INFO", write_out=False, new_l
     if write_out:
         if new_line:
             print("\n")
-        print(f'logs/{current_date}.txt -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
+        print(f'logs/{current_date}.log -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
 
 
 
