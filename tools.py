@@ -11,6 +11,9 @@ r = np.random.RandomState()
 
 ENCODING = "windows-1250"
 MAIN_THREAD_NAME = "Main"
+LOGS_FOLDER = "logs/"
+LOGS_EXT = "log"
+
 
 
 def pad_zero(num:int|str):
@@ -35,12 +38,12 @@ def log_info(message:str, detail="", message_type="INFO", write_out=False, new_l
     current_date = make_date(dtime.now())
     current_time = make_time(dtime.now())
     try:
-        f = open(f"logs/{current_date}.log", "a")
+        f = open(f"{LOGS_FOLDER}{current_date}.{LOGS_EXT}", "a")
     except FileNotFoundError:
         os.mkdir("logs")
         # log
         log_info("Recreating logs folder")
-        f = open(f"logs/{current_date}.log", "a")
+        f = open(f"{LOGS_FOLDER}{current_date}.{LOGS_EXT}", "a")
     if new_line:
         f.write("\n")
     f.write(f"[{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}\n")
@@ -48,11 +51,11 @@ def log_info(message:str, detail="", message_type="INFO", write_out=False, new_l
     if write_out:
         if new_line:
             print("\n")
-        print(f'logs/{current_date}.log -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
+        print(f'{LOGS_FOLDER}{current_date}.{LOGS_EXT} -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
 
 
 
-def encode_keybinds(settings:dict):
+def encode_keybinds(settings:dict[list[bytes|int]]):
     for x in settings["keybinds"]:
         settings['keybinds'][x][0] = settings['keybinds'][x][0].decode(ENCODING)
     return settings

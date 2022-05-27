@@ -1,5 +1,6 @@
 from __future__ import annotations
 import inspect
+import copy
 
 import random_sentance as rs
 
@@ -8,8 +9,14 @@ import tools as ts
 from tools import ENCODING, r
 
 
+class Globals:
+    def __init__(self, in_game_loop:bool, in_fight:bool):
+        self.in_game_loop = bool(in_game_loop)
+        self.in_fight = bool(in_fight)
+
+
 class Key:
-    def __init__(self, value:list):
+    def __init__(self, value:list[bytes, int]):
         self.value = value
         self.name = self.value[0].decode(ENCODING)
         self.set_name()
@@ -36,19 +43,20 @@ class Key:
                     case _:
                         self.name = self.value[0].decode(ENCODING)
     
-    def change(self, key):
+    def change(self, key:list):
         self.value = key
         self.set_name()
+
 
 class Settings:
 
     DOUBLE_KEYS = [b"\xe0", b"\x00"]
 
-    def __init__(self, auto_save:bool, keybinds):
+    def __init__(self, auto_save:bool, keybinds:dict[list]):
         self.auto_save = auto_save
         for x in keybinds:
             keybinds[x] = Key(keybinds[x])
-        self.keybinds = keybinds
+        self.keybinds = dict[Key](keybinds)
         self.keybind_mapping = []
         self.save_keybind_mapping()
     
@@ -62,7 +70,8 @@ class Settings:
     
     def save_keybind_mapping(self):
         # [[keybinds["esc"], keybinds["up"], keybinds["down"], keybinds["left"], keybinds["right"], keybinds["enter"]], [b"\xe0", b"\x00"]]
-        self.keybind_mapping = [[self.keybinds["esc"].value,
+        # [[[b"\x1b"], [b"H", 1], [b"P", 1], [b"K", 1], [b"M", 1], [b"\r"]], [b"\xe0", b"\x00"]]
+        self.keybind_mapping:list[list[list[bytes|int]]|list[bytes]] = [[self.keybinds["esc"].value,
         self.keybinds["up"].value,
         self.keybinds["down"].value,
         self.keybinds["left"].value,
@@ -72,11 +81,11 @@ class Settings:
 
 
 class Save_data:
-    def __init__(self, save_num, last_access:list, player:Player, seed):
-        self.save_num = save_num
-        self.last_access = last_access
-        self.player = player
-        self.seed = seed
+    def __init__(self, save_num:int, last_access:list[int], player:Player, seed:tuple):
+        self.save_num = int(save_num)
+        self.last_access = list[int](last_access)
+        self.player = copy.deepcopy(player)
+        self.seed = tuple(seed)
 
 
 def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|range, fluc_small=2, fluc_big=3, c_rare=0.05, team=1, c_team_change=0.005, name:str=None):
@@ -92,7 +101,7 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
             stat_value = round(r.triangular(stat_value.start, (stat_value.start + stat_value.stop) / 2, stat_value.stop))
         if stat_value < 0:
             stat_value = 0
-        return stat_value
+        return int(stat_value)
     
     if name == None:
         stack = inspect.stack()
@@ -126,14 +135,14 @@ class Entity:
     def __init__ (self, traits:list=None):
         if traits == None:
             traits = entity_master(1, 1, 1, 1, name="test")
-        self.name = traits[0]
-        self.hp = traits[1]
-        self.attack = traits[2]
-        self.defence = traits[3]
-        self.speed = traits[4]
-        self.rare = traits[5]
-        self.team = traits[6]
-        self.switched = traits[7]
+        self.name = str(traits[0])
+        self.hp = int(traits[1])
+        self.attack = int(traits[2])
+        self.defence = int(traits[3])
+        self.speed = int(traits[4])
+        self.rare = bool(traits[5])
+        self.team = int(traits[6])
+        self.switched = bool(traits[7])
     
     def __str__(self):
         return f'Name: {self.name}\nHp: {self.hp}\nAttack: {self.attack}\nDefence: {self.defence}\nSpeed: {self.speed}\nRare: {self.rare}\nTeam: {"Player" if self.team==0 else self.team}\nSwitched sides: {self.switched}'
