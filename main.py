@@ -13,19 +13,12 @@ import save_file_manager as sfm
 import classes as cl
 import tools as ts
 
-from tools import MAIN_THREAD_NAME, r
+from tools import MAIN_THREAD_NAME, SAVE_FOLDER, SAVE_NAME, SAVE_EXT, SAVE_FILE_PATH, AUTO_SAVE_DELAY, ENCODING, r
 
 try:
     ts.threading.current_thread().name = MAIN_THREAD_NAME
     ts.log_info("Preloading global variables", new_line=True)
     # ts.decode_save_file(0, "settings")
-
-    # CONSTANTS
-    SAVE_FOLDER = os.path.dirname(os.path.abspath(__file__)) + "/saves"
-    SAVE_NAME = "save*"
-    SAVE_EXT = "sav"
-    SAVE_FILE_PATH = os.path.join(SAVE_FOLDER, SAVE_NAME)
-    AUTO_SAVE_DELAY = 3
 
     # GLOBAL VARIABLES
     SETTINGS = cl.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
@@ -291,7 +284,7 @@ def new_save(save_num=1):
         os.mkdir("saves")
         # log
         ts.log_info("Recreating saves folder")
-    sfm.encode_save([json.dumps(new_display_data), json.dumps(new_save_data)], save_num, SAVE_FILE_PATH, SAVE_EXT)
+    sfm.encode_save([json.dumps(new_display_data), json.dumps(new_save_data)], save_num, SAVE_FILE_PATH, SAVE_EXT, ENCODING, 2)
     # log
     ts.log_info("Created save", f'slot number: {save_num}, player name: "{player.name}"')
 
@@ -302,7 +295,6 @@ def new_save(save_num=1):
     SAVE_DATA = cl.Save_data(save_num, last_access, player, r.get_state())
     game_loop()
 
-# json_j = json.loads(sfm.decode_save()[0])
 
 def load_save(save_num=1):
     # read data
@@ -477,7 +469,8 @@ def main_menu():
 
 def main():
     # ts.decode_save_file(0, "settings")
-    # ts.decode_save_file(1, SAVE_FILE_PATH)
+    # ts.decode_save_file(1)
+    ts.encode_save_file(1)
     main_menu()
 
 
