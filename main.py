@@ -406,62 +406,62 @@ def main_menu():
     in_main_menu = True
     while True:
         status = [-1, -1]
-        if len(files_data):
-            if in_main_menu:
-                in_main_menu = False
-                option = sfm.UI_list(["New save", "Load/Delete save", "Options"], " Main menu", can_esc=True).display(SETTINGS.keybind_mapping)
+        if in_main_menu:
+            in_main_menu = False
+            if len(files_data):
+                mm_list = ["New save", "Load/Delete save", "Options"]
             else:
-                option = 1
-            # new file
-            if option == 0:
-                new_slot = 1
-                for data in files_data:
-                    if data[0] == new_slot:
-                        new_slot += 1
-                status = [1, new_slot]
-            elif option == -1:
-                break
-            # load/delete
-            elif option == 1:
-                # get data from file_data
-                list_data = []
-                for data in files_data:
-                    list_data.append(data[1])
-                    list_data.append(None)
-                list_data.append("Delete file")
-                list_data.append("Back")
-                option = sfm.UI_list_s(list_data, " Level select", True, True, exclude_none=True).display(SETTINGS.keybind_mapping)
-                # load
-                if option != -1 and option < len(files_data):
-                    status = [0, files_data[int(option)][0]]
-                # delete
-                elif option == len(files_data):
-                    # remove "delete file"
-                    list_data.pop(len(list_data) - 2)
-                    while len(files_data) > 0:
-                        option = sfm.UI_list(list_data, " Delete mode!", "X ", "  ", multiline=True, can_esc=True, exclude_none=True).display(SETTINGS.keybind_mapping)
-                        if option != -1 and option < (len(list_data) - 1) / 2:
-                            if sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(SETTINGS.keybind_mapping):
-                                # log
-                                datas = json.loads(sfm.decode_save(files_data[option][0], SAVE_FILE_PATH, SAVE_EXT, decode_until=1)[0])
-                                last_access = datas["last_access"]
-                                ts.log_info("Deleted save", f'slot number: {files_data[option][0]}, hero name: "{datas["player_name"]}", last saved: {ts.make_date(last_access)} {ts.make_time(last_access[3:])}')
-                                # remove
-                                os.remove(f'{SAVE_FILE_PATH.replace("*", str(files_data[option][0]))}.{SAVE_EXT}')
-                                list_data.pop(option * 2)
-                                list_data.pop(option * 2)
-                                files_data.pop(option)
-                        else:
-                            break
-                # back
-                else:
-                    in_main_menu = True
-            elif option == 2:
-                sfm.UI_list_s(["Keybinds", "Other", None, "Back"], " Options", False, True, [keybind_setting, other_options], True).display(SETTINGS.keybind_mapping)
-                in_main_menu = True
+                mm_list = ["New save", "Options"]
+            option = sfm.UI_list_s(mm_list, " Main menu", can_esc=True).display(SETTINGS.keybind_mapping)
         else:
-            input(f"\n No save files detected!")
-            status = [1, 1]
+            option = 1
+        # new file
+        if option == 0:
+            new_slot = 1
+            for data in files_data:
+                if data[0] == new_slot:
+                    new_slot += 1
+            status = [1, new_slot]
+        elif option == -1:
+            break
+        # load/delete
+        elif option == 1 and len(files_data):
+            # get data from file_data
+            list_data = []
+            for data in files_data:
+                list_data.append(data[1])
+                list_data.append(None)
+            list_data.append("Delete file")
+            list_data.append("Back")
+            option = sfm.UI_list_s(list_data, " Level select", True, True, exclude_none=True).display(SETTINGS.keybind_mapping)
+            # load
+            if option != -1 and option < len(files_data):
+                status = [0, files_data[int(option)][0]]
+            # delete
+            elif option == len(files_data):
+                # remove "delete file"
+                list_data.pop(len(list_data) - 2)
+                while len(files_data) > 0:
+                    option = sfm.UI_list(list_data, " Delete mode!", "X ", "  ", multiline=True, can_esc=True, exclude_none=True).display(SETTINGS.keybind_mapping)
+                    if option != -1 and option < (len(list_data) - 1) / 2:
+                        if sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(SETTINGS.keybind_mapping):
+                            # log
+                            datas = json.loads(sfm.decode_save(files_data[option][0], SAVE_FILE_PATH, SAVE_EXT, decode_until=1)[0])
+                            last_access = datas["last_access"]
+                            ts.log_info("Deleted save", f'slot number: {files_data[option][0]}, hero name: "{datas["player_name"]}", last saved: {ts.make_date(last_access)} {ts.make_time(last_access[3:])}')
+                            # remove
+                            os.remove(f'{SAVE_FILE_PATH.replace("*", str(files_data[option][0]))}.{SAVE_EXT}')
+                            list_data.pop(option * 2)
+                            list_data.pop(option * 2)
+                            files_data.pop(option)
+                    else:
+                        break
+            # back
+            else:
+                in_main_menu = True
+        elif (option == 2 and len(files_data)) or (option == 1 and not len(files_data)):
+            sfm.UI_list_s(["Keybinds", "Other", None, "Back"], " Options", False, True, [keybind_setting, other_options], True).display(SETTINGS.keybind_mapping)
+            in_main_menu = True
 
         # action
         # new save
