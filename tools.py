@@ -19,6 +19,7 @@ SAVE_NAME = "save*"
 SAVE_EXT = "sav"
 SAVE_FILE_PATH = os.path.join(SAVE_FOLDER, SAVE_NAME)
 AUTO_SAVE_DELAY = 3
+SETTINGS_ENCODE_SEED = 1
 
 
 
@@ -97,10 +98,10 @@ def settings_manager(line_name:str, write_value=None):
     """
     # default values
     try:
-        settings = decode_keybinds(json.loads(sfm.decode_save(0, "settings", SAVE_EXT, ENCODING)[0]))
+        settings = decode_keybinds(json.loads(sfm.decode_save(SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING)[0]))
     except FileNotFoundError:
         settings = {"auto_save": True, "keybinds": {"esc": [b"\x1b"], "up": [b"H", 1], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
-        sfm.encode_save(json.dumps(encode_keybinds(settings)), 0, "settings", SAVE_EXT, ENCODING, 2)
+        sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, 2)
         # log
         log_info("Recreated settings")
     if write_value == None:
@@ -110,7 +111,7 @@ def settings_manager(line_name:str, write_value=None):
             return settings[line_name]
     else:
         settings[line_name] = write_value
-        sfm.encode_save(json.dumps(encode_keybinds(settings)), 0, "settings", SAVE_EXT, ENCODING, 2)
+        sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, 2)
 
 
 def random_state_converter(random_state:np.random.RandomState | dict | tuple):
@@ -145,13 +146,16 @@ def decode_save_file(save_num=1, save_name=SAVE_FILE_PATH):
 
 def encode_save_file(save_num=1, save_name=SAVE_FILE_PATH):
     try:
-        f = open(f'{save_name.replace("*", str(save_num))}.decoded.txt', "w")
+        f = open(f'{save_name.replace("*", str(save_num))}.decoded.txt', "r")
         save_data = f.readlines()
         f.close()
+        save_data_new = []
+        for line in save_data:
+            save_data_new.append(line.replace("\n", ""))
     except FileNotFoundError:
         print("decode_save_file: FILE NOT FOUND!")
     else:
-        sfm.encode_save(save_data, save_num, save_name, SAVE_EXT, ENCODING, 2)
+        sfm.encode_save(save_data_new, save_num, save_name, SAVE_EXT, ENCODING, 2)
 
 
 # thread_1 = threading.Thread(target="function", name="Thread name", args=["argument list"])

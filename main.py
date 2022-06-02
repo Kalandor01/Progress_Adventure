@@ -13,12 +13,12 @@ import save_file_manager as sfm
 import classes as cl
 import tools as ts
 
-from tools import MAIN_THREAD_NAME, SAVE_FOLDER, SAVE_NAME, SAVE_EXT, SAVE_FILE_PATH, AUTO_SAVE_DELAY, ENCODING, r
+from tools import MAIN_THREAD_NAME, SAVE_FOLDER, SAVE_NAME, SAVE_EXT, SAVE_FILE_PATH, AUTO_SAVE_DELAY, ENCODING, SETTINGS_ENCODE_SEED, r
 
 try:
     ts.threading.current_thread().name = MAIN_THREAD_NAME
     ts.log_info("Preloading global variables", new_line=True)
-    # ts.decode_save_file(0, "settings")
+    # ts.decode_save_file(SETTINGS_ENCODE_SEED, "settings")
 
     # GLOBAL VARIABLES
     SETTINGS = cl.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
@@ -253,6 +253,7 @@ def game_loop():
     print("Wandering...")
     time.sleep(5)
     prepair_fight()
+    # save_game() maybe instead of the auto save
     # ENDING
     GLOBALS.in_game_loop = False
     input("Exiting...Press keys!")
@@ -298,7 +299,7 @@ def new_save(save_num=1):
 
 def load_save(save_num=1):
     # read data
-    datas = json.loads(sfm.decode_save(save_num, SAVE_FILE_PATH, SAVE_EXT)[1])
+    datas = json.loads(sfm.decode_save(save_num, SAVE_FILE_PATH, SAVE_EXT, ENCODING)[1])
     # last access
     last_access = datas["last_access"]
     # player
@@ -351,6 +352,7 @@ def get_saves_data():
     return datas_processed
 
 
+# REWORK THIS ASAP
 def main_menu():
     # action functions
     def other_options():
@@ -405,8 +407,11 @@ def main_menu():
             else:
                 mm_list = ["New save", "Options"]
             option = sfm.UI_list_s(mm_list, " Main menu", can_esc=True).display(SETTINGS.keybind_mapping)
-        else:
+        elif len(files_data):
             option = 1
+        else:
+            option = -2
+            in_main_menu = True
         # new file
         if option == 0:
             new_slot = 1
@@ -438,7 +443,7 @@ def main_menu():
                     if option != -1 and option < (len(list_data) - 1) / 2:
                         if sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(SETTINGS.keybind_mapping):
                             # log
-                            datas = json.loads(sfm.decode_save(files_data[option][0], SAVE_FILE_PATH, SAVE_EXT, decode_until=1)[0])
+                            datas = json.loads(sfm.decode_save(files_data[option][0], SAVE_FILE_PATH, SAVE_EXT, ENCODING, 1)[0])
                             last_access = datas["last_access"]
                             ts.log_info("Deleted save", f'slot number: {files_data[option][0]}, hero name: "{datas["player_name"]}", last saved: {ts.make_date(last_access)} {ts.make_time(last_access[3:])}')
                             # remove
@@ -448,6 +453,9 @@ def main_menu():
                             files_data.pop(option)
                     else:
                         break
+                print(len(files_data))
+                if len(files_data) == 0:
+                    in_main_menu = True
             # back
             else:
                 in_main_menu = True
@@ -461,16 +469,18 @@ def main_menu():
             input(f"\nNew game in slot {status[1]}!\n")
             # new slot?
             new_save(status[1])
+            files_data = get_saves_data()
         # load
         elif status[0] == 0:
             input(f"\nLoading slot {status[1]}!")
             load_save(status[1])
+            files_data = get_saves_data()
 
 
 def main():
-    # ts.decode_save_file(0, "settings")
+    # ts.decode_save_file(SETTINGS_ENCODE_SEED, "settings")
     # ts.decode_save_file(1)
-    ts.encode_save_file(1)
+    # ts.encode_save_file(1)
     main_menu()
 
 
