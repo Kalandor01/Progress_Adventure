@@ -11,6 +11,8 @@ r = np.random.RandomState()
 
 ENCODING = "windows-1250"
 MAIN_THREAD_NAME = "Main"
+AUTO_SAVE_THREAD_NAME = "Auto saver"
+MANUAL_SAVE_THREAD_NAME = "Quit manager"
 LOGS_FOLDER = "logs/"
 LOGS_EXT = "log"
 
@@ -20,14 +22,20 @@ SAVE_EXT = "sav"
 SAVE_FILE_PATH = os.path.join(SAVE_FOLDER, SAVE_NAME)
 AUTO_SAVE_DELAY = 3
 SETTINGS_ENCODE_SEED = 1
-
+DOUBLE_KEYS = [b"\xe0", b"\x00"]
 
 
 def pad_zero(num:int|str):
+    """
+    Converts numbers that are smaller than 10 to have a trailing 0.
+    """
     return ('0' if int(num) < 10 else '') + str(num)
 
 
 def make_date(date_lis:list|dtime, sep="-"):
+    """
+    Turns a datetime object's date part or a list into a formated string.
+    """
     if type(date_lis) == dtime:
         return f"{pad_zero(date_lis.year)}{sep}{pad_zero(date_lis.month)}{sep}{pad_zero(date_lis.day)}"
     else:
@@ -35,6 +43,9 @@ def make_date(date_lis:list|dtime, sep="-"):
 
 
 def make_time(time_lis:list|dtime, sep=":"):
+    """
+    Turns a datetime object's time part or a list into a formated string.
+    """
     if type(time_lis) == dtime:
         return f"{pad_zero(time_lis.hour)}{sep}{pad_zero(time_lis.minute)}{sep}{pad_zero(time_lis.second)}"
     else:
@@ -42,6 +53,9 @@ def make_time(time_lis:list|dtime, sep=":"):
 
 
 def log_info(message:str, detail="", message_type="INFO", write_out=False, new_line=False):
+    """
+    Progress Adventure logger.
+    """
     current_date = make_date(dtime.now())
     current_time = make_time(dtime.now())
     try:
@@ -61,6 +75,29 @@ def log_info(message:str, detail="", message_type="INFO", write_out=False, new_l
         print(f'{LOGS_FOLDER}{current_date}.{LOGS_EXT} -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
 
 
+def press_key(text=""):
+    """
+    Writes out text, and then stalls until the user presses any key.
+    """
+
+    print(text, end="", flush=True)
+    if DOUBLE_KEYS.count(getch()):
+        getch()
+    print()
+
+
+def is_key(key:object) -> bool:
+    """
+    Waits for a specific key.\n
+    key should be a Key object.
+    """
+    key_in = getch()
+    arrow = False
+    if key_in in DOUBLE_KEYS:
+        arrow = True
+        key_in = getch()
+    return ((len(key.value) == 1 and not arrow) or (len(key.value) > 1 and arrow)) and key_in == key.value[0]
+
 
 def encode_keybinds(settings:dict[list[bytes|int]]):
     for x in settings["keybinds"]:
@@ -72,17 +109,6 @@ def decode_keybinds(settings:dict):
     for x in settings["keybinds"]:
         settings['keybinds'][x][0] = bytes(settings['keybinds'][x][0], ENCODING)
     return settings
-
-
-def is_key(key_array:list):
-    # key array, exept [[key], [double checker]]
-    key = getch()
-    arrow = False
-    if key in key_array[1]:
-        arrow = True
-        key = getch()
-    return ((len(key_array[0]) == 1 and not arrow) or (len(key_array[0]) > 1 and arrow)) and key == key_array[0][0]
-
 
 def settings_manager(line_name:str, write_value=None):
     """
@@ -116,7 +142,7 @@ def settings_manager(line_name:str, write_value=None):
 
 def random_state_converter(random_state:np.random.RandomState | dict | tuple):
     """
-    Can convert a numpy RandomState.getstate() into an easily storable string and back.
+    Can convert a numpy RandomState.getstate() into a json format and back.
     """
     if type(random_state) == dict:
         states = [int(num) for num in random_state["state"]]
@@ -133,6 +159,9 @@ def random_state_converter(random_state:np.random.RandomState | dict | tuple):
 
 
 def decode_save_file(save_num=1, save_name=SAVE_FILE_PATH):
+    """
+    Decodes a save file into a normal txt.
+    """
     try:
         save_data = sfm.decode_save(save_num, save_name, SAVE_EXT, ENCODING)
     except FileNotFoundError:
@@ -145,6 +174,9 @@ def decode_save_file(save_num=1, save_name=SAVE_FILE_PATH):
 
 
 def encode_save_file(save_num=1, save_name=SAVE_FILE_PATH):
+    """
+    Encodes a txt file into a .sav file.
+    """
     try:
         f = open(f'{save_name.replace("*", str(save_num))}.decoded.txt', "r")
         save_data = f.readlines()

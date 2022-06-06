@@ -6,7 +6,7 @@ import random_sentance as rs
 
 import tools as ts
 
-from tools import ENCODING, r
+from tools import ENCODING, DOUBLE_KEYS, r
 
 
 class Globals:
@@ -50,7 +50,7 @@ class Key:
 
 class Settings:
 
-    DOUBLE_KEYS = [b"\xe0", b"\x00"]
+    DOUBLE_KEYS = DOUBLE_KEYS
 
     def __init__(self, auto_save:bool, keybinds:dict[list]):
         self.auto_save = auto_save

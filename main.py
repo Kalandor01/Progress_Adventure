@@ -13,7 +13,7 @@ import save_file_manager as sfm
 import classes as cl
 import tools as ts
 
-from tools import MAIN_THREAD_NAME, SAVE_FOLDER, SAVE_NAME, SAVE_EXT, SAVE_FILE_PATH, AUTO_SAVE_DELAY, ENCODING, SETTINGS_ENCODE_SEED, r
+from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME, SAVE_FOLDER, SAVE_NAME, SAVE_EXT, SAVE_FILE_PATH, AUTO_SAVE_DELAY, ENCODING, SETTINGS_ENCODE_SEED, r
 
 try:
     ts.threading.current_thread().name = MAIN_THREAD_NAME
@@ -222,7 +222,7 @@ def quit_game():
     try:
         while True:
             if GLOBALS.in_game_loop:
-                if ts.is_key([SETTINGS.keybinds["esc"].value, SETTINGS.DOUBLE_KEYS]):
+                if ts.is_key(SETTINGS.keybinds["esc"]):
                     if not GLOBALS.in_fight:
                         ts.log_info("Beggining manual save", f"slot number: {SAVE_DATA.save_num}")
                         save_game()
@@ -242,11 +242,11 @@ def game_loop():
     ts.log_info("Game loop started")
     # TRHEADS
     # manual quit
-    thread_quit = thr.Thread(target=quit_game, name="Quit manager", daemon=True)
+    thread_quit = thr.Thread(target=quit_game, name=MANUAL_SAVE_THREAD_NAME, daemon=True)
     thread_quit.start()
     # auto saver
     if SETTINGS.auto_save:
-        thread_save = thr.Thread(target=auto_saver, name="Auto saver", daemon=True)
+        thread_save = thr.Thread(target=auto_saver, name=AUTO_SAVE_THREAD_NAME, daemon=True)
         thread_save.start()
     # GAME
     stats(-1)
@@ -256,7 +256,7 @@ def game_loop():
     # save_game() maybe instead of the auto save
     # ENDING
     GLOBALS.in_game_loop = False
-    input("Exiting...Press keys!")
+    ts.press_key("Exiting...Press keys!")
     ts.log_info("Game loop ended")
 
     
@@ -337,7 +337,7 @@ def get_saves_data():
     for data in datas:
         if data[1] == -1:
             ts.log_info("Decode error", f"Slot number: {data[0]}", "ERROR")
-            input(f"Save file {data[0]} is corrupted!")
+            ts.press_key(f"Save file {data[0]} is corrupted!")
         else:
             try:
                 data[1] = json.loads(data[1][0])
@@ -348,7 +348,7 @@ def get_saves_data():
                 datas_processed.append([data[0], data_processed])
             except (TypeError, IndexError):
                 ts.log_info("Parse error", f"Slot number: {data[0]}", "ERROR")
-                input(f"Save file {data[0]} could not be parsed!")
+                ts.press_key(f"Save file {data[0]} could not be parsed!")
     return datas_processed
 
 
@@ -466,13 +466,13 @@ def main_menu():
         # action
         # new save
         if status[0] == 1:
-            input(f"\nNew game in slot {status[1]}!\n")
+            ts.press_key(f"\nNew game in slot {status[1]}!\n")
             # new slot?
             new_save(status[1])
             files_data = get_saves_data()
         # load
         elif status[0] == 0:
-            input(f"\nLoading slot {status[1]}!")
+            ts.press_key(f"\nLoading slot {status[1]}!")
             load_save(status[1])
             files_data = get_saves_data()
 
