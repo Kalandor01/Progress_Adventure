@@ -9,6 +9,8 @@ import save_file_manager as sfm
 
 r = np.random.RandomState()
 
+SFM_MIN_VERSION = "1.10.2"
+
 ENCODING = "windows-1250"
 MAIN_THREAD_NAME = "Main"
 AUTO_SAVE_THREAD_NAME = "Auto saver"
@@ -158,39 +160,42 @@ def random_state_converter(random_state:np.random.RandomState | dict | tuple):
         return {"seed": {"type": state[0], "state": state_nums, "pos": state[2], "has_gauss": state[3], "cached_gaussian": state[4]}}
 
 
-def decode_save_file(save_num=1, save_name=SAVE_FILE_PATH):
-    """
-    Decodes a save file into a normal txt.
-    """
-    try:
-        save_data = sfm.decode_save(save_num, save_name, SAVE_EXT, ENCODING)
-    except FileNotFoundError:
-        print("decode_save_file: FILE NOT FOUND!")
+def check_p_version(min_version:str, curr_version:str):
+    version = curr_version.split(".")
+    min_v = min_version.split(".")
+
+    for x in range(len(version)):
+        if len(min_v) < (x + 1):
+            return True
+        # print(f"{version[x]} >=? {min_v[x]}")
+        if (x == len(version) - 1 and len(version) < len(min_v)) or (int(version[x]) < int(min_v[x])):
+            return False
+    return True
+
+def package_response(bad_packages:list):
+    if len(bad_packages) == 0:
+        log_info("All packages up to date")
+        return True
     else:
-        f = open(f'{save_name.replace("*", str(save_num))}.decoded.txt', "w")
-        for line in save_data:
-            f.write(line + "\n")
-        f.close()
+        log_info("Some packages are not up to date", bad_packages, "WARN")
+        if input(str(bad_packages) + " packages out of date. Do you want to continue?(Y/N): ").upper() == "Y":
+            log_info("Continuing anyways")
+            return True
+        else:
+            return False
 
-
-def encode_save_file(save_num=1, save_name=SAVE_FILE_PATH):
+def check_package_versions():
     """
-    Encodes a txt file into a .sav file.
+    Checks if all tested packages are up do date.
+    Checks:
+    - Save File Manager
     """
-    try:
-        f = open(f'{save_name.replace("*", str(save_num))}.decoded.txt', "r")
-        save_data = f.readlines()
-        f.close()
-        save_data_new = []
-        for line in save_data:
-            save_data_new.append(line.replace("\n", ""))
-    except FileNotFoundError:
-        print("decode_save_file: FILE NOT FOUND!")
-    else:
-        sfm.encode_save(save_data_new, save_num, save_name, SAVE_EXT, ENCODING, 2)
 
+    log_info("Checking package versions", new_line=True)
+    packages = [[SFM_MIN_VERSION, sfm]]
+    bad_packages = []
+    for package in packages:
+        if not check_p_version(package[0], package[1].__version__):
+            bad_packages.append(package[1].__name__)
+    return package_response(bad_packages)
 
-# thread_1 = threading.Thread(target="function", name="Thread name", args=["argument list"])
-# thread_1.start()
-# merge main and started thread 1?
-# thread_1.join()

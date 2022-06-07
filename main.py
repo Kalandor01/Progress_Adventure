@@ -10,21 +10,26 @@ from msvcrt import getch
 
 import save_file_manager as sfm
 
-import classes as cl
 import tools as ts
+import dev_tools as dt
+import classes as cl
 
 from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME, SAVE_FOLDER, SAVE_NAME, SAVE_EXT, SAVE_FILE_PATH, AUTO_SAVE_DELAY, ENCODING, SETTINGS_ENCODE_SEED, r
 
 try:
     ts.threading.current_thread().name = MAIN_THREAD_NAME
-    ts.log_info("Preloading global variables", new_line=True)
-    # ts.decode_save_file(SETTINGS_ENCODE_SEED, "settings")
+    if ts.check_package_versions():
+        ts.log_info("Preloading global variables")
+        # dt.decode_save_file(SETTINGS_ENCODE_SEED, "settings")
 
-    # GLOBAL VARIABLES
-    SETTINGS = cl.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
-    SETTINGS.save_keybind_mapping()
-    SAVE_DATA = cl.Save_data
-    GLOBALS = cl.Globals(False, False)
+        # GLOBAL VARIABLES
+        GOOD_PACKAGES = True
+        SETTINGS = cl.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
+        SETTINGS.save_keybind_mapping()
+        SAVE_DATA = cl.Save_data
+        GLOBALS = cl.Globals(False, False)
+    else:
+        GOOD_PACKAGES = False
 except:
     ts.log_info("Preloading crahed", sys.exc_info(), "ERROR")
     raise
@@ -453,7 +458,6 @@ def main_menu():
                             files_data.pop(option)
                     else:
                         break
-                print(len(files_data))
                 if len(files_data) == 0:
                     in_main_menu = True
             # back
@@ -478,9 +482,9 @@ def main_menu():
 
 
 def main():
-    # ts.decode_save_file(SETTINGS_ENCODE_SEED, "settings")
-    # ts.decode_save_file(1)
-    # ts.encode_save_file(1)
+    # dt.decode_save_file(SETTINGS_ENCODE_SEED, "settings")
+    # dt.decode_save_file(1)
+    # dt.encode_save_file(1)
     main_menu()
 
 
@@ -488,14 +492,13 @@ if __name__ == "__main__":
     # ultimate error handlind (release only)
     error_handling = False
 
-    # begin log
-    ts.log_info("Beginning new instance")
-
     exit_game = False
     while not exit_game:
         exit_game = True
         try:
-            main()
+            if GOOD_PACKAGES:
+                ts.log_info("Beginning new instance")
+                main()
         except:
             ts.log_info("Instance crahed", sys.exc_info(), "ERROR")
             if error_handling:
