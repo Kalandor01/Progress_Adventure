@@ -14,7 +14,8 @@ import tools as ts
 import dev_tools as dt
 import classes as cl
 
-from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME, SAVE_FOLDER, SAVE_NAME, SAVE_EXT, SAVE_FILE_PATH, AUTO_SAVE_DELAY, ENCODING, SETTINGS_ENCODE_SEED, r
+from tools import r
+from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME, SAVE_FOLDER, SAVE_NAME, SAVE_EXT, SAVE_FILE_PATH, AUTO_SAVE_DELAY, ENCODING, SETTINGS_ENCODE_SEED, FILE_ENCODING_VERSION
 
 try:
     ts.threading.current_thread().name = MAIN_THREAD_NAME
@@ -290,7 +291,7 @@ def new_save(save_num=1):
         os.mkdir("saves")
         # log
         ts.log_info("Recreating saves folder")
-    sfm.encode_save([json.dumps(new_display_data), json.dumps(new_save_data)], save_num, SAVE_FILE_PATH, SAVE_EXT, ENCODING, 2)
+    sfm.encode_save([json.dumps(new_display_data), json.dumps(new_save_data)], save_num, SAVE_FILE_PATH, SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
     # log
     ts.log_info("Created save", f'slot number: {save_num}, player name: "{player.name}"')
 
@@ -431,6 +432,7 @@ def main_menu():
             # get data from file_data
             list_data = []
             for data in files_data:
+                print(data[1])
                 list_data.append(data[1])
                 list_data.append(None)
             list_data.append("Delete file")

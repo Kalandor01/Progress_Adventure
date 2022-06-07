@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import threading
@@ -7,24 +8,30 @@ import numpy as np
 
 import save_file_manager as sfm
 
+# random
 r = np.random.RandomState()
 
+# package versions
 SFM_MIN_VERSION = "1.10.2"
-
+# language
 ENCODING = "windows-1250"
+# thread names
 MAIN_THREAD_NAME = "Main"
 AUTO_SAVE_THREAD_NAME = "Auto saver"
 MANUAL_SAVE_THREAD_NAME = "Quit manager"
+# paths/folders/file names
 LOGS_FOLDER = "logs/"
 LOGS_EXT = "log"
-
 SAVE_FOLDER = os.path.dirname(os.path.abspath(__file__)) + "/saves"
 SAVE_NAME = "save*"
 SAVE_EXT = "sav"
 SAVE_FILE_PATH = os.path.join(SAVE_FOLDER, SAVE_NAME)
+# other
 AUTO_SAVE_DELAY = 3
 SETTINGS_ENCODE_SEED = 1
+FILE_ENCODING_VERSION = 2
 DOUBLE_KEYS = [b"\xe0", b"\x00"]
+LOG_MS = False
 
 
 def pad_zero(num:int|str):
@@ -44,14 +51,14 @@ def make_date(date_lis:list|dtime, sep="-"):
         return f"{pad_zero(date_lis[0])}{sep}{pad_zero(date_lis[1])}{sep}{pad_zero(date_lis[2])}"
 
 
-def make_time(time_lis:list|dtime, sep=":"):
+def make_time(time_lis:list|dtime, sep=":", write_ms=False):
     """
     Turns a datetime object's time part or a list into a formated string.
     """
     if type(time_lis) == dtime:
-        return f"{pad_zero(time_lis.hour)}{sep}{pad_zero(time_lis.minute)}{sep}{pad_zero(time_lis.second)}"
+        return f"{pad_zero(time_lis.hour)}{sep}{pad_zero(time_lis.minute)}{sep}{pad_zero(time_lis.second)}{f'.{time_lis.microsecond}' if write_ms else ''}"
     else:
-        return f"{pad_zero(time_lis[0])}{sep}{pad_zero(time_lis[1])}{sep}{pad_zero(time_lis[2])}"
+        return f"{pad_zero(time_lis[0])}{sep}{pad_zero(time_lis[1])}{sep}{pad_zero(time_lis[2])}{f'.{time_lis[3]}' if write_ms else ''}"
 
 
 def log_info(message:str, detail="", message_type="INFO", write_out=False, new_line=False):
@@ -59,7 +66,7 @@ def log_info(message:str, detail="", message_type="INFO", write_out=False, new_l
     Progress Adventure logger.
     """
     current_date = make_date(dtime.now())
-    current_time = make_time(dtime.now())
+    current_time = make_time(dtime.now(), write_ms=LOG_MS)
     try:
         f = open(f"{LOGS_FOLDER}{current_date}.{LOGS_EXT}", "a")
     except FileNotFoundError:
@@ -101,6 +108,104 @@ def is_key(key:object) -> bool:
     return ((len(key.value) == 1 and not arrow) or (len(key.value) > 1 and arrow)) and key_in == key.value[0]
 
 
+# normal but flawed
+def file_data_merger(def_data:list|dict, file_data:list|dict):
+    def_data_c = copy.deepcopy(def_data)
+    if type(def_data) == list:
+        merged_data = []
+        for x in range(len(def_data_c)):
+            print(def_data_c[x])
+            try:
+                if type(def_data_c[x]) == list or type(def_data_c[x]) == dict:
+                    merged_data.append(file_data_merger(def_data_c[x], file_data[x]))
+                else:
+                    merged_data.append(file_data[x])
+            except IndexError:
+                merged_data.append(def_data_c[x])
+    else:
+        merged_data = {}
+        for key in def_data_c:
+            print(def_data_c[key])
+            try:
+                if type(def_data_c[key]) == list or type(def_data_c[key]) == dict:
+                    merged_data[key] = file_data_merger(def_data_c[key], file_data[key])
+                else:
+                    merged_data[key] = file_data[key]
+            except KeyError:
+                merged_data[key] = def_data_c[key]
+    return merged_data
+
+def_d = {"auto_save": True, "keybinds": {"esc": [b"\x1b"], "up": [b"H", 1], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
+file_d = {"auto_save": False, "lol": "trash", "keybinds": {"esc": [b"\x1b", 1, 2, 3], "up": [b"H"], "right": [b"M", 1], "enter": [b"\r"]}}
+merged_d = file_data_merger(def_d, file_d)
+print(def_d)
+print(file_d)
+print(str(merged_d) + "\n\n\n")
+
+
+
+# ULTIMATE MIND DESTRUCTION!!!
+def file_data_merger_special(def_data:list|dict, file_data:list|dict):
+    print("init")
+    code = def_data["file_merger_code"]
+    value = def_data["file_merger_value"]
+    print("nice", def_data, file_data)
+    if code == -1:
+        merged_data = file_data
+    elif code == 1:
+        merged_data = file_data
+    return merged_data
+
+def file_data_merger_2(def_data:list|dict, file_data:list|dict):
+    def_data_c = copy.deepcopy(def_data)
+    if type(def_data_c) == list:
+        merged_data = []
+        for x in range(len(def_data_c)):
+            print(def_data_c[x])
+            try:
+                if type(def_data_c[x]) == list or type(def_data_c[x]) == dict:
+                    print("hm")
+                    try:
+                        if type(def_data_c[x]) == dict and def_data_c[x]["file_merger_code"] != 0 and def_data_c[x]["file_merger_value"] != None:
+                            print("list")
+                            merged_data[x] = file_data_merger_special(def_data_c[x], file_data)
+                    except KeyError:
+                        merged_data.append(file_data_merger_2(def_data_c[x], file_data[x], True))
+                else:
+                    merged_data.append(file_data[x])
+            except IndexError:
+                merged_data.append(def_data_c[x])
+    else:
+        merged_data = {}
+        for key in def_data_c:
+            print(def_data_c[key])
+            try:
+                if type(def_data_c[key]) == list or type(def_data_c[key]) == dict:
+                    try:
+                        if type(def_data_c[key]) == dict and def_data_c[key]["file_merger_code"] != 0 and def_data_c[key]["file_merger_value"] != None:
+                            print("dict")
+                            merged_data[key] = file_data_merger_special(def_data_c[key], file_data[key])
+                    except KeyError:
+                        merged_data[key] = file_data_merger_2(def_data_c[key], file_data[key])
+                    else:
+                        if not (type(def_data_c[key]) == dict and def_data_c[key]["file_merger_code"] != 0 and def_data_c[key]["file_merger_value"] != None):
+                            merged_data[key] = file_data_merger_2(def_data_c[key], file_data[key])
+                else:
+                    merged_data[key] = file_data[key]
+            except KeyError:
+                merged_data[key] = def_data_c[key]
+    return merged_data
+
+def_d = {"auto_save": {"file_merger_code": 1, "file_merger_value": [52]}, "keybinds": {"esc": [b"\x1b"], "up": [b"H", {"file_merger_code": -1, "file_merger_value": 1}], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
+file_d = {"auto_save": [1, 2, 3, 4, 5], "lol": "trash", "keybinds": {"esc": [b"\x1b", 1, 2, 3], "up": [b"H"], "right": [b"M", 1], "enter": [b"\r"]}}
+
+merged_d = file_data_merger_2(def_d, file_d)
+print("\n" + str(def_d))
+print(file_d)
+print(merged_d)
+
+
+
 def encode_keybinds(settings:dict[list[bytes|int]]):
     for x in settings["keybinds"]:
         settings['keybinds'][x][0] = settings['keybinds'][x][0].decode(ENCODING)
@@ -124,14 +229,23 @@ def settings_manager(line_name:str, write_value=None):
     \t- right
     \t- enter
     """
+
+    def recreate_settings():
+        settings = {"auto_save": True, "keybinds": {"esc": [b"\x1b"], "up": [b"H", 1], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
+        sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
+        # log
+        log_info("Recreated settings")
+        return settings
+
     # default values
     try:
         settings = decode_keybinds(json.loads(sfm.decode_save(SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING)[0]))
+    except ValueError:
+        log_info("Decode error", "Settings", "ERROR")
+        press_key(f"The settings file is corrupted, and will now be recreated!")
+        settings = recreate_settings()
     except FileNotFoundError:
-        settings = {"auto_save": True, "keybinds": {"esc": [b"\x1b"], "up": [b"H", 1], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
-        sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, 2)
-        # log
-        log_info("Recreated settings")
+        settings = recreate_settings()
     if write_value == None:
         if line_name == None:
             return settings
@@ -139,7 +253,7 @@ def settings_manager(line_name:str, write_value=None):
             return settings[line_name]
     else:
         settings[line_name] = write_value
-        sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, 2)
+        sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
 
 
 def random_state_converter(random_state:np.random.RandomState | dict | tuple):
