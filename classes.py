@@ -132,7 +132,7 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
 
 
 class Entity:
-    def __init__ (self, traits:list=None):
+    def __init__(self, traits:list=None):
         if traits == None:
             traits = entity_master(1, 1, 1, 1, name="test")
         self.name = str(traits[0])

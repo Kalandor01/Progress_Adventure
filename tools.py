@@ -135,42 +135,49 @@ def file_data_merger(def_data:list|dict, file_data:list|dict):
                 merged_data[key] = def_data_c[key]
     return merged_data
 
-def_d = {"auto_save": True, "keybinds": {"esc": [b"\x1b"], "up": [b"H", 1], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
-file_d = {"auto_save": False, "lol": "trash", "keybinds": {"esc": [b"\x1b", 1, 2, 3], "up": [b"H"], "right": [b"M", 1], "enter": [b"\r"]}}
-merged_d = file_data_merger(def_d, file_d)
-print(def_d)
-print(file_d)
-print(str(merged_d) + "\n\n\n")
+# def_d = {"auto_save": True, "keybinds": {"esc": [b"\x1b"], "up": [b"H", 1], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
+# file_d = {"auto_save": False, "lol": "trash", "keybinds": {"esc": [b"\x1b", 1, 2, 3], "up": [b"H"], "right": [b"M", 1], "enter": [b"\r"]}}
+# merged_d = file_data_merger(def_d, file_d)
+# print(def_d)
+# print(file_d)
+# print(str(merged_d) + "\n\n\n")
 
 
 
 # ULTIMATE MIND DESTRUCTION!!!
-def file_data_merger_special(def_data:list|dict, file_data:list|dict):
-    print("init")
+def file_data_merger_special(def_data:list|dict, file_data:list|dict, index:int|str, list_type:type):
     code = def_data["file_merger_code"]
     value = def_data["file_merger_value"]
-    print("nice", def_data, file_data)
+    print("good", def_data, file_data)
     if code == -1:
-        merged_data = file_data
+        if len(file_data) == 0:
+            merged_data = value
+        else:
+            merged_data = file_data[index]
     elif code == 1:
         merged_data = file_data
+    print(merged_data)
     return merged_data
+
+def is_good(data:list|dict, write=False):
+    good = (type(data) == dict and "file_merger_code" in data.keys() and "file_merger_value" in data.keys() and data["file_merger_code"] != 0)
+    if write:
+        print(f"{data}:", good)
+    return good
 
 def file_data_merger_2(def_data:list|dict, file_data:list|dict):
     def_data_c = copy.deepcopy(def_data)
     if type(def_data_c) == list:
         merged_data = []
         for x in range(len(def_data_c)):
-            print(def_data_c[x])
+            print("\nlist", type(def_data_c[x]))
+            good = is_good(def_data_c[x], True)
             try:
                 if type(def_data_c[x]) == list or type(def_data_c[x]) == dict:
-                    print("hm")
-                    try:
-                        if type(def_data_c[x]) == dict and def_data_c[x]["file_merger_code"] != 0 and def_data_c[x]["file_merger_value"] != None:
-                            print("list")
-                            merged_data[x] = file_data_merger_special(def_data_c[x], file_data)
-                    except KeyError:
-                        merged_data.append(file_data_merger_2(def_data_c[x], file_data[x], True))
+                    if good:
+                        merged_data.append(file_data_merger_special(def_data_c[x], file_data, x, list))
+                    else:
+                        merged_data.append(file_data_merger_2(def_data_c[x], file_data[x]))
                 else:
                     merged_data.append(file_data[x])
             except IndexError:
@@ -178,18 +185,14 @@ def file_data_merger_2(def_data:list|dict, file_data:list|dict):
     else:
         merged_data = {}
         for key in def_data_c:
-            print(def_data_c[key])
+            print("\ndict", type(def_data_c[key]))
+            good = is_good(def_data_c[key], True)
             try:
                 if type(def_data_c[key]) == list or type(def_data_c[key]) == dict:
-                    try:
-                        if type(def_data_c[key]) == dict and def_data_c[key]["file_merger_code"] != 0 and def_data_c[key]["file_merger_value"] != None:
-                            print("dict")
-                            merged_data[key] = file_data_merger_special(def_data_c[key], file_data[key])
-                    except KeyError:
-                        merged_data[key] = file_data_merger_2(def_data_c[key], file_data[key])
+                    if good:
+                        merged_data[key] = file_data_merger_special(def_data_c[key], file_data, key, dict)
                     else:
-                        if not (type(def_data_c[key]) == dict and def_data_c[key]["file_merger_code"] != 0 and def_data_c[key]["file_merger_value"] != None):
-                            merged_data[key] = file_data_merger_2(def_data_c[key], file_data[key])
+                        merged_data[key] = file_data_merger_2(def_data_c[key], file_data[key])
                 else:
                     merged_data[key] = file_data[key]
             except KeyError:
