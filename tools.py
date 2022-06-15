@@ -6,13 +6,17 @@ from datetime import datetime as dtime
 from msvcrt import getch
 import numpy as np
 
+import random_sentance as rs
 import save_file_manager as sfm
 
 # random
 r = np.random.RandomState()
 
 # package versions
-SFM_MIN_VERSION = "1.10.2"
+PIP_NP_MIN_VERSION = "1.22.1"
+
+PIP_SFM_MIN_VERSION = "1.10.2"
+PIP_RS_MIN_VERSION = "1.5.1"
 # language
 ENCODING = "windows-1250"
 # thread names
@@ -108,42 +112,6 @@ def is_key(key:object) -> bool:
     return ((len(key.value) == 1 and not arrow) or (len(key.value) > 1 and arrow)) and key_in == key.value[0]
 
 
-# normal but flawed
-def file_data_merger(def_data:list|dict, file_data:list|dict):
-    def_data_c = copy.deepcopy(def_data)
-    if type(def_data) == list:
-        merged_data = []
-        for x in range(len(def_data_c)):
-            print(def_data_c[x])
-            try:
-                if type(def_data_c[x]) == list or type(def_data_c[x]) == dict:
-                    merged_data.append(file_data_merger(def_data_c[x], file_data[x]))
-                else:
-                    merged_data.append(file_data[x])
-            except IndexError:
-                merged_data.append(def_data_c[x])
-    else:
-        merged_data = {}
-        for key in def_data_c:
-            print(def_data_c[key])
-            try:
-                if type(def_data_c[key]) == list or type(def_data_c[key]) == dict:
-                    merged_data[key] = file_data_merger(def_data_c[key], file_data[key])
-                else:
-                    merged_data[key] = file_data[key]
-            except KeyError:
-                merged_data[key] = def_data_c[key]
-    return merged_data
-
-# def_d = {"auto_save": True, "keybinds": {"esc": [b"\x1b"], "up": [b"H", 1], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
-# file_d = {"auto_save": False, "lol": "trash", "keybinds": {"esc": [b"\x1b", 1, 2, 3], "up": [b"H"], "right": [b"M", 1], "enter": [b"\r"]}}
-# merged_d = file_data_merger(def_d, file_d)
-# print(def_d)
-# print(file_d)
-# print(str(merged_d) + "\n\n\n")
-
-
-
 # ULTIMATE MIND DESTRUCTION!!!
 def file_data_merger_special(def_data:list|dict, file_data:list|dict, index:int|str, list_type:type):
     code = def_data["file_merger_code"]
@@ -165,7 +133,7 @@ def is_good(data:list|dict, write=False):
         print(f"{data}:", good)
     return good
 
-def file_data_merger_2(def_data:list|dict, file_data:list|dict):
+def file_data_merger(def_data:list|dict, file_data:list|dict):
     def_data_c = copy.deepcopy(def_data)
     if type(def_data_c) == list:
         merged_data = []
@@ -177,7 +145,7 @@ def file_data_merger_2(def_data:list|dict, file_data:list|dict):
                     if good:
                         merged_data.append(file_data_merger_special(def_data_c[x], file_data, x, list))
                     else:
-                        merged_data.append(file_data_merger_2(def_data_c[x], file_data[x]))
+                        merged_data.append(file_data_merger(def_data_c[x], file_data[x]))
                 else:
                     merged_data.append(file_data[x])
             except IndexError:
@@ -192,7 +160,7 @@ def file_data_merger_2(def_data:list|dict, file_data:list|dict):
                     if good:
                         merged_data[key] = file_data_merger_special(def_data_c[key], file_data, key, dict)
                     else:
-                        merged_data[key] = file_data_merger_2(def_data_c[key], file_data[key])
+                        merged_data[key] = file_data_merger(def_data_c[key], file_data[key])
                 else:
                     merged_data[key] = file_data[key]
             except KeyError:
@@ -202,7 +170,7 @@ def file_data_merger_2(def_data:list|dict, file_data:list|dict):
 def_d = {"auto_save": {"file_merger_code": 1, "file_merger_value": [52]}, "keybinds": {"esc": [b"\x1b"], "up": [b"H", {"file_merger_code": -1, "file_merger_value": 1}], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
 file_d = {"auto_save": [1, 2, 3, 4, 5], "lol": "trash", "keybinds": {"esc": [b"\x1b", 1, 2, 3], "up": [b"H"], "right": [b"M", 1], "enter": [b"\r"]}}
 
-merged_d = file_data_merger_2(def_d, file_d)
+merged_d = file_data_merger(def_d, file_d)
 print("\n" + str(def_d))
 print(file_d)
 print(merged_d)
@@ -213,7 +181,6 @@ def encode_keybinds(settings:dict[list[bytes|int]]):
     for x in settings["keybinds"]:
         settings['keybinds'][x][0] = settings['keybinds'][x][0].decode(ENCODING)
     return settings
-
 
 def decode_keybinds(settings:dict):
     for x in settings["keybinds"]:
@@ -295,7 +262,7 @@ def package_response(bad_packages:list):
         return True
     else:
         log_info("Some packages are not up to date", bad_packages, "WARN")
-        if input(str(bad_packages) + " packages out of date. Do you want to continue?(Y/N): ").upper() == "Y":
+        if input(str(", ".join(bad_packages)) + " packages out of date. Do you want to continue?(Y/N): ").upper() == "Y":
             log_info("Continuing anyways")
             return True
         else:
@@ -309,7 +276,7 @@ def check_package_versions():
     """
 
     log_info("Checking package versions", new_line=True)
-    packages = [[SFM_MIN_VERSION, sfm]]
+    packages = [[PIP_NP_MIN_VERSION, np], [PIP_SFM_MIN_VERSION, sfm], [PIP_RS_MIN_VERSION, rs]]
     bad_packages = []
     for package in packages:
         if not check_p_version(package[0], package[1].__version__):

@@ -214,7 +214,7 @@ def auto_saver():
             time.sleep(AUTO_SAVE_DELAY)
             if GLOBALS.in_game_loop:
                 if not GLOBALS.in_fight:
-                    ts.log_info("Beggining auto save", f"slot number: {SAVE_DATA.save_num}")
+                    ts.log_info("Beginning auto save", f"slot number: {SAVE_DATA.save_num}")
                     save_game()
             else:
                 break
@@ -230,7 +230,7 @@ def quit_game():
             if GLOBALS.in_game_loop:
                 if ts.is_key(SETTINGS.keybinds["esc"]):
                     if not GLOBALS.in_fight:
-                        ts.log_info("Beggining manual save", f"slot number: {SAVE_DATA.save_num}")
+                        ts.log_info("Beginning manual save", f"slot number: {SAVE_DATA.save_num}")
                         save_game()
                         break
                     else:

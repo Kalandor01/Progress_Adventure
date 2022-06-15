@@ -1,0 +1,5 @@
+pip:
+    - numpy
+git:
+    - Save File Manager
+    - Random Sentance
