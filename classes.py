@@ -1,4 +1,5 @@
 from __future__ import annotations
+from enum import Enum, auto
 import inspect
 import copy
 
@@ -10,9 +11,10 @@ from tools import ENCODING, DOUBLE_KEYS, r
 
 
 class Globals:
-    def __init__(self, in_game_loop:bool, in_fight:bool):
+    def __init__(self, in_game_loop:bool, in_fight:bool, exiting:bool):
         self.in_game_loop = bool(in_game_loop)
         self.in_fight = bool(in_fight)
+        self.exiting = bool(exiting)
 
 
 class Key:
@@ -185,3 +187,64 @@ class Troll(Entity):
 class Test(Entity):
     def __init__(self):
         super().__init__()
+
+
+# MAYBE IF THERE ARE A LOT OF ITEMS!!!
+"""
+class Weapon_items(Enum):
+    SWORD = auto()
+    BOW = auto()
+    ARROW = auto()
+
+class Armour_items(Enum):
+    SHIELD = auto()
+
+class Misc_items(Enum):
+    POTION = auto()
+
+class Item_categories(Enum):
+    WEAPONS = Weapon_items()
+    ARMOUR = Armour_items()
+    MISC = Misc_items()
+
+Item_categories.WEAPONS.value.SWORD
+# name:Item_name -> name:Item_categories
+"""
+
+class Item_name(Enum):
+    SWORD = auto()
+    SHIELD = auto()
+    POTION = auto()
+    BOW = auto()
+    ARROW = auto()
+
+
+class Item:
+    def __init__(self, name:Item_name, amount=1):
+        self.name = name
+        self.amount = amount
+    
+    def use(self):
+        return False
+
+
+class Inventory:
+    def __init__(self):
+        self.items:list[Item] = []
+    
+
+    def add(self, name:Item_name, amount=1):
+        for item in self.items:
+            if item.name == name:
+                item.amount += amount
+                break
+    
+
+    def use(self, name:Item_name):
+        for x in range(len(self.items)):
+            if self.items[x].name == name:
+                if self.items[x].use():
+                    self.items[x].amount -= 1
+                    if self.items[x].amount <= 0:
+                        self.items.pop(x)
+                break

@@ -1,12 +1,11 @@
-import copy
 import json
 import os
 import threading
 from datetime import datetime as dtime
 from msvcrt import getch
 import numpy as np
+import colorama
 
-import random_sentance as rs
 import save_file_manager as sfm
 
 # random
@@ -14,8 +13,9 @@ r = np.random.RandomState()
 
 # package versions
 PIP_NP_MIN_VERSION = "1.22.1"
+PIP_COLOR_MIN_VERSION = "0.4.5"
 
-PIP_SFM_MIN_VERSION = "1.10.2"
+PIP_SFM_MIN_VERSION = "1.10.6"
 PIP_RS_MIN_VERSION = "1.5.1"
 # language
 ENCODING = "windows-1250"
@@ -24,18 +24,27 @@ MAIN_THREAD_NAME = "Main"
 AUTO_SAVE_THREAD_NAME = "Auto saver"
 MANUAL_SAVE_THREAD_NAME = "Quit manager"
 # paths/folders/file names
-LOGS_FOLDER = "logs/"
-LOGS_EXT = "log"
-SAVE_FOLDER = os.path.dirname(os.path.abspath(__file__)) + "/saves"
+ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__))
+SAVES_FOLDER = "saves"
+SAVES_FOLDER_PATH = os.path.join(ROOT_FOLDER, SAVES_FOLDER)
 SAVE_NAME = "save*"
 SAVE_EXT = "sav"
-SAVE_FILE_PATH = os.path.join(SAVE_FOLDER, SAVE_NAME)
+SAVE_FILE_PATH = os.path.join(SAVES_FOLDER_PATH, SAVE_NAME)
+LOGS_FOLDER = "logs" + os.path.sep
+LOGS_EXT = "log"
+BACKUPS_FOLDER = "backups" + os.path.sep
+BACKUPS_FOLDER_PATH = os.path.join(ROOT_FOLDER, BACKUPS_FOLDER)
+BACKUP_EXT = SAVE_EXT + ".bak"
+# colorama color
+C_F_RED = colorama.Fore.RED
+C_F_GREEN = colorama.Fore.GREEN
 # other
 AUTO_SAVE_DELAY = 3
 SETTINGS_ENCODE_SEED = 1
 FILE_ENCODING_VERSION = 2
 DOUBLE_KEYS = [b"\xe0", b"\x00"]
 LOG_MS = False
+SAVE_VERSION = 1.0
 
 
 def pad_zero(num:int|str):
@@ -112,69 +121,88 @@ def is_key(key:object) -> bool:
     return ((len(key.value) == 1 and not arrow) or (len(key.value) > 1 and arrow)) and key_in == key.value[0]
 
 
-# ULTIMATE MIND DESTRUCTION!!!
-def file_data_merger_special(def_data:list|dict, file_data:list|dict, index:int|str, list_type:type):
-    code = def_data["file_merger_code"]
-    value = def_data["file_merger_value"]
-    print("good", def_data, file_data)
-    if code == -1:
-        if len(file_data) == 0:
-            merged_data = value
-        else:
+def text_c(text:str, color):
+    """
+    Colors text fore/background.
+    """
+    return color + text + colorama.Back.RESET + colorama.Fore.RESET
+
+
+# FILE_DATA_MERGER ABANDONED!!!
+    """
+    # -1: add only if there is nothing in the list? (NO!)
+    # 1: don't remove if there is extra stuff in list (success!?)
+
+    # ULTIMATE MIND DESTRUCTION!!!
+    def file_data_merger_special(def_data:list|dict, file_data:list|dict, index:int|str, list_type:type):
+        code = def_data["file_merger_code"]
+        value = def_data["file_merger_value"]
+        print("good:", def_data, file_data)
+        if code == -1:
+            if len(file_data) == 0:
+                merged_data = value
+            else:
+                if len(file_data) < index:
+                    merged_data = file_data[index]
+                else:
+                    merged_data = {"file_merger_nothing_to_add": None}
+        elif code == 1:
             merged_data = file_data[index]
-    elif code == 1:
-        merged_data = file_data
-    print(merged_data)
-    return merged_data
+        print("merged:", merged_data)
+        return merged_data
 
-def is_good(data:list|dict, write=False):
-    good = (type(data) == dict and "file_merger_code" in data.keys() and "file_merger_value" in data.keys() and data["file_merger_code"] != 0)
-    if write:
-        print(f"{data}:", good)
-    return good
+    def is_good(data:list|dict, write=False):
+        good = (type(data) == dict and "file_merger_code" in data.keys() and "file_merger_value" in data.keys() and data["file_merger_code"] != 0)
+        if write:
+            print(f"{data}:", good)
+        return good
 
-def file_data_merger(def_data:list|dict, file_data:list|dict):
-    def_data_c = copy.deepcopy(def_data)
-    if type(def_data_c) == list:
-        merged_data = []
-        for x in range(len(def_data_c)):
-            print("\nlist", type(def_data_c[x]))
-            good = is_good(def_data_c[x], True)
-            try:
-                if type(def_data_c[x]) == list or type(def_data_c[x]) == dict:
-                    if good:
-                        merged_data.append(file_data_merger_special(def_data_c[x], file_data, x, list))
+    def file_data_merger(def_data:list|dict, file_data:list|dict):
+        def_data_c = copy.deepcopy(def_data)
+        if type(def_data_c) == list:
+            merged_data = []
+            for x in range(len(def_data_c)):
+                print("\nlist", type(def_data_c[x]))
+                good = is_good(def_data_c[x], True)
+                try:
+                    if type(def_data_c[x]) == list or type(def_data_c[x]) == dict:
+                        if good:
+                            sp_merge = file_data_merger_special(def_data_c[x], file_data, x, list)
+                            if sp_merge != {"file_merger_nothing_to_add": None}:
+                                merged_data.append()
+                        else:
+                            merged_data.append(file_data_merger(def_data_c[x], file_data[x]))
                     else:
-                        merged_data.append(file_data_merger(def_data_c[x], file_data[x]))
-                else:
-                    merged_data.append(file_data[x])
-            except IndexError:
-                merged_data.append(def_data_c[x])
-    else:
-        merged_data = {}
-        for key in def_data_c:
-            print("\ndict", type(def_data_c[key]))
-            good = is_good(def_data_c[key], True)
-            try:
-                if type(def_data_c[key]) == list or type(def_data_c[key]) == dict:
-                    if good:
-                        merged_data[key] = file_data_merger_special(def_data_c[key], file_data, key, dict)
+                        merged_data.append(file_data[x])
+                except IndexError:
+                    print("error")
+                    merged_data.append(def_data_c[x])
+        else:
+            merged_data = {}
+            for key in def_data_c:
+                print("\ndict", type(def_data_c[key]))
+                good = is_good(def_data_c[key], True)
+                try:
+                    if type(def_data_c[key]) == list or type(def_data_c[key]) == dict:
+                        if good:
+                            merged_data[key] = file_data_merger_special(def_data_c[key], file_data, key, dict)
+                        else:
+                            merged_data[key] = file_data_merger(def_data_c[key], file_data[key])
                     else:
-                        merged_data[key] = file_data_merger(def_data_c[key], file_data[key])
-                else:
-                    merged_data[key] = file_data[key]
-            except KeyError:
-                merged_data[key] = def_data_c[key]
-    return merged_data
+                        merged_data[key] = file_data[key]
+                except KeyError:
+                    print("error")
+                    merged_data[key] = def_data_c[key]
+        return merged_data
 
-def_d = {"auto_save": {"file_merger_code": 1, "file_merger_value": [52]}, "keybinds": {"esc": [b"\x1b"], "up": [b"H", {"file_merger_code": -1, "file_merger_value": 1}], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
-file_d = {"auto_save": [1, 2, 3, 4, 5], "lol": "trash", "keybinds": {"esc": [b"\x1b", 1, 2, 3], "up": [b"H"], "right": [b"M", 1], "enter": [b"\r"]}}
+    def_d = {"auto_save": {"file_merger_code": 1, "file_merger_value": [52]}, "keybinds": {"esc": [b"\x1b"], "up": [b"H", {"file_merger_code": -1, "file_merger_value": 1}], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
+    file_d = {"auto_save": [1, 2, 3, 4, 5], "lol": "trash", "keybinds": {"esc": [b"\x1b", 1, 2, 3], "up": [b"H", 1], "right": [b"M", 1], "enter": [b"\r"]}}
 
-merged_d = file_data_merger(def_d, file_d)
-print("\n" + str(def_d))
-print(file_d)
-print(merged_d)
-
+    merged_d = file_data_merger(def_d, file_d)
+    print("\n" + str(def_d))
+    print("\n" + str(file_d))
+    print("\n" + str(merged_d))
+    """
 
 
 def encode_keybinds(settings:dict[list[bytes|int]]):
@@ -222,8 +250,10 @@ def settings_manager(line_name:str, write_value=None):
         else:
             return settings[line_name]
     else:
-        settings[line_name] = write_value
-        sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
+        if settings[line_name] != write_value:
+            log_info("Changed settings", f"{line_name}: {settings[line_name]} -> {write_value}")
+            settings[line_name] = write_value
+            sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
 
 
 def random_state_converter(random_state:np.random.RandomState | dict | tuple):
@@ -274,9 +304,10 @@ def check_package_versions():
     Checks:
     - Save File Manager
     """
+    import random_sentance as rs
 
     log_info("Checking package versions", new_line=True)
-    packages = [[PIP_NP_MIN_VERSION, np], [PIP_SFM_MIN_VERSION, sfm], [PIP_RS_MIN_VERSION, rs]]
+    packages = [[PIP_NP_MIN_VERSION, np], [PIP_COLOR_MIN_VERSION, colorama], [PIP_SFM_MIN_VERSION, sfm], [PIP_RS_MIN_VERSION, rs]]
     bad_packages = []
     for package in packages:
         if not check_p_version(package[0], package[1].__version__):

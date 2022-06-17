@@ -2,6 +2,7 @@
 import json
 import math
 import os
+import shutil
 import sys
 import threading as thr
 import time
@@ -14,13 +15,17 @@ import tools as ts
 import dev_tools as dt
 import classes as cl
 
-from tools import r
-from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME, SAVE_FOLDER, SAVE_NAME, SAVE_EXT, SAVE_FILE_PATH, AUTO_SAVE_DELAY, ENCODING, SETTINGS_ENCODE_SEED, FILE_ENCODING_VERSION
+from tools import r, colorama
+from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME
+from tools import SAVES_FOLDER, SAVES_FOLDER_PATH, SAVE_NAME, SAVE_EXT, SAVE_FILE_PATH
+from tools import AUTO_SAVE_DELAY, ENCODING, SETTINGS_ENCODE_SEED, FILE_ENCODING_VERSION, SAVE_VERSION
+from tools import C_F_RED, C_F_GREEN, BACKUPS_FOLDER, BACKUPS_FOLDER_PATH, BACKUP_EXT
 
 try:
     ts.threading.current_thread().name = MAIN_THREAD_NAME
     if ts.check_package_versions():
         ts.log_info("Preloading global variables")
+        colorama.init()
         # dt.decode_save_file(SETTINGS_ENCODE_SEED, "settings")
 
         # GLOBAL VARIABLES
@@ -28,7 +33,7 @@ try:
         SETTINGS = cl.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
         SETTINGS.save_keybind_mapping()
         SAVE_DATA = cl.Save_data
-        GLOBALS = cl.Globals(False, False)
+        GLOBALS = cl.Globals(False, False, False)
     else:
         GOOD_PACKAGES = False
 except:
@@ -203,8 +208,42 @@ def prepair_fight():
     GLOBALS.in_fight = False
 
 
+def make_save(frozen_data:cl.Save_data=SAVE_DATA):
+    # make player
+    player = frozen_data.player
+    # make new save data
+    display_data = {}
+    save_data = {}
+    # save_version
+    display_data.update({"save_version": SAVE_VERSION})
+    save_data.update({"save_version": SAVE_VERSION})
+    # last_access
+    now = datetime.now()
+    last_access = {"last_access": [now.year, now.month, now.day, now.hour, now.minute, now.second]}
+    display_data.update(last_access)
+    save_data.update(last_access)
+    # player
+    player_data = {"player": {"name": player.name, "hp": player.hp, "attack": player.attack, "defence": player.defence, "speed": player.speed}}
+    display_data.update({"player_name": player.name})
+    save_data.update(player_data)
+    # randomstate
+    save_data.update(ts.random_state_converter(r))
+    # create new save
+    try:
+        f = open(f'{SAVE_FILE_PATH.replace("*", str(frozen_data.save_num))}.{SAVE_EXT}', "w")
+        f.close()
+    except FileNotFoundError:
+        os.mkdir(SAVES_FOLDER)
+        # log
+        ts.log_info("Recreating saves folder")
+    sfm.encode_save([json.dumps(display_data), json.dumps(save_data)], frozen_data.save_num, SAVE_FILE_PATH, SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
+
+
 def save_game():
     frozen_data = copy.deepcopy(SAVE_DATA)
+    make_save(frozen_data)
+    # log
+    ts.log_info("Game saved", f'slot number: {frozen_data.save_num}, player name: "{frozen_data.player.name}"')
 
 
 # Auto save thread
@@ -232,9 +271,10 @@ def quit_game():
                     if not GLOBALS.in_fight:
                         ts.log_info("Beginning manual save", f"slot number: {SAVE_DATA.save_num}")
                         save_game()
+                        GLOBALS.exiting = True
                         break
                     else:
-                        print("You can't exit while a fight happening!")
+                        print("You can't exit while a fight is happening!")
             else:
                 break
     except:
@@ -258,58 +298,68 @@ def game_loop():
     stats(-1)
     print("Wandering...")
     time.sleep(5)
-    prepair_fight()
-    # save_game() maybe instead of the auto save
-    # ENDING
+    if not GLOBALS.exiting:
+        prepair_fight()
+        save_game()
+        # save_game() maybe instead of the auto save
+        # ENDING
     GLOBALS.in_game_loop = False
     ts.press_key("Exiting...Press keys!")
     ts.log_info("Game loop ended")
 
     
 def new_save(save_num=1):
+    ts.log_info("Preparing game data")
     # make player
     player = cl.Player(input("What is your name?: "))
-    # make new save data
-    new_display_data = {}
-    new_save_data = {}
     # last_access
     now = datetime.now()
-    last_access = {"last_access": [now.year, now.month, now.day, now.hour, now.minute, now.second]}
-    new_display_data.update(last_access)
-    new_save_data.update(last_access)
-    # player
-    player_data = {"player": {"name": player.name, "hp": player.hp, "attack": player.attack, "defence": player.defence, "speed": player.speed}}
-    new_display_data.update({"player_name": player.name})
-    new_save_data.update(player_data)
-    # randomstate
-    new_save_data.update(ts.random_state_converter(r))
-    # create new save
-    try:
-        f = open(f'{SAVE_FILE_PATH.replace("*", str(save_num))}.{SAVE_EXT}', "w")
-        f.close()
-    except FileNotFoundError:
-        os.mkdir("saves")
-        # log
-        ts.log_info("Recreating saves folder")
-    sfm.encode_save([json.dumps(new_display_data), json.dumps(new_save_data)], save_num, SAVE_FILE_PATH, SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
-    # log
-    ts.log_info("Created save", f'slot number: {save_num}, player name: "{player.name}"')
-
-    # PREPARING
-    ts.log_info("Preparing game data")
+    last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
     # load to class
     global SAVE_DATA
     SAVE_DATA = cl.Save_data(save_num, last_access, player, r.get_state())
+    make_save()
+    ts.log_info("Created save", f'slot number: {save_num}, player name: "{player.name}"')
     game_loop()
+
+
+def correct_save_data(data, save_version):
+    ts.log_info("Correcting save data")
+    # 0.0 -> 1.0
+    if save_version == 0.0:
+        save_version = 1.0
+        ts.log_info("Corrected save data", "0.0 -> 1.0")
+    # 1.0 -> ?
+    if save_version == 1.0:
+        save_version = "?"
+        ts.log_info("Corrected save data", "1.0 -> ?")
+    return data
 
 
 def load_save(save_num=1):
     # read data
-    datas = json.loads(sfm.decode_save(save_num, SAVE_FILE_PATH, SAVE_EXT, ENCODING)[1])
+    data = json.loads(sfm.decode_save(save_num, SAVE_FILE_PATH, SAVE_EXT, ENCODING)[1])
+    # save version
+    try: save_version = data["save_version"]
+    except KeyError: save_version = 0.0
+    if save_version != SAVE_VERSION:
+        is_older = ts.check_p_version(str(save_version), str(SAVE_VERSION))
+        ts.log_info("Trying to load save with an incorrect version", f"{SAVE_VERSION} -> {save_version}")
+        ans = sfm.UI_list(["No", "Yes"], f"Save file {save_num} is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to back up the save file before loading it?").display(SETTINGS.keybind_mapping)
+        if ans == 1:
+            # check for saves folder
+            if not os.path.isdir(BACKUPS_FOLDER_PATH):
+                os.mkdir(BACKUPS_FOLDER)
+                ts.log_info("Recreating backups folder")
+            save_name = f'{SAVE_FILE_PATH.replace("*", str(save_num))}.{SAVE_EXT}'
+            backup_name = os.path.join(BACKUPS_FOLDER_PATH, (f'{ts.make_date(datetime.now())}_{SAVE_NAME.replace("*", str(save_num))}.{BACKUP_EXT}'))
+            shutil.copyfile(save_name, backup_name)
+            ts.log_info("Made backup", f'{BACKUPS_FOLDER}{SAVE_NAME.replace("*", str(save_num))}.{SAVE_EXT}.bak')
+        data = correct_save_data(data, save_version)
     # last access
-    last_access = datas["last_access"]
+    last_access = data["last_access"]
     # player
-    player_data = datas["player"]
+    player_data = data["player"]
     player = cl.Player(player_data["name"])
     player.hp = int(player_data["hp"])
     player.attack = int(player_data["attack"])
@@ -321,7 +371,7 @@ def load_save(save_num=1):
     # PREPARING
     ts.log_info("Preparing game data")
     # load random state
-    r.set_state(ts.random_state_converter(datas["seed"]))
+    r.set_state(ts.random_state_converter(data["seed"]))
     # load to class
     global SAVE_DATA
     SAVE_DATA = cl.Save_data(save_num, last_access, player, r.get_state())
@@ -329,15 +379,12 @@ def load_save(save_num=1):
 
 
 def get_saves_data():
-    try:
-        f = open(f'{SAVE_FILE_PATH.replace("*", "0")}.{SAVE_EXT}', "w")
-        f.close()
-        os.remove(f'{SAVE_FILE_PATH.replace("*", "0")}.{SAVE_EXT}')
-    except FileNotFoundError:
-        os.mkdir("saves")
-        # log
+    # check for saves folder
+    if not os.path.isdir(SAVES_FOLDER_PATH):
+        os.mkdir(SAVES_FOLDER)
         ts.log_info("Recreating saves folder")
-    datas = sfm.file_reader_s(SAVE_NAME, SAVE_FOLDER, 1)
+    # read saves
+    datas = sfm.file_reader_s(SAVE_NAME, SAVES_FOLDER_PATH, 1)
     # process file data
     datas_processed = []
     for data in datas:
@@ -351,6 +398,10 @@ def get_saves_data():
                 data_processed += f"Save file {data[0]}: {data[1]['player_name']}\n"
                 last_access = data[1]["last_access"]
                 data_processed += f"Last opened: {ts.make_date(last_access, '.')} {ts.make_time(last_access[3:])}"
+                # check version
+                try: save_version = data[1]["save_version"]
+                except KeyError: save_version = 0.0
+                data_processed += ts.text_c(f" v.{save_version}", (C_F_GREEN if save_version == SAVE_VERSION else C_F_RED))
                 datas_processed.append([data[0], data_processed])
             except (TypeError, IndexError):
                 ts.log_info("Parse error", f"Slot number: {data[0]}", "ERROR")
@@ -363,9 +414,11 @@ def main_menu():
     # action functions
     def other_options():
         auto_save = sfm.Toggle(SETTINGS.auto_save, "Auto save: ")
-        sfm.options_ui([auto_save, None, sfm.UI_list(["Back"])], " Other options", key_mapping=SETTINGS.keybind_mapping)
-        SETTINGS.auto_save = bool(auto_save.value)
-        ts.settings_manager("auto_save", SETTINGS.auto_save)
+        other_settings = [auto_save, None, sfm.UI_list(["Done"])]
+        response = sfm.options_ui(other_settings, " Other options", key_mapping=SETTINGS.keybind_mapping)
+        if response != None:
+            SETTINGS.auto_save = bool(auto_save.value)
+            ts.settings_manager("auto_save", SETTINGS.auto_save)
 
     def set_keybind(name:str):
         print("\n\nPress any key\n\n", end="")

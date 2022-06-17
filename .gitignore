@@ -1,8 +1,10 @@
 __pycache__
 
+backups
 logs
 saves
 
 *.log
 *.sav
+*.sav.bak
 *.decoded.txt
