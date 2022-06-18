@@ -3,8 +3,6 @@ from enum import Enum, auto
 import inspect
 import copy
 
-import random_sentance as rs
-
 import tools as ts
 
 from tools import ENCODING, DOUBLE_KEYS, r
@@ -90,7 +88,7 @@ class Save_data:
         self.seed = tuple(seed)
 
 
-def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|range, fluc_small=2, fluc_big=3, c_rare=0.05, team=1, c_team_change=0.005, name:str=None):
+def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|range, fluc_small=2, fluc_big=3, c_rare=0.02, team=1, c_team_change=0.005, name:str=None):
     
     def configure_stat(stat_value:int|range):
         # int or range
@@ -133,10 +131,134 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
     return [name, life, attack, deff, speed, rare, team, switched]
 
 
+class Loot_controller:
+    def __init__(self, item:Item_categories, chance=1.0, item_num:int|range=1, rolls=1):
+        self.item = item
+        self.chance = float(chance)
+        if type(item_num) == int:
+            item_num = range(item_num, item_num)
+        self.item_num = item_num
+        self.rolls = int(rolls)
+
+def loot_manager(drops:list[Loot_controller]=None):
+    loot = []
+    for drop in drops:
+        num = 0
+        for _ in range(drop.rolls):
+            num += (1 if r.random() <= drop.chance else 0) * r.randint(drop.item_num.start, drop.item_num.stop + 1)
+        if num > 0:
+            loot.append([drop.item, num])
+    return loot
+
+
+class Weapon_items(Enum):
+    WOODEN_SWORD = auto()
+    STONE_SWORD = auto()
+    STEEL_SWORD = auto()
+    WOODEN_BOW = auto()
+    STEEL_ARROW = auto()
+    WOODEN_CLUB = auto()
+    CLUB_WITH_TEETH = auto()
+
+class Armour_items(Enum):
+    WOODEN_SHIELD = auto()
+    LEATHER_CAP = auto()
+    LEATHER_TUNIC = auto()
+    LEATHER_PANTS = auto()
+    LEATHER_BOOTS = auto()
+
+class Material_items(Enum):
+    BOTTLE = auto()
+    WOOL = auto()
+    CLOTH = auto()
+    WOOD = auto()
+    STONE = auto()
+    STEEL = auto()
+    GOLD = auto()
+    TEETH = auto()
+
+class Misc_items(Enum):
+    HEALTH_POTION = auto()
+    GOLD_COIN = auto()
+    SILVER_COIN = auto()
+    COPPER_COIN = auto()
+    ROTTEN_FLESH = auto()
+
+class Item_categories(Enum):
+    WEAPONS = Weapon_items
+    ARMOUR = Armour_items
+    MATERIALS = Material_items
+    MISC = Misc_items
+
+
+class Item:
+    def __init__(self, name:Item_categories, amount=1):
+        self.name = name
+        self.amount = amount
+        self.make_item()
+    
+    def make_item(self):
+        match(self.name):
+            case Weapon_items.CLUB_WITH_TEETH:
+                self.d_name = "Club with teeth"
+            case _:
+                self.d_name = self.name.name.lower().capitalize().replace("_", " ")
+
+    def use(self):
+        return False
+
+
+class Inventory:
+    def __init__(self):
+        self.items:list[Item] = []
+    
+
+    def add(self, name:Item_categories, amount=1):
+        for item in self.items:
+            if item.name == name:
+                item.amount += amount
+                return None
+        self.items.append(Item(name, amount))
+    
+
+    def remove(self, name:Item_categories, amount=1):
+        for item in self.items:
+            if item.name == name:
+                if item.amount >= amount:
+                    item.amount -= amount
+                    return True
+                break
+        return False
+
+
+    def loot(self, loot:list):
+        for item in loot:
+            self.add(item[0], item[1])
+
+
+    def use(self, name:Item_categories):
+        for x in range(len(self.items)):
+            if self.items[x].name == name:
+                if self.items[x].use():
+                    self.items[x].amount -= 1
+                    if self.items[x].amount <= 0:
+                        self.items.pop(x)
+                break
+    
+
+    def __str__(self):
+        txt = "Inventory:"
+        for item in self.items:
+            txt += f"\n\t{item.d_name}{' x' + str(item.amount) if item.amount > 1 else ''}"
+        return txt
+
+
 class Entity:
-    def __init__(self, traits:list=None):
+    def __init__(self, traits:list=None, drops:list=None):
         if traits == None:
             traits = entity_master(1, 1, 1, 1, name="test")
+        if drops == None:
+            drops = []
         self.name = str(traits[0])
         self.hp = int(traits[1])
         self.attack = int(traits[2])
@@ -145,6 +267,7 @@ class Entity:
         self.rare = bool(traits[5])
         self.team = int(traits[6])
         self.switched = bool(traits[7])
+        self.drops = drops
     
     def __str__(self):
         return f'Name: {self.name}\nHp: {self.hp}\nAttack: {self.attack}\nDefence: {self.defence}\nSpeed: {self.speed}\nRare: {self.rare}\nTeam: {"Player" if self.team==0 else self.team}\nSwitched sides: {self.switched}'
@@ -159,6 +282,7 @@ class Player(Entity):
         if name == "":
             name = "You"
         super().__init__(entity_master(range(14, 26), range(7, 13), range(7, 13), range(1, 20), 0, 0, 0, 0, 0, name))
+        self.inventory = Inventory()
         # self.name = "You"
         # self.hp = r.randint(1, 7) + r.randint(1, 7) + 12
         # self.attack = r.randint(1, 7) + 6
@@ -171,80 +295,29 @@ class Player(Entity):
 
 class Caveman(Entity):
     def __init__(self):
-        super().__init__(entity_master(7, 7, 7, 7))
+        super().__init__(entity_master(7, 7, 7, 7), loot_manager(
+            [Loot_controller(Item_categories.WEAPONS.value.WOODEN_CLUB, 0.3),
+            Loot_controller(Item_categories.MATERIALS.value.CLOTH, 0.15, range(0, 1), 3),
+            Loot_controller(Item_categories.MISC.value.COPPER_COIN, 0.35, range(0, 4), 3)]))
 
 
 class Ghoul(Entity):
     def __init__(self):
-        super().__init__(entity_master(11, 9, 9, 9))
+        super().__init__(entity_master(11, 9, 9, 9), loot_manager(
+            [Loot_controller(Item_categories.WEAPONS.value.STONE_SWORD, 0.2),
+            Loot_controller(Item_categories.MISC.value.ROTTEN_FLESH, 0.55, range(0, 3)),
+            Loot_controller(Item_categories.MISC.value.COPPER_COIN, 0.40, range(0, 5), 4)]))
 
 
 class Troll(Entity):
     def __init__(self):
-        super().__init__(entity_master(13, 11, 11, 5))
+        super().__init__(entity_master(13, 11, 11, 5), loot_manager(
+            [Loot_controller(Item_categories.WEAPONS.value.CLUB_WITH_TEETH, 0.25),
+            Loot_controller(Item_categories.MATERIALS.value.CLOTH, 0.25, range(1, 3), 2),
+            Loot_controller(Item_categories.MATERIALS.value.TEETH, 0.35, range(1, 5), 2),
+            Loot_controller(Item_categories.MISC.value.SILVER_COIN, 0.30, range(1, 3), 3)]))
 
 
 class Test(Entity):
     def __init__(self):
         super().__init__()
-
-
-# MAYBE IF THERE ARE A LOT OF ITEMS!!!
-"""
-class Weapon_items(Enum):
-    SWORD = auto()
-    BOW = auto()
-    ARROW = auto()
-
-class Armour_items(Enum):
-    SHIELD = auto()
-
-class Misc_items(Enum):
-    POTION = auto()
-
-class Item_categories(Enum):
-    WEAPONS = Weapon_items()
-    ARMOUR = Armour_items()
-    MISC = Misc_items()
-
-Item_categories.WEAPONS.value.SWORD
-# name:Item_name -> name:Item_categories
-"""
-
-class Item_name(Enum):
-    SWORD = auto()
-    SHIELD = auto()
-    POTION = auto()
-    BOW = auto()
-    ARROW = auto()
-
-
-class Item:
-    def __init__(self, name:Item_name, amount=1):
-        self.name = name
-        self.amount = amount
-    
-    def use(self):
-        return False
-
-
-class Inventory:
-    def __init__(self):
-        self.items:list[Item] = []
-    
-
-    def add(self, name:Item_name, amount=1):
-        for item in self.items:
-            if item.name == name:
-                item.amount += amount
-                break
-    
-
-    def use(self, name:Item_name):
-        for x in range(len(self.items)):
-            if self.items[x].name == name:
-                if self.items[x].use():
-                    self.items[x].amount -= 1
-                    if self.items[x].amount <= 0:
-                        self.items.pop(x)
-                break

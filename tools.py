@@ -1,3 +1,4 @@
+from enum import Enum
 import json
 import os
 import threading
@@ -44,7 +45,7 @@ SETTINGS_ENCODE_SEED = 1
 FILE_ENCODING_VERSION = 2
 DOUBLE_KEYS = [b"\xe0", b"\x00"]
 LOG_MS = False
-SAVE_VERSION = 1.0
+SAVE_VERSION = 1.1
 
 
 def pad_zero(num:int|str):
@@ -113,6 +114,7 @@ def is_key(key:object) -> bool:
     Waits for a specific key.\n
     key should be a Key object.
     """
+
     key_in = getch()
     arrow = False
     if key_in in DOUBLE_KEYS:
@@ -271,7 +273,33 @@ def random_state_converter(random_state:np.random.RandomState | dict | tuple):
         state_nums = []
         for num in state[1]:
             state_nums.append(int(num))
-        return {"seed": {"type": state[0], "state": state_nums, "pos": state[2], "has_gauss": state[3], "cached_gaussian": state[4]}}
+        return {"type": state[0], "state": state_nums, "pos": state[2], "has_gauss": state[3], "cached_gaussian": state[4]}
+
+def item_finder(name:str) -> Enum|None:
+    """
+    Gives back the item enum, from the item name.\n
+    Returns ``None`` if it doesn't exist.
+    """
+    from classes import Item_categories
+
+    for enum in Item_categories._value2member_map_:
+        try: return enum._member_map_[name]
+        except KeyError: pass
+
+def inventory_converter(inventory:list):
+    """
+    Can convert between the json and object versions of the inventory items list.
+    """
+    from classes import Item
+
+    items = []
+    for item in inventory:
+        if type(item) == list:
+            items.append(Item(item_finder(item[0]), item[1]))
+        else:
+            item:Item
+            items.append([item.name.name, item.amount])
+    return items
 
 
 def check_p_version(min_version:str, curr_version:str):
