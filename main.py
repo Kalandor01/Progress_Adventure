@@ -236,9 +236,7 @@ def make_save(frozen_data:cl.Save_data):
     # randomstate
     save_data["seed"] = ts.random_state_converter(r)
     # create new save
-    if not os.path.isdir(SAVES_FOLDER_PATH):
-        os.mkdir(SAVES_FOLDER)
-        ts.log_info("Recreating saves folder")
+    ts.recreate_saves_folder()
     now = datetime.now()
     save_name = f'{SAVE_FILE_PATH.replace("*", str(frozen_data.save_num))}.{SAVE_EXT}'
     backup_name = f'{SAVES_FOLDER + os.path.sep}{SAVE_NAME.replace("*", str(frozen_data.save_num))}_{ts.make_date(now) + "_" + ts.make_time(now, ";", True)}.{BACKUP_EXT}'
@@ -363,10 +361,7 @@ def load_save(save_num=1):
         ts.log_info("Trying to load save with an incorrect version", f"{SAVE_VERSION} -> {save_version}")
         ans = sfm.UI_list(["Yes", "No"], f"Save file {save_num} is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to back up the save file before loading it?").display(SETTINGS.keybind_mapping)
         if ans == 0:
-            # check for saves folder
-            if not os.path.isdir(BACKUPS_FOLDER_PATH):
-                os.mkdir(BACKUPS_FOLDER)
-                ts.log_info("Recreating backups folder")
+            ts.recreate_backups_folder()
             save_name = f'{SAVE_FILE_PATH.replace("*", str(save_num))}.{SAVE_EXT}'
             now = datetime.now()
             backup_name = os.path.join(BACKUPS_FOLDER_PATH, (f'{ts.make_date(now)}_{ts.make_time(now, ";")}_{SAVE_NAME.replace("*", str(save_num))}.{BACKUP_EXT}'))
@@ -397,10 +392,7 @@ def load_save(save_num=1):
 
 
 def get_saves_data():
-    # check for saves folder
-    if not os.path.isdir(SAVES_FOLDER_PATH):
-        os.mkdir(SAVES_FOLDER)
-        ts.log_info("Recreating saves folder")
+    ts.recreate_saves_folder()
     # read saves
     datas = sfm.file_reader_s(SAVE_NAME, SAVES_FOLDER_PATH, 1)
     # process file data

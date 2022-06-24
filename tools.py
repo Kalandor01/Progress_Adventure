@@ -26,13 +26,17 @@ AUTO_SAVE_THREAD_NAME = "Auto saver"
 MANUAL_SAVE_THREAD_NAME = "Quit manager"
 # paths/folders/file names
 ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__))
+    #save
 SAVES_FOLDER = "saves"
 SAVES_FOLDER_PATH = os.path.join(ROOT_FOLDER, SAVES_FOLDER)
 SAVE_NAME = "save*"
 SAVE_EXT = "sav"
 SAVE_FILE_PATH = os.path.join(SAVES_FOLDER_PATH, SAVE_NAME)
+    #logs
 LOGS_FOLDER = "logs" + os.path.sep
-LOGS_EXT = "log"
+LOGS_FOLDER_PATH = os.path.join(ROOT_FOLDER, LOGS_FOLDER)
+LOG_EXT = "log"
+    #backups
 BACKUPS_FOLDER = "backups" + os.path.sep
 BACKUPS_FOLDER_PATH = os.path.join(ROOT_FOLDER, BACKUPS_FOLDER)
 BACKUP_EXT = SAVE_EXT + ".bak"
@@ -81,13 +85,8 @@ def log_info(message:str, detail="", message_type="INFO", write_out=False, new_l
     """
     current_date = make_date(dtime.now())
     current_time = make_time(dtime.now(), write_ms=LOG_MS)
-    try:
-        f = open(f"{LOGS_FOLDER}{current_date}.{LOGS_EXT}", "a")
-    except FileNotFoundError:
-        os.mkdir("logs")
-        # log
-        log_info("Recreating logs folder")
-        f = open(f"{LOGS_FOLDER}{current_date}.{LOGS_EXT}", "a")
+    recreate_logs_folder()
+    f = open(f"{LOGS_FOLDER}{current_date}.{LOG_EXT}", "a")
     if new_line:
         f.write("\n")
     f.write(f"[{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}\n")
@@ -95,7 +94,25 @@ def log_info(message:str, detail="", message_type="INFO", write_out=False, new_l
     if write_out:
         if new_line:
             print("\n")
-        print(f'{LOGS_FOLDER}{current_date}.{LOGS_EXT} -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
+        print(f'{LOGS_FOLDER}{current_date}.{LOG_EXT} -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
+
+
+def recreate_saves_folder():
+    if not os.path.isdir(SAVES_FOLDER_PATH):
+        os.mkdir(SAVES_FOLDER)
+        log_info("Recreating saves folder")
+
+
+def recreate_backups_folder():
+    if not os.path.isdir(BACKUPS_FOLDER_PATH):
+        os.mkdir(BACKUPS_FOLDER)
+        log_info("Recreating backups folder")
+
+
+def recreate_logs_folder():
+    if not os.path.isdir(LOGS_FOLDER_PATH):
+        os.mkdir(LOGS_FOLDER)
+        log_info("Recreating logs folder")
 
 
 def press_key(text=""):
