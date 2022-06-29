@@ -24,6 +24,7 @@ ENCODING = "windows-1250"
 MAIN_THREAD_NAME = "Main"
 AUTO_SAVE_THREAD_NAME = "Auto saver"
 MANUAL_SAVE_THREAD_NAME = "Quit manager"
+TEST_THREAD_NAME = "Test"
 # paths/folders/file names
 ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__))
     #save
@@ -78,6 +79,12 @@ def make_time(time_lis:list|dtime, sep=":", write_ms=False):
     else:
         return f"{pad_zero(time_lis[0])}{sep}{pad_zero(time_lis[1])}{sep}{pad_zero(time_lis[2])}{f'.{time_lis[3]}' if write_ms else ''}"
 
+
+def begin_log():
+    current_date = make_date(dtime.now())
+    recreate_logs_folder()
+    f = open(f"{LOGS_FOLDER}{current_date}.{LOG_EXT}", "a")
+    f.write("\n")
 
 def log_info(message:str, detail="", message_type="INFO", write_out=False, new_line=False):
     """
@@ -345,13 +352,16 @@ def package_response(bad_packages:list):
 
 def check_package_versions():
     """
-    Checks if all tested packages are up do date.
+    Checks if all tested packages are up do date.\n
     Checks:
+    - numpy
+    - colorama
     - Save File Manager
+    - random sentance
     """
     import random_sentance as rs
 
-    log_info("Checking package versions", new_line=True)
+    log_info("Checking package versions")
     packages = [[PIP_NP_MIN_VERSION, np], [PIP_COLOR_MIN_VERSION, colorama], [PIP_SFM_MIN_VERSION, sfm], [PIP_RS_MIN_VERSION, rs]]
     bad_packages = []
     for package in packages:

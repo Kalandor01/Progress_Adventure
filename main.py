@@ -9,36 +9,36 @@ import time
 from datetime import datetime
 from msvcrt import getch
 
-import save_file_manager as sfm
-
 import tools as ts
 import dev_tools as dt
 import classes as cl
 
-from tools import r, colorama
+from tools import r, colorama, sfm
 from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME, ROOT_FOLDER
 from tools import SAVES_FOLDER, SAVES_FOLDER_PATH, SAVE_NAME, SAVE_EXT, SAVE_FILE_PATH
 from tools import AUTO_SAVE_DELAY, ENCODING, SETTINGS_ENCODE_SEED, FILE_ENCODING_VERSION, SAVE_VERSION
 from tools import C_F_RED, C_F_GREEN, BACKUPS_FOLDER, BACKUPS_FOLDER_PATH, BACKUP_EXT
 
-try:
-    ts.threading.current_thread().name = MAIN_THREAD_NAME
-    if ts.check_package_versions():
-        ts.log_info("Preloading global variables")
-        colorama.init()
-        # dt.decode_save_file(SETTINGS_ENCODE_SEED, "settings")
+if __name__ == "__main__":
+    try:
+        ts.threading.current_thread().name = MAIN_THREAD_NAME
+        ts.begin_log()
+        if ts.check_package_versions():
+            ts.log_info("Preloading global variables")
+            colorama.init()
+            # dt.decode_save_file(SETTINGS_ENCODE_SEED, "settings")
 
-        # GLOBAL VARIABLES
-        GOOD_PACKAGES = True
-        SETTINGS = cl.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
-        SETTINGS.save_keybind_mapping()
-        SAVE_DATA = cl.Save_data
-        GLOBALS = cl.Globals(False, False, False)
-    else:
-        GOOD_PACKAGES = False
-except:
-    ts.log_info("Preloading crahed", sys.exc_info(), "ERROR")
-    raise
+            # GLOBAL VARIABLES
+            GOOD_PACKAGES = True
+            SETTINGS = cl.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
+            SETTINGS.save_keybind_mapping()
+            SAVE_DATA = cl.Save_data
+            GLOBALS = cl.Globals(False, False, False)
+        else:
+            GOOD_PACKAGES = False
+    except:
+        ts.log_info("Preloading crahed", sys.exc_info(), "ERROR")
+        raise
 
 
 def imput(ask="Num: ", type=int):
