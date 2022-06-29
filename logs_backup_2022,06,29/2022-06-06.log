@@ -1,0 +1,88 @@
+
+[21:39:33] [Main/INFO]	: |Preloading global variables| 
+[21:39:33] [Main/ERROR]	: |Preloading crahed| (<class 'ValueError'>, ValueError('byte must be in range(0, 256)'), <traceback object at 0x0000007BEC9F2F80>)
+
+[21:39:48] [Main/INFO]	: |Preloading global variables| 
+[21:39:48] [Main/ERROR]	: |Preloading crahed| (<class 'ValueError'>, ValueError('byte must be in range(0, 256)'), <traceback object at 0x000000DE6EC62F80>)
+
+[21:40:16] [Main/INFO]	: |Preloading global variables| 
+[21:40:16] [Main/ERROR]	: |Preloading crahed| (<class 'ValueError'>, ValueError('byte must be in range(0, 256)'), <traceback object at 0x0000009053222F80>)
+
+[21:40:31] [Main/INFO]	: |Preloading global variables| 
+[21:40:31] [Main/INFO]	: |Recreated settings| 
+[21:40:31] [Main/INFO]	: |Beginning new instance| 
+[21:40:53] [Main/INFO]	: |Created save| slot number: 1, player name: "h"
+[21:40:53] [Main/INFO]	: |Preparing game data| 
+[21:40:53] [Main/INFO]	: |Game loop started| 
+[21:40:55] [Quit manager/ERROR]	: |Thread crahed| (<class 'AttributeError'>, AttributeError("'bytes' object has no attribute 'value'"), <traceback object at 0x000000F892924D80>)
+[21:40:56] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[21:40:58] [Main/INFO]	: |Fight started| 
+[21:41:03] [Main/INFO]	: |Fight ended| 
+[21:42:30] [Main/INFO]	: |Game loop ended| 
+[21:42:31] [Main/INFO]	: |Instance ended succesfuly| 
+
+[21:43:38] [Main/INFO]	: |Preloading global variables| 
+[21:43:38] [Main/INFO]	: |Beginning new instance| 
+[21:43:43] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "h", last saved: 2022-06-06 21:40:53
+[21:43:43] [Main/INFO]	: |Preparing game data| 
+[21:43:43] [Main/INFO]	: |Game loop started| 
+[21:43:44] [Quit manager/INFO]	: |Beggining manual save| slot number: 1
+[21:43:46] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[21:43:48] [Main/INFO]	: |Fight started| 
+
+[21:43:53] [Main/INFO]	: |Preloading global variables| 
+[21:43:53] [Main/INFO]	: |Beginning new instance| 
+[21:43:56] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "h", last saved: 2022-06-06 21:40:53
+[21:43:56] [Main/INFO]	: |Preparing game data| 
+[21:43:56] [Main/INFO]	: |Game loop started| 
+[21:43:59] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[21:43:59] [Quit manager/INFO]	: |Beggining manual save| slot number: 1
+[21:44:01] [Main/INFO]	: |Fight started| 
+[21:44:06] [Main/INFO]	: |Fight ended| 
+[21:44:08] [Main/INFO]	: |Game loop ended| 
+[21:44:12] [Main/INFO]	: |Instance ended succesfuly| 
+
+[21:50:45] [Main/INFO]	: |Preloading global variables| 
+[21:50:45] [Main/INFO]	: |Beginning new instance| 
+[21:51:08] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "h", last saved: 2022-06-06 21:40:53
+[21:51:08] [Main/INFO]	: |Preparing game data| 
+[21:51:08] [Main/INFO]	: |Game loop started| 
+[21:51:10] [Quit manager/INFO]	: |Beggining manual save| slot number: 1
+[21:51:11] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[21:51:13] [Main/INFO]	: |Fight started| 
+[21:51:18] [Main/INFO]	: |Fight ended| 
+[21:51:20] [Main/INFO]	: |Game loop ended| 
+[21:51:21] [Main/INFO]	: |Instance ended succesfuly| 
+
+[21:56:53] [Main/INFO]	: |Preloading global variables| 
+[21:56:53] [Main/INFO]	: |Beginning new instance| 
+[21:56:57] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "h", last saved: 2022-06-06 21:40:53
+[21:56:57] [Main/INFO]	: |Preparing game data| 
+[21:56:57] [Main/INFO]	: |Game loop started| 
+[21:57:00] [Quit manager/INFO]	: |Beggining manual save| slot number: 1
+[21:57:00] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[21:57:02] [Main/INFO]	: |Fight started| 
+
+[22:00:30] [Main/INFO]	: |Preloading global variables| 
+[22:00:30] [Main/INFO]	: |Beginning new instance| 
+[22:00:33] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:02:49] [Main/INFO]	: |Preloading global variables| 
+[22:02:49] [Main/INFO]	: |Beginning new instance| 
+[22:03:01] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "h", last saved: 2022-06-06 21:40:53
+[22:03:01] [Main/INFO]	: |Preparing game data| 
+[22:03:01] [Main/INFO]	: |Game loop started| 
+[22:03:04] [Quit manager/INFO]	: |Beggining manual save| slot number: 1
+[22:03:04] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[22:03:06] [Main/INFO]	: |Fight started| 
+[22:03:11] [Main/INFO]	: |Fight ended| 
+[22:03:11] [Main/INFO]	: |Game loop ended| 
+[22:03:16] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:05:16] [Main/INFO]	: |Preloading global variables| 
+[22:05:16] [Main/INFO]	: |Beginning new instance| 
+[22:05:19] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:13:33] [Main/INFO]	: |Preloading global variables| 
+[22:13:33] [Main/INFO]	: |Beginning new instance| 
+[22:13:34] [Main/INFO]	: |Instance ended succesfuly| 

@@ -1,0 +1,536 @@
+[01:17:32] [MainThread/INFO]	: |Recreated settings| 
+[01:20:37] [MainThread/INFO]	: |Recreated settings| 
+[01:23:01] [MainThread/INFO]	: |Recreated settings| 
+[01:24:27] [MainThread/INFO]	: |Recreated settings| 
+[01:29:06] [MainThread/INFO]	: |Preloading global variables| 
+[01:29:06] [MainThread/INFO]	: |Recreated settings| 
+[01:29:47] [MainThread/INFO]	: |Preloading global variables| 
+[01:29:48] [MainThread/ERROR]	: |Instance crahed| (<class 'json.decoder.JSONDecodeError'>, JSONDecodeError('Expecting property name enclosed in double quotes: line 1 column 2 (char 1)'), <traceback object at 0x000000019C4F6900>)
+[01:30:16] [MainThread/INFO]	: |Preloading global variables| 
+[01:30:16] [MainThread/INFO]	: |Recreated settings| 
+[01:30:16] [MainThread/ERROR]	: |Instance crahed| (<class 'json.decoder.JSONDecodeError'>, JSONDecodeError('Expecting property name enclosed in double quotes: line 1 column 2 (char 1)'), <traceback object at 0x00000097BAF47E80>)
+[01:32:57] [MainThread/INFO]	: |Preloading global variables| 
+[01:32:57] [MainThread/INFO]	: |Recreated settings| 
+[01:32:57] [MainThread/ERROR]	: |Instance crahed| (<class 'json.decoder.JSONDecodeError'>, JSONDecodeError('Expecting property name enclosed in double quotes: line 1 column 2 (char 1)'), <traceback object at 0x000000B109CD4AC0>)
+[01:34:47] [MainThread/INFO]	: |Preloading global variables| 
+[01:34:47] [MainThread/ERROR]	: |Instance crahed| (<class 'json.decoder.JSONDecodeError'>, JSONDecodeError('Expecting property name enclosed in double quotes: line 1 column 2 (char 1)'), <traceback object at 0x000000DDCCDB5F00>)
+[01:36:35] [MainThread/INFO]	: |Preloading global variables| 
+[01:36:35] [MainThread/INFO]	: |Recreated settings| 
+[01:36:35] [MainThread/ERROR]	: |Instance crahed| (<class 'json.decoder.JSONDecodeError'>, JSONDecodeError('Expecting property name enclosed in double quotes: line 1 column 2 (char 1)'), <traceback object at 0x0000003CE9AF5EC0>)
+[01:36:49] [MainThread/INFO]	: |Preloading global variables| 
+[01:36:49] [MainThread/ERROR]	: |Instance crahed| (<class 'json.decoder.JSONDecodeError'>, JSONDecodeError('Expecting property name enclosed in double quotes: line 1 column 2 (char 1)'), <traceback object at 0x0000009D454B5F40>)
+[01:37:24] [MainThread/INFO]	: |Preloading global variables| 
+[01:37:24] [MainThread/INFO]	: |Recreated settings| 
+[01:37:24] [MainThread/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('the JSON object must be str, bytes or bytearray, not list'), <traceback object at 0x000000AE19CA6280>)
+[01:37:54] [MainThread/INFO]	: |Preloading global variables| 
+[01:37:54] [MainThread/INFO]	: |Recreated settings| 
+[01:37:54] [MainThread/ERROR]	: |Instance crahed| (<class 'UnboundLocalError'>, UnboundLocalError("local variable 'settings' referenced before assignment"), <traceback object at 0x00000084C257EC00>)
+[01:38:10] [MainThread/INFO]	: |Preloading global variables| 
+[01:38:10] [MainThread/ERROR]	: |Instance crahed| (<class 'UnboundLocalError'>, UnboundLocalError("local variable 'settings' referenced before assignment"), <traceback object at 0x0000009D88F06EC0>)
+[01:39:04] [MainThread/INFO]	: |Preloading global variables| 
+[01:39:04] [MainThread/INFO]	: |Recreated settings| 
+[01:39:04] [MainThread/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('string indices must be integers'), <traceback object at 0x0000004ED1AF6280>)
+[01:39:20] [MainThread/INFO]	: |Preloading global variables| 
+[01:39:20] [MainThread/ERROR]	: |Instance crahed| (<class 'UnboundLocalError'>, UnboundLocalError("local variable 'settings' referenced before assignment"), <traceback object at 0x000000E7E2362B00>)
+[01:39:33] [MainThread/INFO]	: |Preloading global variables| 
+[01:39:33] [MainThread/INFO]	: |Recreated settings| 
+[01:39:33] [MainThread/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('string indices must be integers'), <traceback object at 0x000000F9A52B2A40>)
+[01:39:38] [MainThread/INFO]	: |Preloading global variables| 
+[01:39:38] [MainThread/ERROR]	: |Instance crahed| (<class 'UnboundLocalError'>, UnboundLocalError("local variable 'settings' referenced before assignment"), <traceback object at 0x00000032F7BF2B00>)
+[01:40:13] [MainThread/INFO]	: |Preloading global variables| 
+[01:40:13] [MainThread/INFO]	: |Recreated settings| 
+[01:40:13] [MainThread/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('string indices must be integers'), <traceback object at 0x000000842BF52A40>)
+[01:40:20] [MainThread/INFO]	: |Preloading global variables| 
+[01:40:20] [MainThread/ERROR]	: |Instance crahed| (<class 'UnboundLocalError'>, UnboundLocalError("local variable 'settings' referenced before assignment"), <traceback object at 0x000000653FE12B00>)
+[01:41:13] [MainThread/INFO]	: |Preloading global variables| 
+[01:41:13] [MainThread/INFO]	: |Recreated settings| 
+[01:41:13] [MainThread/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('string indices must be integers'), <traceback object at 0x0000002F46AB2A40>)
+[01:41:17] [MainThread/INFO]	: |Preloading global variables| 
+[01:41:17] [MainThread/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('the JSON object must be str, bytes or bytearray, not list'), <traceback object at 0x000000D891DE5F00>)
+[01:41:34] [MainThread/INFO]	: |Preloading global variables| 
+[01:41:34] [MainThread/ERROR]	: |Instance crahed| (<class 'json.decoder.JSONDecodeError'>, JSONDecodeError('Expecting property name enclosed in double quotes: line 1 column 2 (char 1)'), <traceback object at 0x0000009983A66A40>)
+[12:42:40] [MainThread/INFO]	: |Preloading global variables| 
+[12:42:40] [MainThread/INFO]	: |Recreated settings| 
+
+[12:42:40] [Main/INFO]	: |Beginning new instance| 
+[12:45:16] [MainThread/INFO]	: |Preloading global variables| 
+
+[12:45:16] [Main/INFO]	: |Beginning new instance| 
+[12:46:42] [MainThread/INFO]	: |Preloading global variables| 
+[12:46:42] [MainThread/INFO]	: |Recreated settings| 
+
+[12:46:42] [Main/INFO]	: |Beginning new instance| 
+[12:48:48] [MainThread/INFO]	: |Preloading global variables| 
+
+[12:48:48] [Main/INFO]	: |Beginning new instance| 
+[12:48:55] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[12:48:55] [Main/INFO]	: |Game loop started| 
+[12:48:59] [MainThread/INFO]	: |Preloading global variables| 
+
+[12:48:59] [Main/INFO]	: |Beginning new instance| 
+[12:49:03] [Main/INFO]	: |Created save| slot number: 2, player name: "K"
+[12:49:03] [Main/INFO]	: |Game loop started| 
+[12:51:24] [MainThread/INFO]	: |Preloading global variables| 
+
+[12:52:12] [Main/INFO]	: |Beginning new instance| 
+
+[12:53:04] [MainThread/INFO]	: |Preloading global variables| 
+[12:53:04] [Main/INFO]	: |Beginning new instance| 
+
+[12:54:15] [Main/INFO]	: |Preloading global variables| 
+[12:54:15] [Main/INFO]	: |Beginning new instance| 
+[12:54:32] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[12:54:32] [Main/INFO]	: |Game loop started| 
+[12:54:37] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[12:54:38] [Main/INFO]	: |Game loop ended| 
+
+[12:55:47] [Main/INFO]	: |Preloading global variables| 
+[12:55:47] [Main/ERROR]	: |Instance crahed| (<class 'FileNotFoundError'>, FileNotFoundError(2, 'No such file or directory'), <traceback object at 0x0000001F2A9A3380>)
+
+[12:56:49] [Main/INFO]	: |Preloading global variables| 
+[12:56:49] [Main/INFO]	: |Beginning new instance| 
+
+[13:08:09] [Main/INFO]	: |Preloading global variables| 
+[13:08:09] [Main/INFO]	: |Recreated settings| 
+[13:08:09] [Main/INFO]	: |Beginning new instance| 
+[13:09:39] [Main/INFO]	: |Instance ended succesfuly| 
+
+[13:14:09] [Main/INFO]	: |Preloading global variables| 
+[13:14:09] [Main/INFO]	: |Beginning new instance| 
+[13:14:14] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('list indices must be integers or slices, not str'), <traceback object at 0x000000B4360F5F00>)
+
+[13:16:21] [Main/INFO]	: |Preloading global variables| 
+[13:16:21] [Main/INFO]	: |Beginning new instance| 
+[13:18:44] [Main/INFO]	: |Instance ended succesfuly| 
+
+[13:50:55] [Main/INFO]	: |Preloading global variables| 
+[13:50:55] [Main/INFO]	: |Beginning new instance| 
+
+[13:51:54] [Main/INFO]	: |Preloading global variables| 
+[13:51:54] [Main/INFO]	: |Beginning new instance| 
+
+[13:52:29] [Main/INFO]	: |Preloading global variables| 
+[13:52:29] [Main/INFO]	: |Beginning new instance| 
+
+[13:52:48] [Main/INFO]	: |Preloading global variables| 
+
+[13:53:07] [Main/INFO]	: |Preloading global variables| 
+[13:53:07] [Main/INFO]	: |Beginning new instance| 
+
+[13:53:24] [Main/INFO]	: |Preloading global variables| 
+
+[13:53:43] [Main/INFO]	: |Preloading global variables| 
+[13:53:43] [Main/INFO]	: |Beginning new instance| 
+
+[13:54:28] [Main/INFO]	: |Preloading global variables| 
+[13:54:28] [Main/INFO]	: |Beginning new instance| 
+
+[13:59:07] [Main/INFO]	: |Preloading global variables| 
+[13:59:07] [Main/INFO]	: |Beginning new instance| 
+
+[14:00:39] [Main/INFO]	: |Preloading global variables| 
+[14:00:39] [Main/INFO]	: |Beginning new instance| 
+
+[14:00:52] [Main/INFO]	: |Preloading global variables| 
+[14:00:52] [Main/INFO]	: |Beginning new instance| 
+
+[14:01:39] [Main/INFO]	: |Preloading global variables| 
+
+[14:02:16] [Main/INFO]	: |Preloading global variables| 
+[14:02:16] [Main/INFO]	: |Beginning new instance| 
+
+[14:02:35] [Main/INFO]	: |Preloading global variables| 
+[14:02:35] [Main/INFO]	: |Beginning new instance| 
+
+[14:03:20] [Main/INFO]	: |Preloading global variables| 
+[14:03:20] [Main/INFO]	: |Beginning new instance| 
+
+[14:03:28] [Main/INFO]	: |Preloading global variables| 
+[14:03:28] [Main/INFO]	: |Beginning new instance| 
+
+[14:06:41] [Main/INFO]	: |Preloading global variables| 
+[14:06:41] [Main/INFO]	: |Beginning new instance| 
+
+[14:07:11] [Main/INFO]	: |Preloading global variables| 
+[14:07:11] [Main/INFO]	: |Beginning new instance| 
+
+[14:21:51] [Main/INFO]	: |Preloading global variables| 
+[14:21:51] [Main/INFO]	: |Beginning new instance| 
+
+[14:23:11] [Main/INFO]	: |Preloading global variables| 
+[14:23:11] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'list' object has no attribute 'decode'"), <traceback object at 0x0000007DF1896380>)
+
+[14:25:08] [Main/INFO]	: |Preloading global variables| 
+[14:25:08] [Main/INFO]	: |Recreated settings| 
+[14:25:08] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError("'NoneType' object is not subscriptable"), <traceback object at 0x0000009A6E3A5540>)
+
+[14:29:00] [Main/INFO]	: |Preloading global variables| 
+[14:29:00] [Main/INFO]	: |Recreated settings| 
+[14:29:00] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError("'NoneType' object is not subscriptable"), <traceback object at 0x000000DE5D965540>)
+
+[14:29:25] [Main/INFO]	: |Preloading global variables| 
+[14:29:25] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError("'NoneType' object is not subscriptable"), <traceback object at 0x0000003CD6BD4C80>)
+
+[14:32:59] [Main/INFO]	: |Preloading global variables| 
+[14:32:59] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError("'NoneType' object is not subscriptable"), <traceback object at 0x0000001F641C4C40>)
+
+[14:34:15] [Main/INFO]	: |Preloading global variables| 
+[14:34:15] [Main/INFO]	: |Recreated settings| 
+[14:34:15] [Main/INFO]	: |Beginning new instance| 
+
+[14:35:36] [Main/INFO]	: |Preloading global variables| 
+[14:35:36] [Main/INFO]	: |Beginning new instance| 
+
+[14:52:15] [Main/INFO]	: |Preloading global variables| 
+[14:52:15] [Main/INFO]	: |Recreated settings| 
+[14:52:15] [Main/INFO]	: |Beginning new instance| 
+
+[14:53:29] [Main/INFO]	: |Preloading global variables| 
+[14:53:29] [Main/INFO]	: |Recreated settings| 
+[14:53:29] [Main/INFO]	: |Beginning new instance| 
+[14:53:42] [Main/INFO]	: |Instance ended succesfuly| 
+
+[14:53:45] [Main/INFO]	: |Preloading global variables| 
+[14:53:45] [Main/INFO]	: |Beginning new instance| 
+
+[14:55:24] [Main/INFO]	: |Preloading global variables| 
+[14:55:24] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('Object of type bytes is not JSON serializable'), <traceback object at 0x0000005611076640>)
+
+[14:55:35] [Main/INFO]	: |Preloading global variables| 
+[14:55:35] [Main/INFO]	: |Recreated settings| 
+[14:55:35] [Main/INFO]	: |Beginning new instance| 
+
+[14:55:59] [Main/INFO]	: |Preloading global variables| 
+[14:55:59] [Main/INFO]	: |Beginning new instance| 
+
+[14:56:08] [Main/INFO]	: |Preloading global variables| 
+[14:56:08] [Main/INFO]	: |Beginning new instance| 
+
+[18:55:55] [Main/INFO]	: |Preloading global variables| 
+[18:55:55] [Main/INFO]	: |Beginning new instance| 
+
+[18:56:25] [Main/INFO]	: |Preloading global variables| 
+[18:56:25] [Main/INFO]	: |Beginning new instance| 
+
+[18:57:50] [Main/INFO]	: |Preloading global variables| 
+[18:57:50] [Main/INFO]	: |Beginning new instance| 
+[18:57:59] [Main/INFO]	: |Instance ended succesfuly| 
+
+[18:58:03] [Main/INFO]	: |Preloading global variables| 
+[18:58:03] [Main/INFO]	: |Beginning new instance| 
+
+[18:59:34] [Main/INFO]	: |Preloading global variables| 
+[18:59:34] [Main/INFO]	: |Beginning new instance| 
+
+[19:01:18] [Main/INFO]	: |Preloading global variables| 
+[19:01:18] [Main/INFO]	: |Beginning new instance| 
+
+[19:02:38] [Main/INFO]	: |Preloading global variables| 
+[19:02:38] [Main/INFO]	: |Beginning new instance| 
+[19:02:43] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'int' object has no attribute 'decode'"), <traceback object at 0x000000FEB9CD6E40>)
+
+[19:04:02] [Main/INFO]	: |Preloading global variables| 
+[19:04:02] [Main/INFO]	: |Beginning new instance| 
+
+[19:04:35] [Main/INFO]	: |Preloading global variables| 
+[19:04:35] [Main/INFO]	: |Beginning new instance| 
+[19:04:41] [Main/ERROR]	: |Instance crahed| (<class 'KeyError'>, KeyError(0), <traceback object at 0x00000084327E71C0>)
+
+[19:05:27] [Main/INFO]	: |Preloading global variables| 
+[19:05:27] [Main/INFO]	: |Recreated settings| 
+[19:05:27] [Main/INFO]	: |Beginning new instance| 
+[19:05:33] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'int' object has no attribute 'decode'"), <traceback object at 0x000000CAF93B6D40>)
+
+[19:06:53] [Main/INFO]	: |Preloading global variables| 
+[19:06:53] [Main/INFO]	: |Beginning new instance| 
+[19:06:58] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'int' object has no attribute 'decode'"), <traceback object at 0x000000C6261A6E00>)
+
+[19:09:13] [Main/INFO]	: |Preloading global variables| 
+[19:09:13] [Main/INFO]	: |Beginning new instance| 
+
+[19:09:33] [Main/INFO]	: |Preloading global variables| 
+[19:09:33] [Main/INFO]	: |Recreated settings| 
+[19:09:33] [Main/INFO]	: |Beginning new instance| 
+
+[19:11:50] [Main/INFO]	: |Preloading global variables| 
+[19:11:50] [Main/INFO]	: |Recreated settings| 
+[19:11:50] [Main/INFO]	: |Beginning new instance| 
+[19:12:00] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'int' object has no attribute 'decode'"), <traceback object at 0x00000098674C6D40>)
+
+[19:13:19] [Main/INFO]	: |Preloading global variables| 
+[19:13:19] [Main/INFO]	: |Beginning new instance| 
+[19:13:23] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'int' object has no attribute 'decode'"), <traceback object at 0x0000003DF8806D00>)
+
+[19:13:48] [Main/INFO]	: |Preloading global variables| 
+[19:13:48] [Main/INFO]	: |Beginning new instance| 
+[19:13:50] [Main/INFO]	: |Instance ended succesfuly| 
+
+[19:14:08] [Main/INFO]	: |Preloading global variables| 
+[19:14:08] [Main/INFO]	: |Beginning new instance| 
+
+[19:14:45] [Main/INFO]	: |Preloading global variables| 
+[19:14:45] [Main/INFO]	: |Beginning new instance| 
+
+[19:15:27] [Main/INFO]	: |Preloading global variables| 
+[19:15:27] [Main/INFO]	: |Beginning new instance| 
+
+[19:16:28] [Main/INFO]	: |Preloading global variables| 
+[19:16:28] [Main/INFO]	: |Beginning new instance| 
+[19:16:43] [Main/INFO]	: |Instance ended succesfuly| 
+
+[19:16:47] [Main/INFO]	: |Preloading global variables| 
+[19:16:47] [Main/INFO]	: |Beginning new instance| 
+[19:16:59] [Main/INFO]	: |Instance ended succesfuly| 
+
+[19:17:14] [Main/INFO]	: |Preloading global variables| 
+[19:17:14] [Main/INFO]	: |Beginning new instance| 
+[19:17:32] [Main/ERROR]	: |Instance crahed| (<class 'KeyError'>, KeyError(0), <traceback object at 0x0000004A7F9C6440>)
+
+[19:29:03] [Main/INFO]	: |Preloading global variables| 
+[19:29:03] [Main/INFO]	: |Beginning new instance| 
+
+[19:32:19] [Main/INFO]	: |Preloading global variables| 
+[19:32:19] [Main/INFO]	: |Beginning new instance| 
+
+[19:32:32] [Main/INFO]	: |Preloading global variables| 
+[19:32:32] [Main/INFO]	: |Beginning new instance| 
+
+[19:32:40] [Main/INFO]	: |Preloading global variables| 
+[19:32:40] [Main/INFO]	: |Beginning new instance| 
+
+[19:34:28] [Main/INFO]	: |Preloading global variables| 
+[19:34:28] [Main/INFO]	: |Beginning new instance| 
+[19:34:41] [Main/INFO]	: |Instance ended succesfuly| 
+
+[19:41:27] [Main/INFO]	: |Preloading global variables| 
+[19:41:27] [Main/INFO]	: |Beginning new instance| 
+[19:41:35] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'int' object has no attribute 'decode'"), <traceback object at 0x000000F9A9316AC0>)
+
+[19:42:22] [Main/INFO]	: |Preloading global variables| 
+[19:42:22] [Main/INFO]	: |Beginning new instance| 
+[19:42:29] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'int' object has no attribute 'decode'"), <traceback object at 0x000000018B597080>)
+
+[19:43:05] [Main/INFO]	: |Preloading global variables| 
+[19:43:05] [Main/INFO]	: |Beginning new instance| 
+
+[19:48:34] [Main/INFO]	: |Preloading global variables| 
+[19:48:34] [Main/INFO]	: |Beginning new instance| 
+[19:48:39] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError("'dict_keys' object is not subscriptable"), <traceback object at 0x000000C925FB67C0>)
+
+[19:49:03] [Main/INFO]	: |Preloading global variables| 
+[19:49:03] [Main/INFO]	: |Beginning new instance| 
+[19:49:07] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError("'dict_keys' object is not subscriptable"), <traceback object at 0x000000358C3F6780>)
+
+[19:50:35] [Main/INFO]	: |Preloading global variables| 
+[19:50:35] [Main/INFO]	: |Beginning new instance| 
+[19:50:39] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'dict_keys' object has no attribute 'dict_keys'"), <traceback object at 0x0000008DD98068C0>)
+
+[19:53:01] [Main/INFO]	: |Preloading global variables| 
+[19:53:01] [Main/INFO]	: |Beginning new instance| 
+[19:53:50] [Main/INFO]	: |Instance ended succesfuly| 
+
+[19:54:38] [Main/INFO]	: |Preloading global variables| 
+[19:54:38] [Main/INFO]	: |Beginning new instance| 
+
+[19:55:06] [Main/INFO]	: |Preloading global variables| 
+[19:55:06] [Main/INFO]	: |Beginning new instance| 
+
+[19:55:28] [Main/INFO]	: |Preloading global variables| 
+[19:55:28] [Main/INFO]	: |Beginning new instance| 
+
+[19:55:58] [Main/INFO]	: |Preloading global variables| 
+[19:55:58] [Main/INFO]	: |Beginning new instance| 
+
+[19:56:48] [Main/INFO]	: |Preloading global variables| 
+[19:56:48] [Main/INFO]	: |Beginning new instance| 
+
+[19:57:49] [Main/INFO]	: |Preloading global variables| 
+[19:57:49] [Main/INFO]	: |Beginning new instance| 
+
+[20:01:04] [Main/INFO]	: |Preloading global variables| 
+[20:01:04] [Main/INFO]	: |Beginning new instance| 
+[20:02:14] [Main/INFO]	: |Instance ended succesfuly| 
+
+[20:04:14] [Main/INFO]	: |Preloading global variables| 
+[20:04:14] [Main/INFO]	: |Beginning new instance| 
+[20:04:18] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError("'Key' object is not subscriptable"), <traceback object at 0x0000003030996B40>)
+
+[20:08:43] [Main/INFO]	: |Preloading global variables| 
+[20:08:43] [Main/INFO]	: |Beginning new instance| 
+[20:08:50] [Main/ERROR]	: |Instance crahed| (<class 'KeyError'>, KeyError(0), <traceback object at 0x000000E5FED16E40>)
+
+[20:11:26] [Main/INFO]	: |Preloading global variables| 
+[20:11:26] [Main/INFO]	: |Beginning new instance| 
+[20:11:31] [Main/ERROR]	: |Instance crahed| (<class 'KeyError'>, KeyError(0), <traceback object at 0x000000C219F56D40>)
+
+[20:12:36] [Main/INFO]	: |Preloading global variables| 
+[20:12:36] [Main/INFO]	: |Beginning new instance| 
+
+[20:13:15] [Main/INFO]	: |Preloading global variables| 
+[20:13:15] [Main/INFO]	: |Beginning new instance| 
+[20:13:24] [Main/INFO]	: |Instance ended succesfuly| 
+
+[20:27:48] [Main/INFO]	: |Preloading global variables| 
+[20:27:48] [Main/INFO]	: |Beginning new instance| 
+
+[20:28:47] [Main/INFO]	: |Preloading global variables| 
+[20:28:47] [Main/INFO]	: |Recreated settings| 
+[20:28:47] [Main/INFO]	: |Beginning new instance| 
+
+[20:29:43] [Main/INFO]	: |Preloading global variables| 
+[20:29:43] [Main/INFO]	: |Beginning new instance| 
+
+[20:33:36] [Main/INFO]	: |Preloading global variables| 
+[20:33:36] [Main/INFO]	: |Recreated settings| 
+[20:33:36] [Main/INFO]	: |Beginning new instance| 
+
+[20:34:29] [Main/INFO]	: |Preloading global variables| 
+[20:34:29] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x0000000DF1266A80>)
+
+[20:34:41] [Main/INFO]	: |Preloading global variables| 
+[20:34:41] [Main/INFO]	: |Recreated settings| 
+[20:34:42] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x0000002E074F6C00>)
+
+[20:36:03] [Main/INFO]	: |Preloading global variables| 
+[20:36:03] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x0000007ABF6D67C0>)
+
+[20:36:27] [Main/INFO]	: |Preloading global variables| 
+[20:36:27] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000CFA4B26880>)
+
+[20:37:26] [Main/INFO]	: |Preloading global variables| 
+[20:37:26] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x0000008844C76A80>)
+
+[20:38:31] [Main/INFO]	: |Preloading global variables| 
+[20:38:31] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x0000006EF5DD6B00>)
+
+[20:39:55] [Main/INFO]	: |Preloading global variables| 
+[20:39:55] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x00000057A47F6B00>)
+
+[20:40:10] [Main/INFO]	: |Preloading global variables| 
+[20:40:10] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x00000025B5196D80>)
+
+[20:41:40] [Main/INFO]	: |Preloading global variables| 
+[20:41:40] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000F141826B40>)
+
+[20:41:57] [Main/INFO]	: |Preloading global variables| 
+[20:41:57] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000F36F146A40>)
+
+[20:43:04] [Main/INFO]	: |Preloading global variables| 
+[20:43:04] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x00000006961C6C00>)
+
+[20:43:37] [Main/INFO]	: |Preloading global variables| 
+[20:43:37] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000B76ECB6AC0>)
+
+[20:44:14] [Main/INFO]	: |Preloading global variables| 
+[20:44:14] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000353D626C00>)
+
+[20:45:29] [Main/INFO]	: |Preloading global variables| 
+[20:45:29] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000B8FF2A6C00>)
+
+[20:46:00] [Main/INFO]	: |Preloading global variables| 
+[20:46:00] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000C5093F6780>)
+
+[20:46:10] [Main/INFO]	: |Preloading global variables| 
+[20:46:10] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x0000002B7FC36780>)
+
+[20:47:16] [Main/INFO]	: |Preloading global variables| 
+[20:47:16] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000468D636E00>)
+
+[20:47:39] [Main/INFO]	: |Preloading global variables| 
+[20:47:39] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x00000031A6D46C40>)
+
+[20:48:02] [Main/INFO]	: |Preloading global variables| 
+[20:48:02] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000DA35336D00>)
+
+[20:48:32] [Main/INFO]	: |Preloading global variables| 
+[20:48:32] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000273AB86C00>)
+
+[20:48:52] [Main/INFO]	: |Preloading global variables| 
+[20:48:52] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000CA8B8F6CC0>)
+
+[20:49:21] [Main/INFO]	: |Preloading global variables| 
+[20:49:21] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x0000006562F6AEC0>)
+
+[20:49:58] [Main/INFO]	: |Preloading global variables| 
+[20:49:58] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000C48F686AC0>)
+
+[20:51:50] [Main/INFO]	: |Preloading global variables| 
+[20:51:50] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000BDFA3B6AC0>)
+
+[20:52:20] [Main/INFO]	: |Preloading global variables| 
+[20:52:20] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x0000006DD2F26EC0>)
+
+[20:53:07] [Main/INFO]	: |Preloading global variables| 
+[20:53:07] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x0000006B9AC86C40>)
+
+[20:54:06] [Main/INFO]	: |Preloading global variables| 
+[20:54:06] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000FE7CEEACC0>)
+
+[20:54:42] [Main/INFO]	: |Preloading global variables| 
+[20:54:42] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x0000003DEACC6800>)
+
+[20:55:53] [Main/INFO]	: |Preloading global variables| 
+[20:55:53] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x00000002DE8067C0>)
+
+[20:57:16] [Main/INFO]	: |Preloading global variables| 
+[20:57:16] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000497EDB6940>)
+
+[20:58:11] [Main/INFO]	: |Preloading global variables| 
+[20:58:11] [Main/INFO]	: |Recreated settings| 
+[20:58:11] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000F927BD69C0>)
+
+[20:58:19] [Main/INFO]	: |Preloading global variables| 
+[20:58:19] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x0000002C31ED68C0>)
+
+[20:58:29] [Main/INFO]	: |Preloading global variables| 
+[20:58:29] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000547F6C6B40>)
+
+[20:58:49] [Main/INFO]	: |Preloading global variables| 
+[21:01:17] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000FDD3ADE580>)
+
+[21:02:03] [Main/INFO]	: |Preloading global variables| 
+
+[21:10:41] [Main/INFO]	: |Preloading global variables| 
+
+[21:17:17] [Main/INFO]	: |Preloading global variables| 
+[21:17:17] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000DB9A056940>)
+
+[21:20:41] [Main/INFO]	: |Preloading global variables| 
+[21:20:41] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'decode'"), <traceback object at 0x000000EC68396AC0>)
+
+[21:21:25] [Main/INFO]	: |Preloading global variables| 
+[21:21:25] [Main/INFO]	: |Beginning new instance| 
+[21:22:52] [Main/INFO]	: |Instance ended succesfuly| 
+
+[21:22:57] [Main/INFO]	: |Preloading global variables| 
+[21:22:57] [Main/INFO]	: |Beginning new instance| 
+[21:23:35] [Main/INFO]	: |Instance ended succesfuly| 
+
+[21:31:10] [Main/INFO]	: |Preloading global variables| 
+[21:31:10] [Main/INFO]	: |Beginning new instance| 
+[21:33:28] [Main/INFO]	: |Created save| slot number: 3, player name: "k"
+[21:33:28] [Main/INFO]	: |Game loop started| 
+
+[21:33:56] [Main/INFO]	: |Preloading global variables| 
+[21:33:56] [Main/INFO]	: |Beginning new instance| 
+[21:34:08] [Main/INFO]	: |Instance ended succesfuly| 
+
+[21:34:11] [Main/INFO]	: |Preloading global variables| 
+[21:34:11] [Main/INFO]	: |Beginning new instance| 
+[21:34:40] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "K", last saved: 2022-05-08 12:49:03
+[21:34:40] [Main/INFO]	: |Game loop started| 
+[21:34:45] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[21:34:50] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[21:34:55] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[21:35:00] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+
+[21:35:06] [Main/INFO]	: |Preloading global variables| 
+[21:35:06] [Main/INFO]	: |Beginning new instance| 
+[21:35:16] [Main/INFO]	: |Loaded save| slot number: 3, hero name: "k", last saved: 2022-05-08 21:33:28
+[21:35:16] [Main/INFO]	: |Game loop started| 
+
+[21:35:26] [Main/INFO]	: |Preloading global variables| 
+[21:35:26] [Main/INFO]	: |Beginning new instance| 
+[21:35:31] [Main/INFO]	: |Deleted save| slot number: 2, hero name: "K", last saved: 2022-05-08 12:49:03
+[21:35:32] [Main/INFO]	: |Deleted save| slot number: 3, hero name: "k", last saved: 2022-05-08 21:33:28
+[21:35:34] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01

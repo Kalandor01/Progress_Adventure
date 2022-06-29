@@ -1,0 +1,43 @@
+[13:26:33] [Main/INFO] : before creating thread
+[13:26:33] [Main/INFO] : before running thread
+[13:26:33] [Thread 1/INFO] : starting
+[13:26:33] [Main/INFO] : wait for the thread to finish
+[13:26:33] [Main/INFO] : all done
+[13:26:35] [Thread 1/INFO] : finishing
+[13:27:22] [Main/INFO]	: before creating thread
+[13:27:22] [Main/INFO]	: before running thread
+[13:27:22] [Thread 1/INFO]	: starting
+[13:27:22] [Main/INFO]	: wait for the thread to finish
+[13:27:22] [Main/INFO]	: all done
+[13:27:24] [Thread 1/INFO]	: finishing
+[13:28:00] [Main/INFO]	: before creating thread
+[13:28:00] [Main/INFO]	: before running thread
+[13:28:00] [Main/INFO]	: wait for the thread to finish
+[13:28:00] [Thread 1/INFO]	: starting
+[13:28:00] [Main/INFO]	: all done
+[13:28:02] [Thread 1/INFO]	: finishing
+[13:28:09] [Main/INFO]	: before creating thread
+[13:28:09] [Main/INFO]	: before running thread
+[13:28:09] [Main/INFO]	: wait for the thread to finish
+[13:28:09] [Thread 1/INFO]	: starting
+[13:28:09] [Main/INFO]	: all done
+[13:28:11] [Thread 1/INFO]	: finishing
+[13:31:07] [Main/INFO]	: before creating thread
+[13:31:07] [Main/INFO]	: before running thread
+[13:31:07] [Main/INFO]	: wait for the thread to finish
+[13:31:07] [Thread 1/INFO]	: starting
+[13:31:07] [Main/INFO]	: all done
+[13:31:09] [Thread 1/INFO]	: finishing
+[13:32:32] [Main/INFO]	: before creating thread
+[13:32:32] [Main/INFO]	: before running thread
+[13:32:32] [Main/INFO]	: wait for the thread to finish
+[13:32:32] [Thread 1/INFO]	: starting
+[13:32:32] [Main/INFO]	: all done
+[13:32:34] [Thread 1/INFO]	: finishing
+[13:32:55] [MainThread/INFO]	: before creating thread
+[13:32:55] [MainThread/INFO]	: before running thread
+[13:32:55] [Thread 1/INFO]	: starting
+[13:32:55] [MainThread/INFO]	: wait for the thread to finish
+[13:32:55] [MainThread/INFO]	: all done
+[18:19:34] [Main/INFO]	: Beginning new instance.
+[18:20:16] [Main/INFO]	: Instance ended succesfuly.

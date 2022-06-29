@@ -1,0 +1,43 @@
+[01:53:44] [Main/INFO]	: Beginning new instance.
+[02:05:57] [Main/INFO]	: Beginning new instance.
+[02:21:01] [Main/INFO]	: |Beginning new instance|
+[02:21:12] [Main/INFO]	: |Created save| slot number: 3, hero name: "test name", last saved: 2022-4-16 2:21:12
+[02:22:23] [Main/INFO]	: |Beginning new instance|
+[02:22:30] [Main/INFO]	: |Created save| slot number: 4, player name: "hm"
+[02:28:01] [Main/INFO]	: |Beginning new instance|
+[02:28:11] [Main/INFO]	: |Loaded save| slot number: 4, hero name: "hm", last saved: 2022-4-16 2:22:29
+[02:30:21] [Main/INFO]	: |Beginning new instance|
+[02:31:57] [Main/INFO]	: |Beginning new instance|
+[02:32:03] [Main/INFO]	: |Loaded save| slot number: 3, hero name: "test name", last saved: 2022-4-16 2:21:12
+[02:32:44] [Main/INFO]	: |Instance ended succesfuly|
+[02:32:54] [Main/INFO]	: |Beginning new instance|
+[02:33:03] [Main/INFO]	: |Deleted save| slot number: 3, hero name: "t", last saved: 2022-4-16 2:21:12
+[02:33:08] [Main/INFO]	: |Deleted save| slot number: 2, hero name: "t", last saved: 2022-4-16 1:53:55
+[02:33:10] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "e", last saved: 2022-4-15 18:19:47
+[02:33:38] [Main/INFO]	: |Created save| slot number: 1, player name: "hi logs"
+[02:38:09] [Main/INFO]	: |Beginning new instance|
+[02:42:29] [Main/INFO]	: |Beginning new instance|
+[02:42:29] [Main/INFO]	: |Recreated metadata|
+[02:42:43] [Main/INFO]	: |Created save| slot number: 1, player name: "i hope this works"
+[02:43:50] [Main/INFO]	: |Instance ended succesfuly|
+[02:44:02] [Main/INFO]	: |Beginning new instance|
+[02:44:39] [Main/INFO]	: |Created save| slot number: 2, player name: "2"
+[02:44:42] [Main/INFO]	: |Beginning new instance|
+[02:44:54] [Main/INFO]	: |Created save| slot number: 3, player name: "3"
+[02:44:58] [Main/INFO]	: |Beginning new instance|
+[02:45:03] [Main/INFO]	: |Created save| slot number: 4, player name: "cmon"
+[02:45:07] [Main/INFO]	: |Beginning new instance|
+[02:45:12] [Main/INFO]	: |Created save| slot number: 5, player name: "bruh"
+[02:45:15] [Main/INFO]	: |Beginning new instance|
+[02:45:18] [Main/INFO]	: |Incremented max saves in metadata| 6
+[02:45:21] [Main/INFO]	: |Created save| slot number: 6, player name: "uh"
+[02:56:31] [Main/INFO]	: |Beginning new instance|
+[02:57:03] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "i hope this works", last saved: 2022-4-16 2:42:43
+[02:57:08] [Main/INFO]	: |Deleted save| slot number: 4, hero name: "cmon", last saved: 2022-4-16 2:45:3
+[02:57:10] [Main/INFO]	: |Deleted save| slot number: 5, hero name: "bruh", last saved: 2022-4-16 2:45:12
+[02:57:14] [Main/INFO]	: |Deleted save| slot number: 3, hero name: "3", last saved: 2022-4-16 2:44:54
+[02:57:18] [Main/INFO]	: |Deleted save| slot number: 6, hero name: "uh", last saved: 2022-4-16 2:45:21
+[02:57:18] [Main/INFO]	: |Decremented max saves in metadata| 5
+[02:57:21] [Main/INFO]	: |Deleted save| slot number: 2, hero name: "2", last saved: 2022-4-16 2:44:39
+[02:57:21] [Main/INFO]	: |Decremented max saves in metadata| 4
+[02:57:28] [Main/INFO]	: |Created save| slot number: 1, player name: "1."

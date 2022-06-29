@@ -4,7 +4,7 @@ backups
 logs
 saves
 
-*.log
+
 *.sav
 *.sav.bak
 *.decoded.json

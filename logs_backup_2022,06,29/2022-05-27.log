@@ -1,0 +1,94 @@
+
+[21:15:24] [Main/INFO]	: |Preloading global variables| 
+[21:15:24] [Main/ERROR]	: |Preloading crahed| (<class 'TypeError'>, TypeError('list indices must be integers or slices, not str'), <traceback object at 0x0000008213F3C080>)
+
+[21:16:02] [Main/INFO]	: |Preloading global variables| 
+[21:16:02] [Main/ERROR]	: |Preloading crahed| (<class 'TypeError'>, TypeError("int() argument must be a string, a bytes-like object or a real number, not 'NoneType'"), <traceback object at 0x0000008BED7E4CC0>)
+
+[21:16:39] [Main/INFO]	: |Preloading global variables| 
+[21:16:39] [Main/ERROR]	: |Preloading crahed| (<class 'TypeError'>, TypeError("int() argument must be a string, a bytes-like object or a real number, not 'NoneType'"), <traceback object at 0x000000AD3A4C4D80>)
+
+[21:16:59] [Main/INFO]	: |Preloading global variables| 
+[21:16:59] [Main/ERROR]	: |Preloading crahed| (<class 'TypeError'>, TypeError("int() argument must be a string, a bytes-like object or a real number, not 'NoneType'"), <traceback object at 0x0000003979454580>)
+
+[21:18:52] [Main/INFO]	: |Preloading global variables| 
+[21:18:52] [Main/ERROR]	: |Preloading crahed| (<class 'TypeError'>, TypeError("int() argument must be a string, a bytes-like object or a real number, not 'NoneType'"), <traceback object at 0x000000BE1B2A4800>)
+
+[21:29:20] [Main/INFO]	: |Preloading global variables| 
+[21:29:20] [Main/ERROR]	: |Preloading crahed| (<class 'TypeError'>, TypeError("int() argument must be a string, a bytes-like object or a real number, not 'NoneType'"), <traceback object at 0x000000F40A6E4D00>)
+
+[21:30:05] [Main/INFO]	: |Preloading global variables| 
+[21:30:05] [Main/ERROR]	: |Preloading crahed| (<class 'TypeError'>, TypeError("int() argument must be a string, a bytes-like object or a real number, not 'NoneType'"), <traceback object at 0x0000002FFF444D00>)
+
+[22:04:43] [Main/INFO]	: |Preloading global variables| 
+[22:04:43] [Main/ERROR]	: |Preloading crahed| (<class 'TypeError'>, TypeError("int() argument must be a string, a bytes-like object or a real number, not 'NoneType'"), <traceback object at 0x000000F37F48BDC0>)
+
+[22:27:37] [Main/INFO]	: |Preloading global variables| 
+[22:27:37] [Main/INFO]	: |Beginning new instance| 
+[22:28:39] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-17 15:51:41
+[22:28:39] [Main/INFO]	: |Preparing game data| 
+[22:28:39] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'Player' object has no attribute 'copy'"), <traceback object at 0x0000008474365640>)
+
+[22:29:24] [Main/INFO]	: |Preloading global variables| 
+[22:29:24] [Main/INFO]	: |Beginning new instance| 
+[22:30:08] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-17 15:51:41
+[22:30:08] [Main/INFO]	: |Preparing game data| 
+[22:30:08] [Main/INFO]	: |Game loop started| 
+[22:30:08] [Quit manager/ERROR]	: |Thread crahed| (<class 'UnboundLocalError'>, UnboundLocalError("local variable '_in_game_loop' referenced before assignment"), <traceback object at 0x000000AE72145280>)
+
+[22:53:45] [Main/INFO]	: |Preloading global variables| 
+[22:53:45] [Main/INFO]	: |Beginning new instance| 
+[22:53:52] [Main/ERROR]	: |Instance crahed| (<class 'NameError'>, NameError("name 'last_accessed' is not defined"), <traceback object at 0x000000333E604980>)
+
+[22:55:49] [Main/INFO]	: |Preloading global variables| 
+[22:55:49] [Main/INFO]	: |Beginning new instance| 
+[22:55:52] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-17 15:51:41
+[22:55:52] [Main/INFO]	: |Preparing game data| 
+[22:55:52] [Main/INFO]	: |Game loop started| 
+[22:55:54] [Quit manager/INFO]	: |Beggining manual save| slot number: 1
+[22:55:57] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[22:55:57] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('prepair_fight() takes 0 positional arguments but 1 was given'), <traceback object at 0x000000C76DB28C80>)
+
+[22:56:41] [Main/INFO]	: |Preloading global variables| 
+[22:56:41] [Main/INFO]	: |Beginning new instance| 
+[22:56:45] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-17 15:51:41
+[22:56:45] [Main/INFO]	: |Preparing game data| 
+[22:56:45] [Main/INFO]	: |Game loop started| 
+[22:56:50] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[22:56:55] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[22:57:00] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[22:57:05] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[22:57:12] [Main/INFO]	: |Game loop ended| 
+[22:57:18] [Main/INFO]	: |Created save| slot number: 2, player name: "k"
+[22:57:18] [Main/INFO]	: |Preparing game data| 
+[22:57:18] [Main/INFO]	: |Game loop started| 
+[22:57:23] [Auto saver/INFO]	: |Beggining auto save| slot number: 2
+[22:57:28] [Auto saver/INFO]	: |Beggining auto save| slot number: 2
+[22:57:40] [Main/INFO]	: |Game loop ended| 
+[22:57:59] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:58:03] [Main/INFO]	: |Preloading global variables| 
+[22:58:04] [Main/INFO]	: |Beginning new instance| 
+
+[23:04:56] [Main/INFO]	: |Preloading global variables| 
+[23:04:56] [Main/INFO]	: |Beginning new instance| 
+[23:05:15] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-05-27 22:57:18
+[23:05:15] [Main/INFO]	: |Preparing game data| 
+[23:05:15] [Main/INFO]	: |Game loop started| 
+[23:05:18] [Auto saver/INFO]	: |Beggining auto save| slot number: 2
+[23:05:20] [Main/INFO]	: |Fight started| 
+[23:05:29] [Main/INFO]	: |Fight ended| 
+[23:05:35] [Main/INFO]	: |Game loop ended| 
+[23:05:55] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "j", last saved: 2022-05-17 15:51:41
+[23:06:07] [Main/INFO]	: |Instance ended succesfuly| 
+
+[23:09:32] [Main/INFO]	: |Preloading global variables| 
+[23:09:32] [Main/INFO]	: |Beginning new instance| 
+[23:09:39] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-05-27 22:57:18
+[23:09:39] [Main/INFO]	: |Preparing game data| 
+[23:09:39] [Main/INFO]	: |Game loop started| 
+[23:09:42] [Auto saver/INFO]	: |Beggining auto save| slot number: 2
+[23:09:44] [Main/INFO]	: |Fight started| 
+[23:09:53] [Main/INFO]	: |Fight ended| 
+[23:09:57] [Main/INFO]	: |Game loop ended| 
+[23:10:08] [Main/INFO]	: |Instance ended succesfuly| 

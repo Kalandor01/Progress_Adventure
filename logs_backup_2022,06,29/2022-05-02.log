@@ -1,0 +1,145 @@
+[00:02:26] [Main/INFO]	: |Beginning new instance| 
+[00:02:27] [Main/INFO]	: |Instance ended succesfuly| 
+[00:03:02] [Main/INFO]	: |Beginning new instance| 
+[00:04:03] [Main/INFO]	: |Beginning new instance| 
+[00:04:16] [Main/INFO]	: |Beginning new instance| 
+[00:08:39] [Main/INFO]	: |Beginning new instance| 
+[00:09:29] [Main/INFO]	: |Beginning new instance| 
+[00:11:03] [Main/INFO]	: |Beginning new instance| 
+[00:47:42] [Main/INFO]	: |Beginning new instance| 
+[00:49:52] [Main/INFO]	: |Beginning new instance| 
+[00:51:48] [Main/INFO]	: |Beginning new instance| 
+[00:52:08] [Main/INFO]	: |Beginning new instance| 
+[01:01:09] [Main/INFO]	: |Beginning new instance| 
+[01:01:50] [Main/INFO]	: |Beginning new instance| 
+[01:02:20] [Main/INFO]	: |Beginning new instance| 
+[01:02:40] [Main/INFO]	: |Beginning new instance| 
+[01:04:19] [Main/INFO]	: |Beginning new instance| 
+[01:04:29] [Main/INFO]	: |Created save| slot number: 1, player name: "k"
+[01:04:33] [Main/INFO]	: |Beginning new instance| 
+[01:04:45] [Main/INFO]	: |Beginning new instance| 
+[01:04:51] [Main/INFO]	: |Created save| slot number: 1, player name: "k"
+[01:04:54] [Main/INFO]	: |Beginning new instance| 
+[01:05:02] [Main/INFO]	: |Created save| slot number: 2, player name: "é"
+[01:05:12] [Main/INFO]	: |Beginning new instance| 
+[01:08:11] [Main/INFO]	: |Beginning new instance| 
+[01:08:11] [Main/ERROR]	: |Decode error| Slot number: 1
+[01:09:06] [Main/INFO]	: |Beginning new instance| 
+[01:09:06] [Main/ERROR]	: |Decode error| Slot number: 1
+[01:09:11] [Main/INFO]	: |Created save| slot number: 1, player name: "h"
+[01:09:14] [Main/INFO]	: |Beginning new instance| 
+[01:09:15] [Main/INFO]	: |Parse error| Slot number: 1
+[01:09:45] [Main/INFO]	: |Beginning new instance| 
+[01:10:00] [Main/INFO]	: |Beginning new instance| 
+[01:10:46] [Main/INFO]	: |Beginning new instance| 
+[01:10:46] [Main/INFO]	: |Parse error| Slot number: 1
+[01:11:01] [Main/INFO]	: |Beginning new instance| 
+[01:11:01] [Main/INFO]	: |Parse error| Slot number: 1
+[01:12:04] [Main/INFO]	: |Beginning new instance| 
+[01:12:29] [Main/INFO]	: |Beginning new instance| 
+[01:12:29] [Main/ERROR]	: |Parse error| Slot number: 1
+[01:13:13] [Main/INFO]	: |Beginning new instance| 
+[01:13:13] [Main/ERROR]	: |Parse error| Slot number: 1
+[01:13:32] [Main/INFO]	: |Beginning new instance| 
+[01:13:32] [Main/ERROR]	: |Parse error| Slot number: 1
+[01:13:37] [Main/INFO]	: |Created save| slot number: 1, player name: "k"
+[01:13:40] [Main/INFO]	: |Beginning new instance| 
+[20:11:38] [Main/INFO]	: |Beginning new instance| 
+[20:11:39] [Main/ERROR]	: |Parse error| Slot number: 1
+[20:11:43] [Main/ERROR]	: |Parse error| Slot number: 2
+[20:12:11] [Main/INFO]	: |Created save| slot number: 1, player name: "None"
+[20:12:21] [Main/INFO]	: |Beginning new instance| 
+[20:12:21] [Main/ERROR]	: |Parse error| Slot number: 2
+[20:12:49] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "None", last saved: 2022-5-2 20:12:11
+[20:13:00] [Main/INFO]	: |Beginning new instance| 
+[20:13:00] [Main/ERROR]	: |Parse error| Slot number: 2
+[20:13:09] [Main/INFO]	: |Beginning new instance| 
+[20:13:39] [Main/INFO]	: |Beginning new instance| 
+[20:14:41] [Main/INFO]	: |Beginning new instance| 
+[20:14:46] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "None", last saved: 2022-5-2 20:12:11
+[20:15:01] [Main/INFO]	: |Created save| slot number: 1, player name: "d|| d"
+[20:15:09] [Main/INFO]	: |Beginning new instance| 
+[20:15:25] [Main/INFO]	: |Beginning new instance| 
+[20:21:53] [Main/INFO]	: |Beginning new instance| 
+[20:21:59] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "d|| d", last saved: 2022-5-2 20:15:1
+[20:22:04] [Main/INFO]	: |Beginning new instance| 
+[20:22:10] [Main/INFO]	: |Created save| slot number: 2, player name: "k"
+[20:22:14] [Main/INFO]	: |Beginning new instance| 
+[20:22:18] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-5-2 20:22:10
+[20:22:18] [Main/ERROR]	: |Instance crahed| (<class 'ValueError'>, ValueError("invalid literal for int() with base 10: '0.0'"), <traceback object at 0x0000004F92044640>)
+[20:22:34] [Main/INFO]	: |Restarting instance| 
+[20:22:34] [Main/INFO]	: |Beginning new instance| 
+[20:24:54] [Main/INFO]	: |Beginning new instance| 
+[20:24:59] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-5-2 20:22:10
+[20:24:59] [Main/ERROR]	: |Instance crahed| (<class 'ValueError'>, ValueError("invalid literal for int() with base 10: '0.0'"), <traceback object at 0x0000009A2F3E80C0>)
+[20:25:11] [Main/INFO]	: |Restarting instance| 
+[20:25:59] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-5-2 20:22:10
+[20:25:59] [Main/ERROR]	: |Instance crahed| (<class 'ValueError'>, ValueError("invalid literal for int() with base 10: '0.0'"), <traceback object at 0x0000009A2F3E8140>)
+[20:26:02] [Main/INFO]	: |Instance ended succesfuly| 
+[20:26:32] [Main/INFO]	: |Beginning new instance| 
+[20:26:36] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-5-2 20:22:10
+[20:26:36] [Main/ERROR]	: |Instance crahed| (<class 'ValueError'>, ValueError("invalid literal for int() with base 10: '0.0'"), <traceback object at 0x000000BF845F80C0>)
+[20:27:37] [Main/INFO]	: |Beginning new instance| 
+[20:27:47] [Main/INFO]	: |Deleted save| slot number: 2, hero name: "k", last saved: 2022-5-2 20:22:10
+[20:27:48] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "d|| d", last saved: 2022-5-2 20:15:1
+[20:27:54] [Main/INFO]	: |Created save| slot number: 1, player name: "kjkjkjsfhddf45zh45h45d45dh4dhh465h465dhf4fdhf4h654h65"
+[20:29:26] [Main/INFO]	: |Beginning new instance| 
+[20:29:33] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "kjkjkjsfhddf45zh45h45d45dh4dhh465h465dhf4fdhf4h654h65", last saved: 2022-5-2 20:27:54
+[20:29:54] [Main/INFO]	: |Beginning new instance| 
+[20:29:59] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('exceptions must derive from BaseException'), <traceback object at 0x00000080115944C0>)
+[20:31:01] [Main/INFO]	: |Beginning new instance| 
+[20:31:04] [Main/ERROR]	: |Instance crahed| (<class 'Exception'>, Exception('test exeption'), <traceback object at 0x00000004078F4340>)
+[20:31:31] [Main/INFO]	: |Beginning new instance| 
+[20:31:34] [Main/ERROR]	: |Instance crahed| (<class 'Exception'>, Exception('test exeption'), <traceback object at 0x0000001CA5DA4300>)
+[20:31:36] [Main/INFO]	: |Restarting instance| 
+[20:31:39] [Main/ERROR]	: |Instance crahed| (<class 'Exception'>, Exception('test exeption'), <traceback object at 0x0000001CA5DA4380>)
+[20:31:41] [Main/INFO]	: |Instance ended succesfuly| 
+[20:32:39] [Main/INFO]	: |Beginning new instance| 
+[20:32:41] [Main/ERROR]	: |Instance crahed| (<class 'Exception'>, Exception('test exeption'), <traceback object at 0x000000883C243D00>)
+[20:32:43] [Main/INFO]	: |Restarting instance| 
+[20:32:45] [Main/ERROR]	: |Instance crahed| (<class 'Exception'>, Exception('test exeption'), <traceback object at 0x000000883C243D80>)
+[20:33:26] [Main/INFO]	: |Beginning new instance| 
+[20:33:30] [Main/ERROR]	: |Instance crahed| (<class 'Exception'>, Exception('test exeption'), <traceback object at 0x0000002A26313D80>)
+[20:33:39] [Main/INFO]	: |Beginning new instance| 
+[20:33:40] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:42] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:42] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:43] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:43] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:43] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:43] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:43] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:43] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:44] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:44] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:44] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:44] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:44] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:44] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:44] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:48] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:48] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:54] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:58] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:58] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:59] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:59] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:59] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:59] [Main/INFO]	: |Instance ended succesfuly| 
+[20:33:59] [Main/INFO]	: |Instance ended succesfuly| 
+[20:35:05] [Main/INFO]	: |Beginning new instance| 
+[20:35:46] [Main/INFO]	: |Beginning new instance| 
+[20:36:19] [Main/INFO]	: |Beginning new instance| 
+[20:39:17] [Main/INFO]	: |Beginning new instance| 
+[20:39:19] [Main/INFO]	: |Instance ended succesfuly| 
+[20:39:29] [Main/INFO]	: |Beginning new instance| 
+[20:39:32] [Main/ERROR]	: |Instance crahed| (<class 'Exception'>, Exception('test exeption'), <traceback object at 0x000000FB6C954300>)
+[20:39:34] [Main/INFO]	: |Restarting instance| 
+[20:39:36] [Main/ERROR]	: |Instance crahed| (<class 'Exception'>, Exception('test exeption'), <traceback object at 0x000000FB6C954380>)
+[20:40:11] [Main/INFO]	: |Beginning new instance| 
+[20:40:13] [Main/INFO]	: |Instance ended succesfuly| 
+[20:40:16] [Main/INFO]	: |Beginning new instance| 
+[20:40:19] [Main/ERROR]	: |Instance crahed| (<class 'Exception'>, Exception('test exeption'), <traceback object at 0x0000006D1BF64300>)
+[20:42:31] [Main/INFO]	: |Beginning new instance| 
+[20:42:37] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "kjkjkjsfhddf45zh45h45d45dh4dhh465h465dhf4fdhf4h654h65", last saved: 2022-5-2 20:27:54
+[20:42:41] [Main/INFO]	: |Created save| slot number: 1, player name: "k"

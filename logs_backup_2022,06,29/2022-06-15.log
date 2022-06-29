@@ -1,0 +1,102 @@
+
+[16:09:06] [Main/INFO]	: |Checking package versions| 
+[16:09:06] [Main/INFO]	: |All packages up to date| 
+[16:09:06] [Main/INFO]	: |Preloading global variables| 
+[16:09:06] [Main/INFO]	: |Beginning new instance| 
+[16:09:28] [Main/INFO]	: |Created save| slot number: 2, player name: "k"
+[16:09:28] [Main/INFO]	: |Preparing game data| 
+[16:09:28] [Main/INFO]	: |Game loop started| 
+[16:09:30] [Quit manager/INFO]	: |Beggining manual save| slot number: 2
+[16:09:31] [Auto saver/INFO]	: |Beggining auto save| slot number: 2
+[16:09:33] [Main/INFO]	: |Fight started| 
+[16:09:38] [Main/INFO]	: |Fight ended| 
+[16:09:44] [Main/INFO]	: |Game loop ended| 
+[16:09:48] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "You", last saved: 2022-06-07 18:44:42
+[16:09:48] [Main/INFO]	: |Preparing game data| 
+[16:09:48] [Main/INFO]	: |Game loop started| 
+[16:09:49] [Quit manager/INFO]	: |Beggining manual save| slot number: 1
+[16:09:51] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[16:09:53] [Main/INFO]	: |Fight started| 
+
+[16:10:37] [Main/INFO]	: |Checking package versions| 
+[16:10:37] [Main/INFO]	: |All packages up to date| 
+[16:10:37] [Main/INFO]	: |Preloading global variables| 
+[16:10:37] [Main/INFO]	: |Beginning new instance| 
+[16:10:42] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-15 16:09:28
+[16:10:42] [Main/INFO]	: |Preparing game data| 
+[16:10:42] [Main/INFO]	: |Game loop started| 
+[16:10:45] [Auto saver/INFO]	: |Beggining auto save| slot number: 2
+[16:10:47] [Main/INFO]	: |Fight started| 
+[16:10:52] [Main/INFO]	: |Fight ended| 
+[16:10:57] [Main/INFO]	: |Game loop ended| 
+[16:11:01] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "You", last saved: 2022-06-07 18:44:42
+[16:11:54] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-15 16:09:28
+[16:11:54] [Main/INFO]	: |Preparing game data| 
+[16:11:54] [Main/INFO]	: |Game loop started| 
+[16:11:59] [Main/INFO]	: |Fight started| 
+[16:12:04] [Main/INFO]	: |Fight ended| 
+[16:12:07] [Main/INFO]	: |Game loop ended| 
+[16:12:24] [Main/INFO]	: |Created save| slot number: 1, player name: "You"
+[16:12:24] [Main/INFO]	: |Preparing game data| 
+[16:12:24] [Main/INFO]	: |Game loop started| 
+[16:12:29] [Main/INFO]	: |Fight started| 
+[16:12:36] [Main/INFO]	: |Fight ended| 
+[16:12:39] [Main/INFO]	: |Game loop ended| 
+[16:12:45] [Main/INFO]	: |Created save| slot number: 3, player name: "You"
+[16:12:45] [Main/INFO]	: |Preparing game data| 
+[16:12:45] [Main/INFO]	: |Game loop started| 
+[16:12:48] [Quit manager/INFO]	: |Beggining manual save| slot number: 3
+[16:12:50] [Main/INFO]	: |Fight started| 
+[16:12:59] [Main/INFO]	: |Fight ended| 
+[16:12:59] [Main/INFO]	: |Game loop ended| 
+[16:13:05] [Main/INFO]	: |Loaded save| slot number: 3, hero name: "You", last saved: 2022-06-15 16:12:44
+[16:13:05] [Main/INFO]	: |Preparing game data| 
+[16:13:05] [Main/INFO]	: |Game loop started| 
+[16:13:10] [Main/INFO]	: |Fight started| 
+[16:13:19] [Main/INFO]	: |Fight ended| 
+[16:13:21] [Quit manager/INFO]	: |Beggining manual save| slot number: 3
+[16:13:21] [Main/INFO]	: |Game loop ended| 
+[16:13:25] [Main/INFO]	: |Loaded save| slot number: 3, hero name: "You", last saved: 2022-06-15 16:12:44
+[16:13:25] [Main/INFO]	: |Preparing game data| 
+[16:13:25] [Main/INFO]	: |Game loop started| 
+[16:13:30] [Main/INFO]	: |Fight started| 
+[16:13:39] [Main/INFO]	: |Fight ended| 
+[16:13:39] [Quit manager/INFO]	: |Beggining manual save| slot number: 3
+[16:13:39] [Main/INFO]	: |Game loop ended| 
+[16:13:39] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:04:07] [Main/INFO]	: |Checking package versions| 
+[22:04:07] [Main/INFO]	: |All packages up to date| 
+[22:04:07] [Main/INFO]	: |Preloading global variables| 
+[22:04:07] [Main/INFO]	: |Beginning new instance| 
+[22:04:31] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:04:37] [Main/INFO]	: |Checking package versions| 
+[22:04:37] [Main/INFO]	: |All packages up to date| 
+[22:04:37] [Main/INFO]	: |Preloading global variables| 
+[22:04:37] [Main/INFO]	: |Recreated settings| 
+[22:04:37] [Main/INFO]	: |Beginning new instance| 
+[22:04:54] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:20:58] [Main/INFO]	: |Checking package versions| 
+[22:20:58] [Main/WARN]	: |Some packages are not up to date| ['numpy', 'save_file_manager', 'random_sentance']
+[22:21:10] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:21:34] [Main/INFO]	: |Checking package versions| 
+[22:21:34] [Main/INFO]	: |All packages up to date| 
+[22:21:34] [Main/INFO]	: |Preloading global variables| 
+[22:21:34] [Main/INFO]	: |Beginning new instance| 
+[22:21:35] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:32:15] [Main/INFO]	: |Checking package versions| 
+[22:32:15] [Main/WARN]	: |Some packages are not up to date| ['save_file_manager']
+[22:32:18] [Main/INFO]	: |Continuing anyways| 
+[22:32:18] [Main/INFO]	: |Preloading global variables| 
+[22:32:18] [Main/INFO]	: |Beginning new instance| 
+[22:32:21] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:33:00] [Main/INFO]	: |Checking package versions| 
+[22:33:00] [Main/INFO]	: |All packages up to date| 
+[22:33:00] [Main/INFO]	: |Preloading global variables| 
+[22:33:00] [Main/INFO]	: |Beginning new instance| 
+[22:33:01] [Main/INFO]	: |Instance ended succesfuly| 

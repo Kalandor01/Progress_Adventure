@@ -1,0 +1,197 @@
+
+[14:45:55] [Main/INFO]	: |Checking package versions| 
+[14:45:55] [Main/INFO]	: |All packages up to date| 
+[14:45:55] [Main/INFO]	: |Preloading global variables| 
+[14:45:55] [Main/INFO]	: |Beginning new instance| 
+[14:46:11] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "h", last saved: 2022-06-06 21:40:53
+[14:46:31] [Main/INFO]	: |Created save| slot number: 1, player name: "You"
+[14:46:31] [Main/INFO]	: |Preparing game data| 
+[14:46:31] [Main/INFO]	: |Game loop started| 
+[14:46:33] [Quit manager/INFO]	: |Beggining manual save| slot number: 1
+[14:46:34] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[14:46:36] [Main/INFO]	: |Fight started| 
+
+[17:24:18] [Main/INFO]	: |Checking package versions| 
+[17:24:18] [Main/INFO]	: |All packages up to date| 
+[17:24:18] [Main/INFO]	: |Preloading global variables| 
+[17:24:18] [Main/INFO]	: |Beginning new instance| 
+[17:24:31] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "You", last saved: 2022-06-07 14:46:31
+[17:24:36] [Main/INFO]	: |Created save| slot number: 1, player name: "j"
+[17:24:36] [Main/INFO]	: |Preparing game data| 
+[17:24:36] [Main/INFO]	: |Game loop started| 
+[17:24:39] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[17:24:41] [Main/INFO]	: |Fight started| 
+[17:24:58] [Main/INFO]	: |Fight ended| 
+[17:25:02] [Main/INFO]	: |Game loop ended| 
+[17:25:09] [Main/INFO]	: |Instance ended succesfuly| 
+
+[17:27:54.475033] [Main/INFO]	: |Checking package versions| 
+[17:27:54.476036] [Main/INFO]	: |All packages up to date| 
+[17:27:54.477038] [Main/INFO]	: |Preloading global variables| 
+[17:27:54.490071] [Main/INFO]	: |Beginning new instance| 
+[17:30:16.813451] [Main/INFO]	: |Instance ended succesfuly| 
+
+[17:34:26] [Main/INFO]	: |Checking package versions| 
+[17:34:26] [Main/INFO]	: |All packages up to date| 
+[17:34:26] [Main/INFO]	: |Preloading global variables| 
+[17:34:26] [Main/INFO]	: |Beginning new instance| 
+
+[17:38:26] [Main/INFO]	: |Checking package versions| 
+[17:38:26] [Main/INFO]	: |All packages up to date| 
+[17:38:26] [Main/INFO]	: |Preloading global variables| 
+[17:38:26] [Main/INFO]	: |Beginning new instance| 
+[17:38:29] [Main/INFO]	: |Instance ended succesfuly| 
+
+[17:38:43.22593] [Main/INFO]	: |Checking package versions| 
+[17:38:43.22593] [Main/INFO]	: |All packages up to date| 
+[17:38:43.24598] [Main/INFO]	: |Preloading global variables| 
+[17:38:43.48663] [Main/INFO]	: |Beginning new instance| 
+[17:38:46.328836] [Main/INFO]	: |Instance ended succesfuly| 
+
+[17:42:23] [Main/INFO]	: |Checking package versions| 
+[17:42:23] [Main/INFO]	: |All packages up to date| 
+[17:42:23] [Main/INFO]	: |Preloading global variables| 
+[17:42:23] [Main/INFO]	: |Beginning new instance| 
+[17:42:45] [Main/ERROR]	: |Instance crahed| (<class 'UnicodeDecodeError'>, UnicodeDecodeError('utf-8', b'\xfb', 0, 1, 'invalid start byte'), <traceback object at 0x0000001AE4364D00>)
+
+[17:43:37] [Main/INFO]	: |Checking package versions| 
+[17:43:37] [Main/INFO]	: |All packages up to date| 
+[17:43:37] [Main/INFO]	: |Preloading global variables| 
+[17:43:37] [Main/INFO]	: |Beginning new instance| 
+[17:43:49] [Main/ERROR]	: |Instance crahed| (<class 'UnicodeDecodeError'>, UnicodeDecodeError('ascii', b'\xa0', 0, 1, 'ordinal not in range(128)'), <traceback object at 0x0000009F29EF5000>)
+
+[17:44:22] [Main/INFO]	: |Checking package versions| 
+[17:44:22] [Main/INFO]	: |All packages up to date| 
+[17:44:22] [Main/INFO]	: |Preloading global variables| 
+[17:44:22] [Main/ERROR]	: |Preloading crahed| (<class 'UnicodeDecodeError'>, UnicodeDecodeError('utf-16-le', b'2', 0, 1, 'truncated data'), <traceback object at 0x0000003278724200>)
+
+[17:44:40] [Main/INFO]	: |Checking package versions| 
+[17:44:40] [Main/INFO]	: |All packages up to date| 
+[17:44:40] [Main/INFO]	: |Preloading global variables| 
+[17:44:40] [Main/ERROR]	: |Preloading crahed| (<class 'LookupError'>, LookupError('unknown encoding: UTF-16-hu'), <traceback object at 0x000000F8BD634240>)
+
+[17:44:52] [Main/INFO]	: |Checking package versions| 
+[17:44:52] [Main/INFO]	: |All packages up to date| 
+[17:44:52] [Main/INFO]	: |Preloading global variables| 
+[17:44:52] [Main/ERROR]	: |Preloading crahed| (<class 'UnicodeDecodeError'>, UnicodeDecodeError('utf-16-le', b'2', 0, 1, 'truncated data'), <traceback object at 0x00000003C4914200>)
+
+[17:45:49] [Main/INFO]	: |Checking package versions| 
+[17:45:49] [Main/INFO]	: |All packages up to date| 
+[17:45:49] [Main/INFO]	: |Preloading global variables| 
+[17:45:49] [Main/ERROR]	: |Preloading crahed| (<class 'UnicodeDecodeError'>, UnicodeDecodeError('utf-16-le', b'\x1b', 0, 1, 'truncated data'), <traceback object at 0x00000066FED24380>)
+
+[18:07:17] [Main/INFO]	: |Checking package versions| 
+[18:07:17] [Main/INFO]	: |All packages up to date| 
+[18:07:17] [Main/INFO]	: |Preloading global variables| 
+[18:07:17] [Main/INFO]	: |Recreated settings| 
+[18:07:17] [Main/INFO]	: |Beginning new instance| 
+[18:07:33] [Main/INFO]	: |Created save| slot number: 1, player name: "ביי"
+[18:07:33] [Main/INFO]	: |Preparing game data| 
+[18:07:33] [Main/INFO]	: |Game loop started| 
+[18:07:36] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[18:07:38] [Main/INFO]	: |Fight started| 
+[18:07:45] [Main/INFO]	: |Fight ended| 
+[18:08:02] [Main/INFO]	: |Game loop ended| 
+[18:08:23] [Main/INFO]	: |Instance ended succesfuly| 
+
+[18:08:27] [Main/INFO]	: |Checking package versions| 
+[18:08:27] [Main/INFO]	: |All packages up to date| 
+[18:08:27] [Main/INFO]	: |Preloading global variables| 
+[18:08:28] [Main/INFO]	: |Beginning new instance| 
+[18:08:42] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "ביי", last saved: 2022-06-07 18:07:33
+[18:08:42] [Main/INFO]	: |Preparing game data| 
+[18:08:42] [Main/INFO]	: |Game loop started| 
+[18:08:45] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[18:08:45] [Quit manager/INFO]	: |Beggining manual save| slot number: 1
+[18:08:47] [Main/INFO]	: |Fight started| 
+[18:08:54] [Main/INFO]	: |Fight ended| 
+[18:08:57] [Main/INFO]	: |Game loop ended| 
+[18:08:59] [Main/INFO]	: |Instance ended succesfuly| 
+
+[18:10:50] [Main/INFO]	: |Checking package versions| 
+[18:10:50] [Main/INFO]	: |All packages up to date| 
+[18:10:50] [Main/INFO]	: |Preloading global variables| 
+[18:10:50] [Main/INFO]	: |Beginning new instance| 
+[18:11:10] [Main/INFO]	: |Instance ended succesfuly| 
+
+[18:11:14] [Main/INFO]	: |Checking package versions| 
+[18:11:14] [Main/INFO]	: |All packages up to date| 
+[18:11:14] [Main/INFO]	: |Preloading global variables| 
+[18:11:14] [Main/INFO]	: |Beginning new instance| 
+[18:11:46] [Main/INFO]	: |Instance ended succesfuly| 
+
+[18:13:18] [Main/INFO]	: |Checking package versions| 
+[18:13:18] [Main/INFO]	: |All packages up to date| 
+[18:13:18] [Main/INFO]	: |Preloading global variables| 
+[18:13:18] [Main/INFO]	: |Beginning new instance| 
+
+[18:16:38] [Main/INFO]	: |Checking package versions| 
+[18:16:38] [Main/INFO]	: |All packages up to date| 
+[18:16:38] [Main/INFO]	: |Preloading global variables| 
+[18:16:38] [Main/INFO]	: |Beginning new instance| 
+
+[18:26:49] [Main/INFO]	: |Checking package versions| 
+[18:26:49] [Main/INFO]	: |All packages up to date| 
+[18:26:49] [Main/INFO]	: |Preloading global variables| 
+[18:26:49] [Main/INFO]	: |Beginning new instance| 
+[18:27:09] [Main/INFO]	: |Instance ended succesfuly| 
+
+[18:27:23] [Main/INFO]	: |Checking package versions| 
+[18:27:23] [Main/INFO]	: |All packages up to date| 
+[18:27:23] [Main/INFO]	: |Preloading global variables| 
+[18:27:23] [Main/INFO]	: |Beginning new instance| 
+[18:27:23] [Main/ERROR]	: |Decode error| Slot number: 1
+[18:27:29] [Main/INFO]	: |Instance ended succesfuly| 
+
+[18:31:44] [Main/INFO]	: |Checking package versions| 
+[18:31:44] [Main/INFO]	: |All packages up to date| 
+[18:31:44] [Main/INFO]	: |Preloading global variables| 
+[18:31:44] [Main/INFO]	: |Beginning new instance| 
+[18:31:44] [Main/ERROR]	: |Decode error| Slot number: 1
+[18:31:48] [Main/INFO]	: |Created save| slot number: 1, player name: "You"
+[18:31:48] [Main/INFO]	: |Preparing game data| 
+[18:31:48] [Main/INFO]	: |Game loop started| 
+
+[18:31:52] [Main/INFO]	: |Checking package versions| 
+[18:31:52] [Main/INFO]	: |All packages up to date| 
+[18:31:52] [Main/INFO]	: |Preloading global variables| 
+[18:31:52] [Main/INFO]	: |Beginning new instance| 
+
+[18:34:21] [Main/INFO]	: |Checking package versions| 
+[18:34:21] [Main/INFO]	: |All packages up to date| 
+[18:34:21] [Main/INFO]	: |Preloading global variables| 
+[18:34:21] [Main/ERROR]	: |Preloading crahed| (<class 'ValueError'>, ValueError('byte must be in range(0, 256)'), <traceback object at 0x0000002CFF1C4140>)
+
+[18:42:57] [Main/INFO]	: |Checking package versions| 
+[18:42:57] [Main/INFO]	: |All packages up to date| 
+[18:42:57] [Main/INFO]	: |Preloading global variables| 
+[18:42:57] [Main/ERROR]	: |Decode error| Settings
+[18:43:04] [Main/INFO]	: |Recreated settings| 
+[18:43:04] [Main/ERROR]	: |Preloading crahed| (<class 'UnboundLocalError'>, UnboundLocalError("local variable 'settings' referenced before assignment"), <traceback object at 0x000000767F1B96C0>)
+
+[18:44:06] [Main/INFO]	: |Checking package versions| 
+[18:44:06] [Main/INFO]	: |All packages up to date| 
+[18:44:06] [Main/INFO]	: |Preloading global variables| 
+[18:44:06] [Main/INFO]	: |Beginning new instance| 
+[18:44:06] [Main/ERROR]	: |Decode error| Slot number: 1
+[18:44:13] [Main/INFO]	: |Instance ended succesfuly| 
+
+[18:44:29] [Main/INFO]	: |Checking package versions| 
+[18:44:29] [Main/INFO]	: |All packages up to date| 
+[18:44:29] [Main/INFO]	: |Preloading global variables| 
+[18:44:29] [Main/ERROR]	: |Decode error| Settings
+[18:44:33] [Main/INFO]	: |Recreated settings| 
+[18:44:33] [Main/INFO]	: |Beginning new instance| 
+[18:44:33] [Main/ERROR]	: |Decode error| Slot number: 1
+[18:44:42] [Main/INFO]	: |Created save| slot number: 1, player name: "You"
+[18:44:42] [Main/INFO]	: |Preparing game data| 
+[18:44:42] [Main/INFO]	: |Game loop started| 
+[18:44:43] [Quit manager/INFO]	: |Beggining manual save| slot number: 1
+[18:44:45] [Auto saver/INFO]	: |Beggining auto save| slot number: 1
+[18:44:47] [Main/INFO]	: |Fight started| 
+
+[18:45:31] [Main/INFO]	: |Checking package versions| 
+[18:45:31] [Main/INFO]	: |All packages up to date| 
+[18:45:31] [Main/INFO]	: |Preloading global variables| 
+[18:45:31] [Main/INFO]	: |Beginning new instance| 
+[18:45:36] [Main/INFO]	: |Instance ended succesfuly| 

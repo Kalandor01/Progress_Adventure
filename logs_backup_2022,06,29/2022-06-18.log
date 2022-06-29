@@ -1,0 +1,533 @@
+
+[11:19:18] [Main/INFO]	: |Checking package versions| 
+[11:19:18] [Main/INFO]	: |All packages up to date| 
+[11:19:18] [Main/INFO]	: |Preloading global variables| 
+[11:19:18] [Main/INFO]	: |Beginning new instance| 
+[11:19:40] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-17 22:59:29
+[11:19:40] [Main/INFO]	: |Preparing game data| 
+[11:19:40] [Main/INFO]	: |Game loop started| 
+[11:19:43] [Auto saver/INFO]	: |Beginning auto save| slot number: 2
+[11:19:43] [Auto saver/INFO]	: |Game saved| slot number: 2, player name: "k"
+[11:19:45] [Main/INFO]	: |Fight started| 
+[11:19:55] [Main/INFO]	: |Fight ended| 
+[11:19:55] [Main/INFO]	: |Game saved| slot number: 2, player name: "k"
+[11:20:01] [Main/INFO]	: |Game loop ended| 
+[11:20:11] [Main/INFO]	: |Changed settings| auto_save: True -> False
+[11:20:19] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 11:19:55
+[11:20:19] [Main/INFO]	: |Preparing game data| 
+[11:20:19] [Main/INFO]	: |Game loop started| 
+[11:20:22] [Quit manager/INFO]	: |Beginning manual save| slot number: 2
+[11:20:22] [Quit manager/INFO]	: |Game saved| slot number: 2, player name: "k"
+[11:20:28] [Main/INFO]	: |Game loop ended| 
+[11:20:35] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 11:20:22
+[11:20:35] [Main/INFO]	: |Preparing game data| 
+[11:20:35] [Main/INFO]	: |Game loop started| 
+[11:20:36] [Quit manager/INFO]	: |Beginning manual save| slot number: 2
+[11:20:36] [Quit manager/INFO]	: |Game saved| slot number: 2, player name: "k"
+[11:20:42] [Main/INFO]	: |Game loop ended| 
+[11:20:45] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 11:20:36
+[11:20:45] [Main/INFO]	: |Preparing game data| 
+[11:20:45] [Main/INFO]	: |Game loop started| 
+[11:21:06] [Main/INFO]	: |Game loop ended| 
+[11:21:07] [Main/INFO]	: |Instance ended succesfuly| 
+
+[11:23:19] [Main/INFO]	: |Checking package versions| 
+[11:23:19] [Main/INFO]	: |All packages up to date| 
+[11:23:19] [Main/INFO]	: |Preloading global variables| 
+[11:23:19] [Main/INFO]	: |Beginning new instance| 
+[11:23:27] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 11:20:36
+[11:23:27] [Main/INFO]	: |Preparing game data| 
+[11:23:27] [Main/INFO]	: |Game loop started| 
+[11:23:32] [Main/INFO]	: |Fight started| 
+[11:23:38] [Main/INFO]	: |Fight ended| 
+[11:23:38] [Main/INFO]	: |Game saved| slot number: 2, player name: "k"
+[11:23:40] [Main/INFO]	: |Game loop ended| 
+[11:23:43] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 11:23:38
+[11:23:43] [Main/INFO]	: |Preparing game data| 
+[11:23:43] [Main/INFO]	: |Game loop started| 
+[11:23:44] [Quit manager/INFO]	: |Beginning manual save| slot number: 2
+[11:23:44] [Quit manager/INFO]	: |Game saved| slot number: 2, player name: "k"
+[11:23:49] [Main/INFO]	: |Game loop ended| 
+[11:23:59] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 11:23:44
+[11:23:59] [Main/INFO]	: |Preparing game data| 
+[11:23:59] [Main/INFO]	: |Game loop started| 
+[11:24:04] [Main/INFO]	: |Fight started| 
+[11:24:17] [Main/INFO]	: |Fight ended| 
+[11:24:17] [Main/INFO]	: |Game saved| slot number: 2, player name: "k"
+[11:24:20] [Main/INFO]	: |Game loop ended| 
+[11:24:23] [Main/INFO]	: |Instance ended succesfuly| 
+
+[13:36:19] [Main/INFO]	: |Checking package versions| 
+[13:36:19] [Main/INFO]	: |All packages up to date| 
+[13:36:19] [Main/INFO]	: |Preloading global variables| 
+[13:36:19] [Main/INFO]	: |Beginning new instance| 
+[13:36:30] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 11:24:17
+[13:36:30] [Main/INFO]	: |Preparing game data| 
+[13:36:30] [Main/INFO]	: |Game loop started| 
+[13:36:35] [Main/INFO]	: |Fight started| 
+[13:36:40] [Main/INFO]	: |Fight ended| 
+[13:36:40] [Main/INFO]	: |Game saved| slot number: 2, player name: "k"
+[13:36:47] [Main/INFO]	: |Game loop ended| 
+[13:36:52] [Main/INFO]	: |Instance ended succesfuly| 
+
+[13:38:30] [Main/INFO]	: |Checking package versions| 
+[13:38:30] [Main/INFO]	: |All packages up to date| 
+[13:38:30] [Main/INFO]	: |Preloading global variables| 
+[13:38:30] [Main/INFO]	: |Beginning new instance| 
+[13:38:35] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 13:36:40
+[13:38:35] [Main/INFO]	: |Preparing game data| 
+[13:38:35] [Main/INFO]	: |Game loop started| 
+[13:38:40] [Main/INFO]	: |Fight started| 
+[13:38:48] [Main/INFO]	: |Fight ended| 
+[13:38:48] [Main/INFO]	: |Game saved| slot number: 2, player name: "k"
+[13:39:03] [Main/INFO]	: |Game loop ended| 
+[13:39:06] [Main/INFO]	: |Instance ended succesfuly| 
+
+[15:42:17] [Main/INFO]	: |Checking package versions| 
+[15:42:17] [Main/INFO]	: |All packages up to date| 
+[15:42:17] [Main/INFO]	: |Preloading global variables| 
+[15:42:17] [Main/INFO]	: |Beginning new instance| 
+[15:42:24] [Main/INFO]	: |Preparing game data| 
+[15:42:29] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("type object 'Save_data' has no attribute 'player'"), <traceback object at 0x000000CE11FAE3C0>)
+
+[15:43:58] [Main/INFO]	: |Checking package versions| 
+[15:43:58] [Main/INFO]	: |All packages up to date| 
+[15:43:58] [Main/INFO]	: |Preloading global variables| 
+[15:43:58] [Main/INFO]	: |Beginning new instance| 
+[15:44:01] [Main/INFO]	: |Preparing game data| 
+[15:44:02] [Main/INFO]	: |Created save| slot number: 4, player name: "k"
+[15:44:02] [Main/INFO]	: |Game loop started| 
+[15:44:07] [Main/INFO]	: |Fight started| 
+[15:44:13] [Main/INFO]	: |Fight ended| 
+[15:44:13] [Main/INFO]	: |Made temporary backup| saves\save4.sav.bak
+[15:44:13] [Main/INFO]	: |Removed temporary backup| saves\save4.sav.bak
+[15:44:13] [Main/INFO]	: |Game saved| slot number: 4, player name: "k"
+[15:44:32] [Main/INFO]	: |Game loop ended| 
+[15:44:42] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 13:38:48
+[15:44:42] [Main/INFO]	: |Preparing game data| 
+[15:44:42] [Main/INFO]	: |Game loop started| 
+[15:44:43] [Quit manager/INFO]	: |Beginning manual save| slot number: 2
+[15:44:43] [Quit manager/INFO]	: |Made temporary backup| saves\save2.sav.bak
+[15:44:43] [Quit manager/INFO]	: |Removed temporary backup| saves\save2.sav.bak
+[15:44:43] [Quit manager/INFO]	: |Game saved| slot number: 2, player name: "k"
+[15:44:49] [Main/INFO]	: |Game loop ended| 
+[15:44:56] [Main/INFO]	: |Instance ended succesfuly| 
+
+[15:47:12] [Main/INFO]	: |Checking package versions| 
+[15:47:12] [Main/INFO]	: |All packages up to date| 
+[15:47:12] [Main/INFO]	: |Preloading global variables| 
+[15:47:12] [Main/INFO]	: |Beginning new instance| 
+[15:47:18] [Main/INFO]	: |Loaded save| slot number: 3, hero name: "You", last saved: 2022-06-17 22:49:41
+[15:47:18] [Main/INFO]	: |Preparing game data| 
+[15:47:18] [Main/INFO]	: |Game loop started| 
+[15:47:22] [Quit manager/INFO]	: |Beginning manual save| slot number: 3
+[15:47:22] [Quit manager/INFO]	: |Made temporary backup| saves\save3.sav.bak
+[15:47:22] [Quit manager/ERROR]	: |Thread crahed| (<class 'TypeError'>, TypeError('exceptions must derive from BaseException'), <traceback object at 0x000000CFF7CF80C0>)
+[15:47:23] [Main/INFO]	: |Fight started| 
+[15:47:36] [Main/INFO]	: |Fight ended| 
+[15:47:36] [Main/INFO]	: |Made temporary backup| saves\save3.sav.bak
+[15:47:36] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('exceptions must derive from BaseException'), <traceback object at 0x000000CFF7CFBCC0>)
+
+[15:54:21] [Main/INFO]	: |Checking package versions| 
+[15:54:21] [Main/INFO]	: |All packages up to date| 
+[15:54:21] [Main/INFO]	: |Preloading global variables| 
+[15:54:21] [Main/INFO]	: |Beginning new instance| 
+[15:54:26] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 15:44:43
+[15:54:26] [Main/INFO]	: |Preparing game data| 
+[15:54:26] [Main/INFO]	: |Game loop started| 
+[15:54:27] [Quit manager/INFO]	: |Beginning manual save| slot number: 2
+[15:54:27] [Quit manager/INFO]	: |Made temporary backup| saves\save2.sav.bak
+[15:54:27] [Quit manager/ERROR]	: |Thread crahed| (<class 'TypeError'>, TypeError('exceptions must derive from BaseException'), <traceback object at 0x0000000818E1FF00>)
+[15:54:31] [Main/INFO]	: |Fight started| 
+[15:54:38] [Main/INFO]	: |Fight ended| 
+[15:54:38] [Main/INFO]	: |Made temporary backup| saves\save2.sav.bak
+[15:54:38] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('exceptions must derive from BaseException'), <traceback object at 0x0000000818E703C0>)
+
+[16:04:26] [Main/INFO]	: |Checking package versions| 
+[16:04:26] [Main/INFO]	: |All packages up to date| 
+[16:04:26] [Main/INFO]	: |Preloading global variables| 
+[16:04:26] [Main/INFO]	: |Beginning new instance| 
+[16:04:35] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 15:44:43
+[16:04:35] [Main/INFO]	: |Preparing game data| 
+[16:04:35] [Main/INFO]	: |Game loop started| 
+[16:04:36] [Quit manager/INFO]	: |Beginning manual save| slot number: 2
+[16:04:36] [Quit manager/INFO]	: |Made temporary backup| saves\save2_2022-06-18_16;04;36.737953.sav.bak
+[16:04:36] [Quit manager/ERROR]	: |Thread crahed| (<class 'TypeError'>, TypeError('exceptions must derive from BaseException'), <traceback object at 0x000000E3F7CAF900>)
+[16:04:40] [Main/INFO]	: |Fight started| 
+[16:04:48] [Main/INFO]	: |Fight ended| 
+[16:04:48] [Main/INFO]	: |Made temporary backup| saves\save2_2022-06-18_16;04;48.9481.sav.bak
+[16:04:48] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('exceptions must derive from BaseException'), <traceback object at 0x000000E3F7CF8580>)
+
+[16:07:42] [Main/INFO]	: |Checking package versions| 
+[16:07:42] [Main/INFO]	: |All packages up to date| 
+[16:07:42] [Main/INFO]	: |Preloading global variables| 
+[16:07:42] [Main/INFO]	: |Beginning new instance| 
+[16:07:42] [Main/ERROR]	: |Parse error| Slot number: 2
+[16:07:52] [Main/INFO]	: |Instance ended succesfuly| 
+
+[16:09:21] [Main/INFO]	: |Checking package versions| 
+[16:09:21] [Main/INFO]	: |All packages up to date| 
+[16:09:21] [Main/INFO]	: |Preloading global variables| 
+[16:09:21] [Main/INFO]	: |Beginning new instance| 
+[16:09:57] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 15:44:43
+[16:09:57] [Main/INFO]	: |Preparing game data| 
+[16:09:57] [Main/INFO]	: |Game loop started| 
+[16:09:58] [Quit manager/INFO]	: |Beginning manual save| slot number: 2
+[16:09:58] [Quit manager/INFO]	: |Made temporary backup| saves\save2_2022-06-18_16;09;58.947190.sav.bak
+[16:09:58] [Quit manager/ERROR]	: |Thread crahed| (<class 'TypeError'>, TypeError('exceptions must derive from BaseException'), <traceback object at 0x000000B52DACF900>)
+[16:10:05] [Main/INFO]	: |Game loop ended| 
+[16:10:05] [Main/ERROR]	: |Parse error| Slot number: 2
+[16:10:31] [Main/INFO]	: |Instance ended succesfuly| 
+
+[16:11:09] [Main/INFO]	: |Checking package versions| 
+[16:11:09] [Main/INFO]	: |All packages up to date| 
+[16:11:09] [Main/INFO]	: |Preloading global variables| 
+[16:11:09] [Main/INFO]	: |Beginning new instance| 
+[16:11:13] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 15:44:43
+[16:11:13] [Main/INFO]	: |Preparing game data| 
+[16:11:13] [Main/INFO]	: |Game loop started| 
+[16:11:14] [Quit manager/INFO]	: |Beginning manual save| slot number: 2
+[16:11:14] [Quit manager/INFO]	: |Made temporary backup| saves\save2_2022-06-18_16;11;14.426401.sav.bak
+[16:11:14] [Quit manager/ERROR]	: |Thread crahed| (<class 'Exception'>, Exception('die'), <traceback object at 0x000000A6FDDA0480>)
+[16:11:23] [Main/INFO]	: |Game loop ended| 
+[16:11:23] [Main/ERROR]	: |Parse error| Slot number: 2
+[16:12:03] [Main/INFO]	: |Instance ended succesfuly| 
+
+[18:16:30] [Main/INFO]	: |Checking package versions| 
+[18:16:30] [Main/INFO]	: |All packages up to date| 
+[18:16:30] [Main/INFO]	: |Preloading global variables| 
+[18:16:30] [Main/INFO]	: |Beginning new instance| 
+[18:16:33] [Main/INFO]	: |Instance ended succesfuly| 
+
+[18:18:49] [Main/INFO]	: |Checking package versions| 
+[18:18:49] [Main/INFO]	: |All packages up to date| 
+[18:18:49] [Main/INFO]	: |Preloading global variables| 
+[18:18:49] [Main/INFO]	: |Beginning new instance| 
+[18:18:57] [Main/INFO]	: |Instance ended succesfuly| 
+
+[18:20:36] [Main/INFO]	: |Checking package versions| 
+[18:20:36] [Main/INFO]	: |All packages up to date| 
+[18:20:36] [Main/INFO]	: |Preloading global variables| 
+[18:20:36] [Main/INFO]	: |Beginning new instance| 
+[18:20:39] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 15:44:43
+[18:20:39] [Main/INFO]	: |Preparing game data| 
+[18:20:39] [Main/INFO]	: |Game loop started| 
+[18:20:44] [Main/INFO]	: |Fight started| 
+[18:20:51] [Main/INFO]	: |Fight ended| 
+[18:20:51] [Main/INFO]	: |Made temporary backup| saves\save2_2022-06-18_18;20;51.953518.sav.bak
+[18:20:52] [Main/INFO]	: |Removed temporary backup| saves\save2_2022-06-18_18;20;51.953518.sav.bak
+[18:20:52] [Main/INFO]	: |Game saved| slot number: 2, player name: "k"
+[18:21:27] [Main/INFO]	: |Game loop ended| 
+[18:21:29] [Main/INFO]	: |Instance ended succesfuly| 
+
+[18:43:19] [Main/INFO]	: |Checking package versions| 
+[18:43:19] [Main/INFO]	: |All packages up to date| 
+[18:43:19] [Main/INFO]	: |Preloading global variables| 
+[18:43:19] [Main/INFO]	: |Beginning new instance| 
+[18:43:33] [Main/INFO]	: |Trying to load save with an incorrect version| 1.1 -> 1.0
+[18:43:39] [Main/INFO]	: |Made backup| backups\save2.sav.bak
+[18:43:40] [Main/INFO]	: |Correcting save data| 
+[18:43:40] [Main/INFO]	: |Corrected save data| 1.0 -> 1.1
+[18:43:40] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 18:20:51
+[18:43:40] [Main/INFO]	: |Preparing game data| 
+[18:43:40] [Main/INFO]	: |Game loop started| 
+[18:43:45] [Main/INFO]	: |Fight started| 
+[18:44:03] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'list' object has no attribute 'loot'"), <traceback object at 0x0000007BDCEF41C0>)
+
+[18:46:32] [Main/INFO]	: |Checking package versions| 
+[18:46:32] [Main/INFO]	: |All packages up to date| 
+[18:46:32] [Main/INFO]	: |Preloading global variables| 
+[18:46:32] [Main/INFO]	: |Beginning new instance| 
+[18:46:55] [Main/INFO]	: |Trying to load save with an incorrect version| 1.1 -> 1.0
+[18:46:57] [Main/INFO]	: |Correcting save data| 
+[18:46:57] [Main/INFO]	: |Corrected save data| 1.0 -> 1.1
+[18:46:57] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 18:20:51
+[18:46:57] [Main/INFO]	: |Preparing game data| 
+[18:46:57] [Main/INFO]	: |Game loop started| 
+[18:47:02] [Main/INFO]	: |Fight started| 
+[18:47:20] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'list' object has no attribute 'loot'"), <traceback object at 0x0000000CB5CD3600>)
+
+[18:58:12] [Main/INFO]	: |Checking package versions| 
+[18:58:12] [Main/INFO]	: |All packages up to date| 
+[18:58:12] [Main/INFO]	: |Preloading global variables| 
+[18:58:12] [Main/INFO]	: |Beginning new instance| 
+[18:58:15] [Main/INFO]	: |Trying to load save with an incorrect version| 1.1 -> 1.0
+[18:58:16] [Main/INFO]	: |Correcting save data| 
+[18:58:16] [Main/INFO]	: |Corrected save data| 1.0 -> 1.1
+[18:58:16] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 18:20:51
+[18:58:16] [Main/INFO]	: |Preparing game data| 
+[18:58:16] [Main/INFO]	: |Game loop started| 
+[18:58:21] [Main/INFO]	: |Fight started| 
+[18:58:40] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'list' object has no attribute 'loot'"), <traceback object at 0x000000D7BBBAE5C0>)
+
+[18:59:58] [Main/INFO]	: |Checking package versions| 
+[18:59:58] [Main/INFO]	: |All packages up to date| 
+[18:59:58] [Main/INFO]	: |Preloading global variables| 
+[18:59:58] [Main/INFO]	: |Beginning new instance| 
+[19:00:01] [Main/INFO]	: |Trying to load save with an incorrect version| 1.1 -> 1.0
+[19:00:02] [Main/INFO]	: |Correcting save data| 
+[19:00:02] [Main/INFO]	: |Corrected save data| 1.0 -> 1.1
+[19:00:03] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "You", last saved: 2022-06-17 22:59:40
+[19:00:03] [Main/INFO]	: |Preparing game data| 
+[19:00:03] [Main/INFO]	: |Game loop started| 
+[19:00:08] [Main/INFO]	: |Fight started| 
+[19:00:17] [Main/INFO]	: |Fight ended| 
+[19:00:17] [Main/INFO]	: |Made temporary backup| saves\save1_2022-06-18_19;00;17.570787.sav.bak
+[19:00:17] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('Object of type Misc_items is not JSON serializable'), <traceback object at 0x000000310F934840>)
+
+[19:02:10] [Main/INFO]	: |Checking package versions| 
+[19:02:10] [Main/INFO]	: |All packages up to date| 
+[19:02:10] [Main/INFO]	: |Preloading global variables| 
+[19:02:10] [Main/INFO]	: |Beginning new instance| 
+[19:02:13] [Main/INFO]	: |Trying to load save with an incorrect version| 1.1 -> 1.0
+[19:02:15] [Main/INFO]	: |Correcting save data| 
+[19:02:15] [Main/INFO]	: |Corrected save data| 1.0 -> 1.1
+[19:02:15] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "You", last saved: 2022-06-17 22:59:40
+[19:02:15] [Main/INFO]	: |Preparing game data| 
+[19:02:15] [Main/INFO]	: |Game loop started| 
+[19:02:20] [Main/INFO]	: |Fight started| 
+[19:02:29] [Main/INFO]	: |Fight ended| 
+[19:02:29] [Main/INFO]	: |Made temporary backup| saves\save1_2022-06-18_19;02;29.903475.sav.bak
+[19:02:29] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('Object of type Misc_items is not JSON serializable'), <traceback object at 0x000000AFD6FAF980>)
+
+[19:03:49] [Main/INFO]	: |Checking package versions| 
+[19:03:49] [Main/INFO]	: |All packages up to date| 
+[19:03:49] [Main/INFO]	: |Preloading global variables| 
+[19:03:49] [Main/INFO]	: |Beginning new instance| 
+[19:03:52] [Main/INFO]	: |Trying to load save with an incorrect version| 1.1 -> 1.0
+[19:03:53] [Main/INFO]	: |Correcting save data| 
+[19:03:53] [Main/INFO]	: |Corrected save data| 1.0 -> 1.1
+[19:03:53] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "You", last saved: 2022-06-17 22:59:40
+[19:03:53] [Main/INFO]	: |Preparing game data| 
+[19:03:53] [Main/INFO]	: |Game loop started| 
+[19:03:58] [Main/INFO]	: |Fight started| 
+[19:04:08] [Main/INFO]	: |Fight ended| 
+[19:04:08] [Main/INFO]	: |Made temporary backup| saves\save1_2022-06-18_19;04;08.185261.sav.bak
+[19:04:08] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('Object of type Misc_items is not JSON serializable'), <traceback object at 0x000000E9A52F3D00>)
+
+[19:05:27] [Main/INFO]	: |Checking package versions| 
+[19:05:27] [Main/INFO]	: |All packages up to date| 
+[19:05:27] [Main/INFO]	: |Preloading global variables| 
+[19:05:27] [Main/INFO]	: |Beginning new instance| 
+[19:05:32] [Main/INFO]	: |Trying to load save with an incorrect version| 1.1 -> 1.0
+[19:05:33] [Main/INFO]	: |Correcting save data| 
+[19:05:33] [Main/INFO]	: |Corrected save data| 1.0 -> 1.1
+[19:05:33] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "You", last saved: 2022-06-17 22:59:40
+[19:05:33] [Main/INFO]	: |Preparing game data| 
+[19:05:33] [Main/INFO]	: |Game loop started| 
+[19:05:38] [Main/INFO]	: |Fight started| 
+[19:05:48] [Main/INFO]	: |Fight ended| 
+[19:05:48] [Main/INFO]	: |Made temporary backup| saves\save1_2022-06-18_19;05;48.456988.sav.bak
+[19:05:48] [Main/INFO]	: |Removed temporary backup| saves\save1_2022-06-18_19;05;48.456988.sav.bak
+[19:05:48] [Main/INFO]	: |Game saved| slot number: 1, player name: "You"
+[19:06:21] [Main/INFO]	: |Game loop ended| 
+[19:06:24] [Main/ERROR]	: |Instance crahed| (<class 'AttributeError'>, AttributeError("'str' object has no attribute 'name'"), <traceback object at 0x000000E1FD489DC0>)
+
+[19:08:15] [Main/INFO]	: |Checking package versions| 
+[19:08:15] [Main/INFO]	: |All packages up to date| 
+[19:08:15] [Main/INFO]	: |Preloading global variables| 
+[19:08:15] [Main/INFO]	: |Beginning new instance| 
+[19:08:18] [Main/INFO]	: |Instance ended succesfuly| 
+
+[21:26:56] [Main/INFO]	: |Checking package versions| 
+[21:26:56] [Main/INFO]	: |All packages up to date| 
+[21:26:56] [Main/INFO]	: |Preloading global variables| 
+[21:26:56] [Main/INFO]	: |Beginning new instance| 
+[21:27:05] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "You", last saved: 2022-06-18 19:05:48
+[21:27:05] [Main/INFO]	: |Preparing game data| 
+[21:27:05] [Main/INFO]	: |Game loop started| 
+[21:27:10] [Main/INFO]	: |Fight started| 
+
+[21:28:30] [Main/INFO]	: |Checking package versions| 
+[21:28:30] [Main/INFO]	: |All packages up to date| 
+[21:28:30] [Main/INFO]	: |Preloading global variables| 
+[21:28:30] [Main/INFO]	: |Beginning new instance| 
+[21:28:34] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "You", last saved: 2022-06-18 19:05:48
+[21:28:34] [Main/INFO]	: |Preparing game data| 
+[21:28:34] [Main/INFO]	: |Game loop started| 
+[21:28:39] [Main/INFO]	: |Fight started| 
+[21:28:52] [Main/INFO]	: |Fight ended| 
+[21:28:52] [Main/INFO]	: |Made temporary backup| saves\save1_2022-06-18_21;28;52.485840.sav.bak
+[21:28:52] [Main/INFO]	: |Removed temporary backup| saves\save1_2022-06-18_21;28;52.485840.sav.bak
+[21:28:52] [Main/INFO]	: |Game saved| slot number: 1, player name: "You"
+[21:29:01] [Main/INFO]	: |Game loop ended| 
+[21:29:03] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "You", last saved: 2022-06-18 21:28:52
+[21:29:03] [Main/INFO]	: |Preparing game data| 
+[21:29:03] [Main/INFO]	: |Game loop started| 
+[21:29:08] [Main/INFO]	: |Fight started| 
+[21:29:24] [Main/INFO]	: |Fight ended| 
+[21:29:24] [Main/INFO]	: |Made temporary backup| saves\save1_2022-06-18_21;29;24.733650.sav.bak
+[21:29:24] [Main/INFO]	: |Removed temporary backup| saves\save1_2022-06-18_21;29;24.733650.sav.bak
+[21:29:24] [Main/INFO]	: |Game saved| slot number: 1, player name: "You"
+[21:29:37] [Main/INFO]	: |Game loop ended| 
+[21:29:39] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "You", last saved: 2022-06-18 21:29:24
+[21:29:39] [Main/INFO]	: |Preparing game data| 
+[21:29:39] [Main/INFO]	: |Game loop started| 
+[21:29:44] [Main/INFO]	: |Fight started| 
+[21:30:06] [Main/INFO]	: |Fight ended| 
+[21:30:06] [Main/INFO]	: |Made temporary backup| saves\save1_2022-06-18_21;30;06.168724.sav.bak
+[21:30:06] [Main/INFO]	: |Removed temporary backup| saves\save1_2022-06-18_21;30;06.168724.sav.bak
+[21:30:06] [Main/INFO]	: |Game saved| slot number: 1, player name: "You"
+[21:30:14] [Main/INFO]	: |Game loop ended| 
+[21:30:16] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "You", last saved: 2022-06-18 21:30:06
+[21:30:16] [Main/INFO]	: |Preparing game data| 
+[21:30:16] [Main/INFO]	: |Game loop started| 
+[21:30:21] [Main/INFO]	: |Fight started| 
+[21:30:32] [Main/INFO]	: |Fight ended| 
+[21:30:32] [Main/INFO]	: |Made temporary backup| saves\save1_2022-06-18_21;30;32.977253.sav.bak
+[21:30:33] [Main/INFO]	: |Removed temporary backup| saves\save1_2022-06-18_21;30;32.977253.sav.bak
+[21:30:33] [Main/INFO]	: |Game saved| slot number: 1, player name: "You"
+[21:30:39] [Main/INFO]	: |Game loop ended| 
+[21:30:40] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "You", last saved: 2022-06-18 21:30:32
+[21:30:40] [Main/INFO]	: |Preparing game data| 
+[21:30:40] [Main/INFO]	: |Game loop started| 
+[21:30:45] [Main/INFO]	: |Fight started| 
+[21:31:00] [Main/INFO]	: |Fight ended| 
+[21:31:00] [Main/INFO]	: |Made temporary backup| saves\save1_2022-06-18_21;31;00.908749.sav.bak
+[21:31:00] [Main/INFO]	: |Removed temporary backup| saves\save1_2022-06-18_21;31;00.908749.sav.bak
+[21:31:00] [Main/INFO]	: |Game saved| slot number: 1, player name: "You"
+[21:31:05] [Main/INFO]	: |Game loop ended| 
+[21:31:08] [Main/INFO]	: |Trying to load save with an incorrect version| 1.1 -> 1.0
+[21:31:10] [Main/INFO]	: |Correcting save data| 
+[21:31:10] [Main/INFO]	: |Corrected save data| 1.0 -> 1.1
+[21:31:10] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 18:20:51
+[21:31:10] [Main/INFO]	: |Preparing game data| 
+[21:31:10] [Main/INFO]	: |Game loop started| 
+[21:31:15] [Main/INFO]	: |Fight started| 
+[21:31:34] [Main/INFO]	: |Fight ended| 
+[21:31:34] [Main/INFO]	: |Made temporary backup| saves\save2_2022-06-18_21;31;34.318770.sav.bak
+[21:31:34] [Main/INFO]	: |Removed temporary backup| saves\save2_2022-06-18_21;31;34.318770.sav.bak
+[21:31:34] [Main/INFO]	: |Game saved| slot number: 2, player name: "k"
+[21:31:40] [Main/INFO]	: |Game loop ended| 
+[21:31:43] [Main/INFO]	: |Trying to load save with an incorrect version| 1.1 -> 1.0
+[21:31:44] [Main/INFO]	: |Correcting save data| 
+[21:31:44] [Main/INFO]	: |Corrected save data| 1.0 -> 1.1
+[21:31:44] [Main/INFO]	: |Loaded save| slot number: 4, hero name: "k", last saved: 2022-06-18 15:44:13
+[21:31:44] [Main/INFO]	: |Preparing game data| 
+[21:31:44] [Main/INFO]	: |Game loop started| 
+[21:31:49] [Main/INFO]	: |Fight started| 
+[21:31:57] [Main/INFO]	: |Fight ended| 
+[21:31:57] [Main/INFO]	: |Made temporary backup| saves\save4_2022-06-18_21;31;57.453578.sav.bak
+[21:31:57] [Main/INFO]	: |Removed temporary backup| saves\save4_2022-06-18_21;31;57.453578.sav.bak
+[21:31:57] [Main/INFO]	: |Game saved| slot number: 4, player name: "k"
+[21:32:12] [Main/INFO]	: |Game loop ended| 
+[21:32:18] [Main/INFO]	: |Instance ended succesfuly| 
+
+[21:42:04] [Main/INFO]	: |Checking package versions| 
+[21:42:04] [Main/INFO]	: |All packages up to date| 
+[21:42:04] [Main/INFO]	: |Preloading global variables| 
+[21:42:04] [Main/INFO]	: |Beginning new instance| 
+[21:42:13] [Main/INFO]	: |Instance ended succesfuly| 
+
+[21:46:03] [Main/INFO]	: |Checking package versions| 
+[21:46:03] [Main/INFO]	: |All packages up to date| 
+[21:46:03] [Main/INFO]	: |Preloading global variables| 
+[21:46:03] [Main/INFO]	: |Beginning new instance| 
+
+[21:48:04] [Main/INFO]	: |Checking package versions| 
+[21:48:04] [Main/INFO]	: |All packages up to date| 
+[21:48:04] [Main/INFO]	: |Preloading global variables| 
+[21:48:04] [Main/INFO]	: |Beginning new instance| 
+
+[21:50:02] [Main/INFO]	: |Checking package versions| 
+[21:50:02] [Main/INFO]	: |All packages up to date| 
+[21:50:02] [Main/INFO]	: |Preloading global variables| 
+[21:50:02] [Main/INFO]	: |Beginning new instance| 
+[21:50:17] [Main/INFO]	: |Instance ended succesfuly| 
+
+[21:50:40] [Main/INFO]	: |Checking package versions| 
+[21:50:40] [Main/INFO]	: |All packages up to date| 
+[21:50:40] [Main/INFO]	: |Preloading global variables| 
+[21:50:40] [Main/INFO]	: |Beginning new instance| 
+[21:50:48] [Main/INFO]	: |Instance ended succesfuly| 
+
+[21:51:46] [Main/INFO]	: |Checking package versions| 
+[21:51:46] [Main/INFO]	: |All packages up to date| 
+[21:51:46] [Main/INFO]	: |Preloading global variables| 
+[21:51:46] [Main/INFO]	: |Beginning new instance| 
+[21:51:50] [Main/INFO]	: |Trying to load save with an incorrect version| 1.1 -> 1.0
+[21:51:51] [Main/INFO]	: |Correcting save data| 
+[21:51:51] [Main/INFO]	: |Corrected save data| 1.0 -> 1.1
+[21:51:51] [Main/INFO]	: |Loaded save| slot number: 4, hero name: "You", last saved: 2022-06-17 22:59:40
+[21:51:51] [Main/INFO]	: |Preparing game data| 
+[21:51:51] [Main/INFO]	: |Game loop started| 
+[21:51:56] [Main/INFO]	: |Fight started| 
+[21:52:06] [Main/INFO]	: |Fight ended| 
+[21:52:06] [Main/INFO]	: |Made temporary backup| saves\save4_2022-06-18_21;52;06.539628.sav.bak
+[21:52:06] [Main/INFO]	: |Removed temporary backup| saves\save4_2022-06-18_21;52;06.539628.sav.bak
+[21:52:06] [Main/INFO]	: |Game saved| slot number: 4, player name: "You"
+[21:52:09] [Main/INFO]	: |Game loop ended| 
+[21:52:16] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:00:25] [Main/INFO]	: |Checking package versions| 
+[22:00:25] [Main/INFO]	: |All packages up to date| 
+[22:00:25] [Main/INFO]	: |Preloading global variables| 
+[22:00:25] [Main/INFO]	: |Beginning new instance| 
+[22:00:27] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:01:09] [Main/INFO]	: |Checking package versions| 
+[22:01:09] [Main/INFO]	: |All packages up to date| 
+[22:01:09] [Main/INFO]	: |Preloading global variables| 
+[22:01:09] [Main/INFO]	: |Beginning new instance| 
+[22:01:14] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:01:36] [Main/INFO]	: |Checking package versions| 
+[22:01:36] [Main/INFO]	: |All packages up to date| 
+[22:01:36] [Main/INFO]	: |Preloading global variables| 
+[22:01:36] [Main/INFO]	: |Beginning new instance| 
+[22:01:40] [Main/INFO]	: |Trying to load save with an incorrect version| 1.1 -> 1.0
+[22:01:43] [Main/INFO]	: |Made backup| backups\2022-06-18_22;01;43_save1.sav.bak
+[22:01:43] [Main/INFO]	: |Correcting save data| 
+[22:01:43] [Main/INFO]	: |Corrected save data| 1.0 -> 1.1
+[22:01:43] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "You", last saved: 2022-06-18 21:31:00
+[22:01:43] [Main/INFO]	: |Preparing game data| 
+[22:01:43] [Main/INFO]	: |Game loop started| 
+[22:01:48] [Main/INFO]	: |Fight started| 
+[22:01:55] [Main/INFO]	: |Fight ended| 
+[22:01:55] [Main/INFO]	: |Made temporary backup| saves\save1_2022-06-18_22;01;55.364305.sav.bak
+[22:01:55] [Main/INFO]	: |Removed temporary backup| saves\save1_2022-06-18_22;01;55.364305.sav.bak
+[22:01:55] [Main/INFO]	: |Game saved| slot number: 1, player name: "You"
+[22:02:03] [Main/INFO]	: |Game loop ended| 
+[22:02:06] [Main/INFO]	: |Trying to load save with an incorrect version| 1.1 -> 1.0
+[22:02:07] [Main/INFO]	: |Made backup| backups\2022-06-18_22;02;07_save2.sav.bak
+[22:02:07] [Main/INFO]	: |Correcting save data| 
+[22:02:07] [Main/INFO]	: |Corrected save data| 1.0 -> 1.1
+[22:02:07] [Main/INFO]	: |Loaded save| slot number: 2, hero name: "k", last saved: 2022-06-18 21:31:34
+[22:02:07] [Main/INFO]	: |Preparing game data| 
+[22:02:07] [Main/INFO]	: |Game loop started| 
+[22:02:12] [Main/INFO]	: |Fight started| 
+[22:02:24] [Main/INFO]	: |Fight ended| 
+[22:02:24] [Main/INFO]	: |Made temporary backup| saves\save2_2022-06-18_22;02;24.398248.sav.bak
+[22:02:24] [Main/INFO]	: |Removed temporary backup| saves\save2_2022-06-18_22;02;24.398248.sav.bak
+[22:02:24] [Main/INFO]	: |Game saved| slot number: 2, player name: "k"
+[22:02:57] [Main/INFO]	: |Game loop ended| 
+[22:02:59] [Main/INFO]	: |Trying to load save with an incorrect version| 1.1 -> 1.0
+[22:03:00] [Main/INFO]	: |Made backup| backups\2022-06-18_22;03;00_save3.sav.bak
+[22:03:00] [Main/INFO]	: |Correcting save data| 
+[22:03:00] [Main/INFO]	: |Corrected save data| 1.0 -> 1.1
+[22:03:00] [Main/INFO]	: |Loaded save| slot number: 3, hero name: "k", last saved: 2022-06-18 21:31:57
+[22:03:00] [Main/INFO]	: |Preparing game data| 
+[22:03:00] [Main/INFO]	: |Game loop started| 
+[22:03:05] [Main/INFO]	: |Fight started| 
+[22:03:13] [Main/INFO]	: |Fight ended| 
+[22:03:13] [Main/INFO]	: |Made temporary backup| saves\save3_2022-06-18_22;03;13.842407.sav.bak
+[22:03:13] [Main/INFO]	: |Removed temporary backup| saves\save3_2022-06-18_22;03;13.842407.sav.bak
+[22:03:13] [Main/INFO]	: |Game saved| slot number: 3, player name: "k"
+[22:03:18] [Main/INFO]	: |Game loop ended| 
+[22:03:22] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:04:17] [Main/INFO]	: |Checking package versions| 
+[22:04:17] [Main/INFO]	: |All packages up to date| 
+[22:04:17] [Main/INFO]	: |Preloading global variables| 
+[22:04:17] [Main/INFO]	: |Beginning new instance| 
+[22:04:17] [Main/INFO]	: |Recreating saves folder| 
+[22:04:24] [Main/INFO]	: |Preparing game data| 
+[22:04:28] [Main/INFO]	: |Created save| slot number: 1, player name: "jj"
+[22:04:28] [Main/INFO]	: |Game loop started| 
+[22:04:32] [Quit manager/INFO]	: |Beginning manual save| slot number: 1
+[22:04:32] [Quit manager/INFO]	: |Made temporary backup| saves\save1_2022-06-18_22;04;32.573298.sav.bak
+[22:04:32] [Quit manager/INFO]	: |Removed temporary backup| saves\save1_2022-06-18_22;04;32.573298.sav.bak
+[22:04:32] [Quit manager/INFO]	: |Game saved| slot number: 1, player name: "jj"
+[22:04:36] [Main/INFO]	: |Game loop ended| 
+[22:04:40] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "jj", last saved: 2022-06-18 22:04:32
+[22:04:41] [Main/INFO]	: |Instance ended succesfuly| 

@@ -1,0 +1,218 @@
+[20:30:46] [Main/INFO]	: |Beginning new instance| 
+[20:31:01] [Main/INFO]	: |Created save| slot number: 3, player name: "kk"
+[20:31:01] [Main/INFO]	: |Game loop started| 
+[20:32:24] [Main/INFO]	: |Beginning new instance| 
+[20:32:30] [Main/INFO]	: |Deleted save| slot number: 4, hero name: "jk", last saved: 2022-05-06 21:57:22
+[20:32:32] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "k", last saved: 2022-05-06 21:41:31
+[20:32:33] [Main/INFO]	: |Deleted save| slot number: 2, hero name: "hjhj", last saved: 2022-05-06 21:49:40
+[20:32:35] [Main/INFO]	: |Deleted save| slot number: 3, hero name: "kk", last saved: 2022-05-07 20:31:01
+[20:42:45] [Main/INFO]	: |Beginning new instance| 
+[20:42:49] [Main/INFO]	: |Created save| slot number: 1, player name: "h"
+[20:42:49] [Main/INFO]	: |Game loop started| 
+[20:42:55] [Main/INFO]	: |Beginning new instance| 
+[20:42:55] [Main/ERROR]	: |Instance crahed| (<class 'ValueError'>, ValueError("invalid literal for int() with base 10: 'save1'"), <traceback object at 0x000000B0861F4C00>)
+[20:46:34] [Main/INFO]	: |Beginning new instance| 
+[20:46:41] [Main/ERROR]	: |Instance crahed| (<class 'FileNotFoundError'>, FileNotFoundError(2, 'No such file or directory'), <traceback object at 0x00000057BD321240>)
+[20:48:58] [Main/INFO]	: |Beginning new instance| 
+[20:49:03] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "h", last saved: 2022-05-07 20:42:49
+[20:49:03] [Main/INFO]	: |Game loop started| 
+[20:49:08] [Main/INFO]	: |Beginning new instance| 
+[20:49:11] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError("'bool' object is not iterable"), <traceback object at 0x000000837F5246C0>)
+[20:51:45] [Main/INFO]	: |Beginning new instance| 
+[20:51:48] [Main/INFO]	: |Created save| slot number: 2, player name: "You"
+[20:51:48] [Main/INFO]	: |Game loop started| 
+[20:51:52] [Main/INFO]	: |Beginning new instance| 
+[20:51:56] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "h", last saved: 2022-05-07 20:42:49
+[20:51:56] [Main/INFO]	: |Game loop started| 
+[20:51:59] [Main/INFO]	: |Beginning new instance| 
+[20:52:04] [Main/INFO]	: |Deleted save| slot number: 2, hero name: "You", last saved: 2022-05-07 20:51:48
+[20:52:05] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "h", last saved: 2022-05-07 20:42:49
+[20:52:09] [Main/INFO]	: |Created save| slot number: 1, player name: "k"
+[20:52:09] [Main/INFO]	: |Game loop started| 
+[20:52:28] [Main/INFO]	: |Game loop ended| 
+[20:52:28] [Main/INFO]	: |Instance ended succesfuly| 
+[20:56:02] [Main/INFO]	: |Beginning new instance| 
+[20:57:02] [Main/INFO]	: |Beginning new instance| 
+[20:58:12] [Main/INFO]	: |Beginning new instance| 
+[20:58:31] [Main/INFO]	: |Beginning new instance| 
+[20:58:56] [Main/INFO]	: |Beginning new instance| 
+[20:59:10] [Main/INFO]	: |Beginning new instance| 
+[21:00:41] [Main/INFO]	: |Beginning new instance| 
+[21:00:41] [Main/ERROR]	: |Instance crahed| (<class 'TypeError'>, TypeError('BaseException.with_traceback() takes exactly one argument (0 given)'), <traceback object at 0x000000FD2E5F0D80>)
+[21:18:33] [Main/INFO]	: |Beginning new instance| 
+[21:18:38] [Main/INFO]	: |Created save| slot number: 2, player name: "k"
+[21:18:38] [Main/INFO]	: |Game loop started| 
+[21:18:55] [Main/INFO]	: |Game loop ended| 
+[21:18:55] [Main/INFO]	: |Instance ended succesfuly| 
+[21:19:22] [Main/INFO]	: |Beginning new instance| 
+[21:20:26] [Main/INFO]	: |Beginning new instance| 
+[21:20:36] [Main/INFO]	: |Deleted save| slot number: 2, hero name: "k", last saved: 2022-05-07 21:18:38
+[21:20:39] [Main/ERROR]	: |Instance crahed| (<class 'IndexError'>, IndexError('list index out of range'), <traceback object at 0x0000004B7FF04BC0>)
+[21:21:02] [Main/INFO]	: |Beginning new instance| 
+[21:21:09] [Main/ERROR]	: |Instance crahed| (<class 'IndexError'>, IndexError('list index out of range'), <traceback object at 0x000000B2D6E51280>)
+[21:22:01] [Main/INFO]	: |Beginning new instance| 
+[21:22:07] [Main/ERROR]	: |Instance crahed| (<class 'IndexError'>, IndexError('list index out of range'), <traceback object at 0x00000038B85F1280>)
+[21:22:51] [Main/INFO]	: |Beginning new instance| 
+[21:22:55] [Main/ERROR]	: |Instance crahed| (<class 'IndexError'>, IndexError('list index out of range'), <traceback object at 0x0000008F30056B80>)
+[21:23:59] [Main/INFO]	: |Beginning new instance| 
+[21:24:08] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "k", last saved: 2022-05-07 20:52:09
+[21:24:12] [Main/INFO]	: |Created save| slot number: 1, player name: "k"
+[21:24:12] [Main/INFO]	: |Game loop started| 
+[21:24:16] [Main/INFO]	: |Beginning new instance| 
+[21:24:43] [Main/INFO]	: |Beginning new instance| 
+[21:24:47] [Main/INFO]	: |Created save| slot number: 2, player name: "l"
+[21:24:47] [Main/INFO]	: |Game loop started| 
+[21:24:50] [Main/INFO]	: |Beginning new instance| 
+[21:24:53] [Main/INFO]	: |Created save| slot number: 3, player name: "j"
+[21:24:53] [Main/INFO]	: |Game loop started| 
+[21:24:57] [Main/INFO]	: |Beginning new instance| 
+[21:25:03] [Main/INFO]	: |Deleted save| slot number: 2, hero name: "l", last saved: 2022-05-07 21:24:47
+[21:25:05] [Main/INFO]	: |Deleted save| slot number: 3, hero name: "j", last saved: 2022-05-07 21:24:53
+[21:25:15] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "k", last saved: 2022-05-07 21:24:12
+[21:25:19] [Main/INFO]	: |Created save| slot number: 1, player name: "h"
+[21:25:19] [Main/INFO]	: |Game loop started| 
+[21:38:22] [Main/INFO]	: |Beginning new instance| 
+[21:38:22] [Main/INFO]	: |Recreating saves folder| 
+[21:38:28] [Main/INFO]	: |Created save| slot number: 1, player name: "j"
+[21:38:28] [Main/INFO]	: |Game loop started| 
+
+[21:45:01] [Main/INFO]	: |Beginning new instance| 
+
+[21:45:09] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:38:28
+
+[21:45:09] [Main/INFO]	: |Game loop started| 
+
+[21:45:47] [Main/INFO]	: |Beginning new instance| 
+[21:45:50] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:38:28
+[21:45:50] [Main/INFO]	: |Game loop started| 
+
+[21:45:55] [Main/INFO]	: |Beginning new instance| 
+[21:45:58] [Main/INFO]	: |Deleted save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:38:28
+[21:46:01] [Main/INFO]	: |Created save| slot number: 1, player name: "j"
+[21:46:01] [Main/INFO]	: |Game loop started| 
+[21:47:05] [Main/INFO]	: |Game loop ended| 
+[21:47:05] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:03:49] [Main/INFO]	: |Beginning new instance| 
+[22:03:53] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:03:53] [Main/INFO]	: |Game loop started| 
+
+[22:07:55] [Main/INFO]	: |Beginning new instance| 
+[22:08:00] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:08:00] [Main/INFO]	: |Game loop started| 
+[22:08:00] [Main/INFO]	: |huh| 
+
+[22:09:28] [Main/INFO]	: |Beginning new instance| 
+
+[22:09:40] [Main/INFO]	: |Beginning new instance| 
+[22:09:46] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:09:46] [Main/INFO]	: |Game loop started| 
+[22:09:51] [Auto saver/INFO]	: |Beggining auto save| slot number: {}
+
+[22:14:41] [Main/INFO]	: |Beginning new instance| 
+[22:14:44] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:14:44] [Main/INFO]	: |Game loop started| 
+[22:14:49] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:14:54] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:14:59] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:15:04] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:15:09] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+
+[22:15:49] [Main/INFO]	: |Beginning new instance| 
+[22:15:52] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:15:52] [Main/INFO]	: |Game loop started| 
+[22:15:57] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:16:02] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:16:07] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:16:12] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:16:17] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:16:22] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:16:27] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:16:32] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:16:37] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:16:42] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+
+[22:17:29] [Main/INFO]	: |Beginning new instance| 
+[22:17:32] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:17:32] [Main/INFO]	: |Game loop started| 
+[22:17:37] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:17:42] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+
+[22:17:58] [Main/INFO]	: |Beginning new instance| 
+[22:18:01] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:18:01] [Main/INFO]	: |Game loop started| 
+[22:18:06] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:18:07] [Main/INFO]	: |Game loop ended| 
+[22:18:07] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:22:38] [Main/INFO]	: |Beginning new instance| 
+[22:22:43] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:22:43] [Main/INFO]	: |Game loop started| 
+[22:22:48] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:22:49] [Main/INFO]	: |Game loop ended| 
+[22:22:53] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:22:58] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:23:03] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:23:03] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:23:03] [Main/INFO]	: |Game loop started| 
+[22:23:08] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:23:08] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:23:09] [Main/INFO]	: |Game loop ended| 
+[22:23:13] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:23:13] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:23:18] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:23:18] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:23:23] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:23:23] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+
+[22:23:52] [Main/INFO]	: |Beginning new instance| 
+[22:23:56] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:23:56] [Main/INFO]	: |Game loop started| 
+[22:24:01] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:24:02] [Main/INFO]	: |Game loop ended| 
+[22:24:06] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:24:10] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:24:32] [Main/INFO]	: |Beginning new instance| 
+[22:24:37] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:24:37] [Main/INFO]	: |Game loop started| 
+[22:24:42] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:24:43] [Main/INFO]	: |Game loop ended| 
+[22:24:47] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:24:52] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+
+[22:33:31] [Main/INFO]	: |Beginning new instance| 
+
+[22:33:43] [Main/INFO]	: |Beginning new instance| 
+
+[22:38:02] [Main/INFO]	: |Beginning new instance| 
+[22:38:09] [Main/ERROR]	: |Instance crahed| (<class 'FileNotFoundError'>, FileNotFoundError(2, 'No such file or directory'), <traceback object at 0x000000F734309A40>)
+
+[22:38:33] [Main/INFO]	: |Beginning new instance| 
+[22:38:38] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:38:38] [Main/INFO]	: |Game loop started| 
+[22:38:44] [Main/INFO]	: |Game loop ended| 
+[22:38:50] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:38:50] [Main/INFO]	: |Game loop started| 
+[22:38:56] [Main/INFO]	: |Game loop ended| 
+[22:38:59] [Main/INFO]	: |Instance ended succesfuly| 
+
+[22:44:22] [Main/INFO]	: |Beginning new instance| 
+[22:44:26] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:44:26] [Main/INFO]	: |Game loop started| 
+[22:44:32] [Main/INFO]	: |Game loop ended| 
+
+[22:45:08] [Main/INFO]	: |Beginning new instance| 
+[22:45:26] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:45:26] [Main/INFO]	: |Game loop started| 
+[22:45:31] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:45:32] [Main/INFO]	: |Game loop ended| 
+[22:45:39] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:45:39] [Main/INFO]	: |Game loop started| 
+[22:45:44] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:45:45] [Main/INFO]	: |Game loop ended| 
+[22:45:53] [Main/INFO]	: |Loaded save| slot number: 1, hero name: "j", last saved: 2022-05-07 21:46:01
+[22:45:53] [Main/INFO]	: |Game loop started| 
+[22:45:58] [Auto saver/INFO]	: |Beggining auto save| slot number: None
+[22:45:59] [Main/INFO]	: |Game loop ended| 
+[22:46:04] [Main/INFO]	: |Instance ended succesfuly| 

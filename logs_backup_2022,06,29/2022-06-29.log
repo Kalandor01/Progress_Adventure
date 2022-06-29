@@ -1,0 +1,63 @@
+
+[14:45:26] [Test/INFO]	: |Checking package versions| 
+[14:45:26] [Test/INFO]	: |All packages up to date| 
+[14:45:26] [Test/INFO]	: |Initialization check| Passed
+[14:49:28] [MainThread/INFO]	: |Initialization check| Running...
+
+[14:49:28] [Test/INFO]	: |Checking package versions| 
+[14:49:28] [Test/INFO]	: |All packages up to date| 
+[14:49:28] [Test/INFO]	: |Initialization check| Passed
+[14:51:06] [Test/INFO]	: |Initialization check| Running...
+
+[14:51:06] [Test/INFO]	: |Checking package versions| 
+[14:51:06] [Test/INFO]	: |All packages up to date| 
+[14:51:07] [Test/INFO]	: |Initialization check| Passed
+
+[14:55:37] [Test/INFO]	: |Initialization check| Running...
+[14:55:37] [Test/INFO]	: |Checking package versions| 
+[14:55:37] [Test/INFO]	: |All packages up to date| 
+[14:55:37] [Test/INFO]	: |Initialization check| Passed
+
+[14:58:34] [Test/INFO]	: |Initialization check| Running...
+[14:58:34] [Test/INFO]	: |Checking package versions| 
+[14:58:34] [Test/INFO]	: |All packages up to date| 
+
+[14:58:34] [Main/INFO]	: |Checking package versions| 
+[14:58:34] [Main/INFO]	: |All packages up to date| 
+[14:58:34] [Main/INFO]	: |Preloading global variables| 
+[14:58:34] [Main/INFO]	: |Beginning new instance| 
+[14:58:56] [Main/INFO]	: |Instance ended succesfuly| 
+
+[15:04:21] [Test/INFO]	: |Initialization check| Running...
+[15:04:21] [Test/INFO]	: |Checking package versions| 
+[15:04:21] [Test/INFO]	: |All packages up to date| 
+[15:04:21] [Test/INFO]	: |Initialization check| Passed
+
+[15:07:59] [Test/INFO]	: |Initialization check| Running...
+[15:07:59] [Test/INFO]	: |Checking package versions| 
+[15:07:59] [Test/INFO]	: |All packages up to date| 
+[15:07:59] [Test/INFO]	: |Initialization check| Passed
+[15:07:59] [Test/INFO]	: |Settings checks| Running...
+[15:07:59] [Test/INFO]	: |Settings checks| Passed
+
+[15:10:03] [Test/INFO]	: |Initialization check| Running...
+[15:10:03] [Test/INFO]	: |Checking package versions| 
+[15:10:03] [Test/INFO]	: |All packages up to date| 
+[15:10:03] [Test/PASS]	: |Initialization check| Passed
+[15:10:03] [Test/INFO]	: |Settings checks| Running...
+[15:10:03] [Test/PASS]	: |Settings checks| Passed
+
+[15:27:24] [Test/INFO]	: |Initialization check| Running...
+[15:27:24] [Test/INFO]	: |Checking package versions| 
+[15:27:24] [Test/INFO]	: |All packages up to date| 
+[15:27:24] [Test/PASS]	: |Initialization check| Passed
+[15:27:24] [Test/INFO]	: |Settings checks| Running...
+[15:27:24] [Test/PASS]	: |Settings checks| Passed
+[15:27:24] [Test/FAIL]	: |Settings checks| Failed
+
+[15:28:31] [Test/INFO]	: |Initialization check| Running...
+[15:28:31] [Test/INFO]	: |Checking package versions| 
+[15:28:31] [Test/INFO]	: |All packages up to date| 
+[15:28:31] [Test/PASS]	: |Initialization check| Passed
+[15:28:31] [Test/INFO]	: |Settings checks| Running...
+[15:28:31] [Test/PASS]	: |Settings checks| Passed
