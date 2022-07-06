@@ -1,6 +1,7 @@
 from enum import Enum
 import json
 import os
+import shutil
 import threading
 from datetime import datetime as dtime
 from msvcrt import getch
@@ -34,11 +35,11 @@ SAVE_NAME = "save*"
 SAVE_EXT = "sav"
 SAVE_FILE_PATH = os.path.join(SAVES_FOLDER_PATH, SAVE_NAME)
     #logs
-LOGS_FOLDER = "logs" + os.path.sep
+LOGS_FOLDER = "logs"
 LOGS_FOLDER_PATH = os.path.join(ROOT_FOLDER, LOGS_FOLDER)
 LOG_EXT = "log"
     #backups
-BACKUPS_FOLDER = "backups" + os.path.sep
+BACKUPS_FOLDER = "backups"
 BACKUPS_FOLDER_PATH = os.path.join(ROOT_FOLDER, BACKUPS_FOLDER)
 BACKUP_EXT = SAVE_EXT + ".bak"
 # colorama color
@@ -70,20 +71,20 @@ def make_date(date_lis:list|dtime, sep="-"):
         return f"{pad_zero(date_lis[0])}{sep}{pad_zero(date_lis[1])}{sep}{pad_zero(date_lis[2])}"
 
 
-def make_time(time_lis:list|dtime, sep=":", write_ms=False):
+def make_time(time_lis:list|dtime, sep=":", write_ms=False, ms_sep:str="."):
     """
     Turns a datetime object's time part or a list into a formated string.
     """
     if type(time_lis) == dtime:
-        return f"{pad_zero(time_lis.hour)}{sep}{pad_zero(time_lis.minute)}{sep}{pad_zero(time_lis.second)}{f'.{time_lis.microsecond}' if write_ms else ''}"
+        return f"{pad_zero(time_lis.hour)}{sep}{pad_zero(time_lis.minute)}{sep}{pad_zero(time_lis.second)}{f'{ms_sep}{time_lis.microsecond}' if write_ms else ''}"
     else:
-        return f"{pad_zero(time_lis[0])}{sep}{pad_zero(time_lis[1])}{sep}{pad_zero(time_lis[2])}{f'.{time_lis[3]}' if write_ms else ''}"
+        return f"{pad_zero(time_lis[0])}{sep}{pad_zero(time_lis[1])}{sep}{pad_zero(time_lis[2])}{f'{ms_sep}{time_lis[3]}' if write_ms else ''}"
 
 
 def begin_log():
     current_date = make_date(dtime.now())
     recreate_logs_folder()
-    f = open(f"{LOGS_FOLDER}{current_date}.{LOG_EXT}", "a")
+    f = open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a")
     f.write("\n")
 
 def log_info(message:str, detail="", message_type="INFO", write_out=False, new_line=False):
@@ -93,7 +94,7 @@ def log_info(message:str, detail="", message_type="INFO", write_out=False, new_l
     current_date = make_date(dtime.now())
     current_time = make_time(dtime.now(), write_ms=LOG_MS)
     recreate_logs_folder()
-    f = open(f"{LOGS_FOLDER}{current_date}.{LOG_EXT}", "a")
+    f = open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a")
     if new_line:
         f.write("\n")
     f.write(f"[{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}\n")
@@ -101,25 +102,48 @@ def log_info(message:str, detail="", message_type="INFO", write_out=False, new_l
     if write_out:
         if new_line:
             print("\n")
-        print(f'{LOGS_FOLDER}{current_date}.{LOG_EXT} -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
+        print(f'{os.path.join(LOGS_FOLDER, f"{current_date}.{LOG_EXT}")} -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
 
+
+def recreate_folder(folder_name:str, folder_path:str=None, display_name:str=None):
+    if folder_path == None:
+        folder_path = os.path.join(ROOT_FOLDER, folder_name)
+    if display_name == None:
+        display_name = folder_name.lower()
+    if not os.path.isdir(folder_path):
+        os.mkdir(folder_name)
+        log_info(f"Recreating {display_name} folder")
 
 def recreate_saves_folder():
-    if not os.path.isdir(SAVES_FOLDER_PATH):
-        os.mkdir(SAVES_FOLDER)
-        log_info("Recreating saves folder")
+    recreate_folder(SAVES_FOLDER)
 
 
 def recreate_backups_folder():
-    if not os.path.isdir(BACKUPS_FOLDER_PATH):
-        os.mkdir(BACKUPS_FOLDER)
-        log_info("Recreating backups folder")
+    recreate_folder(BACKUPS_FOLDER)
 
 
 def recreate_logs_folder():
-    if not os.path.isdir(LOGS_FOLDER_PATH):
-        os.mkdir(LOGS_FOLDER)
-        log_info("Recreating logs folder")
+    recreate_folder(LOGS_FOLDER)
+
+
+def make_backup(save_num:int, is_temporary=False):
+    recreate_saves_folder()
+    recreate_backups_folder()
+    now = dtime.now()
+    backup_name_end = f'{make_date(now)};{make_time(now, "-", is_temporary, "-")};{SAVE_NAME.replace("*", str(save_num))}.{BACKUP_EXT}'
+    save_name = f'{SAVE_FILE_PATH.replace("*", str(save_num))}.{SAVE_EXT}'
+    display_save_name = f'{os.path.join(SAVES_FOLDER, SAVE_NAME).replace("*", str(save_num))}.{SAVE_EXT}'
+    backup_name = os.path.join(BACKUPS_FOLDER_PATH, backup_name_end)
+    display_backup_name = os.path.join(BACKUPS_FOLDER, backup_name_end)
+
+    if os.path.isfile(save_name):
+        shutil.copyfile(save_name, backup_name)
+        log_info(f"Made {('temporary ' if is_temporary else ' ')}backup", display_backup_name)
+        return [backup_name, display_backup_name]
+    else:
+        log_info("Backup failed", f"save file not found: {display_save_name}", "WARN")
+        return False
+    
 
 
 def press_key(text=""):
@@ -265,7 +289,7 @@ def settings_manager(line_name:str, write_value=None):
     try:
         settings = decode_keybinds(json.loads(sfm.decode_save(SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING)[0]))
     except ValueError:
-        log_info("Decode error", "Settings", "ERROR")
+        log_info("Decode error", "settings", "ERROR")
         press_key(f"The settings file is corrupted, and will now be recreated!")
         settings = recreate_settings()
     except FileNotFoundError:

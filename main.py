@@ -2,11 +2,10 @@
 import json
 import math
 import os
-import shutil
 import sys
 import threading as thr
 import time
-from datetime import datetime
+from datetime import datetime as dtime
 from msvcrt import getch
 
 import tools as ts
@@ -14,10 +13,10 @@ import dev_tools as dt
 import classes as cl
 
 from tools import r, colorama, sfm
-from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME, ROOT_FOLDER
-from tools import SAVES_FOLDER, SAVES_FOLDER_PATH, SAVE_NAME, SAVE_EXT, SAVE_FILE_PATH
+from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME
+from tools import SAVES_FOLDER_PATH, SAVE_NAME, SAVE_EXT, SAVE_FILE_PATH
 from tools import AUTO_SAVE_DELAY, ENCODING, SETTINGS_ENCODE_SEED, FILE_ENCODING_VERSION, SAVE_VERSION
-from tools import C_F_RED, C_F_GREEN, BACKUPS_FOLDER, BACKUPS_FOLDER_PATH, BACKUP_EXT
+from tools import C_F_RED, C_F_GREEN
 
 if __name__ == "__main__":
     try:
@@ -225,7 +224,7 @@ def make_save(frozen_data:cl.Save_data):
     display_data["save_version"] = SAVE_VERSION
     save_data["save_version"] = SAVE_VERSION
     # last_access
-    now = datetime.now()
+    now = dtime.now()
     last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
     display_data["last_access"] = last_access
     save_data["last_access"] = last_access
@@ -236,20 +235,11 @@ def make_save(frozen_data:cl.Save_data):
     # randomstate
     save_data["seed"] = ts.random_state_converter(r)
     # create new save
-    ts.recreate_saves_folder()
-    now = datetime.now()
-    save_name = f'{SAVE_FILE_PATH.replace("*", str(frozen_data.save_num))}.{SAVE_EXT}'
-    backup_name = f'{SAVES_FOLDER + os.path.sep}{SAVE_NAME.replace("*", str(frozen_data.save_num))}_{ts.make_date(now) + "_" + ts.make_time(now, ";", True)}.{BACKUP_EXT}'
-    full_backup_name = ROOT_FOLDER + os.path.sep + backup_name
-    existing_save = False
-    if os.path.isfile(save_name):
-        existing_save = True
-        shutil.copyfile(save_name, full_backup_name)
-        ts.log_info("Made temporary backup", backup_name)
+    backup_status = ts.make_backup(frozen_data.save_num, True)
     sfm.encode_save([json.dumps(display_data), json.dumps(save_data)], frozen_data.save_num, SAVE_FILE_PATH, SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
-    if existing_save:
-        os.remove(full_backup_name)
-        ts.log_info("Removed temporary backup", backup_name)
+    if backup_status != False:
+        os.remove(backup_status[0])
+        ts.log_info("Removed temporary backup", backup_status[1])
 
 
 def save_game():
@@ -326,7 +316,7 @@ def new_save(save_num=1):
     # make player
     player = cl.Player(input("What is your name?: "))
     # last_access
-    now = datetime.now()
+    now = dtime.now()
     last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
     # load to class
     global SAVE_DATA
@@ -361,12 +351,7 @@ def load_save(save_num=1):
         ts.log_info("Trying to load save with an incorrect version", f"{SAVE_VERSION} -> {save_version}")
         ans = sfm.UI_list(["Yes", "No"], f"Save file {save_num} is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to back up the save file before loading it?").display(SETTINGS.keybind_mapping)
         if ans == 0:
-            ts.recreate_backups_folder()
-            save_name = f'{SAVE_FILE_PATH.replace("*", str(save_num))}.{SAVE_EXT}'
-            now = datetime.now()
-            backup_name = os.path.join(BACKUPS_FOLDER_PATH, (f'{ts.make_date(now)}_{ts.make_time(now, ";")}_{SAVE_NAME.replace("*", str(save_num))}.{BACKUP_EXT}'))
-            shutil.copyfile(save_name, backup_name)
-            ts.log_info("Made backup", f'{BACKUPS_FOLDER}{ts.make_date(now)}_{ts.make_time(now, ";")}_{SAVE_NAME.replace("*", str(save_num))}.{BACKUP_EXT}')
+            ts.make_backup(save_num)
         data = correct_save_data(data, save_version)
     # last access
     last_access = data["last_access"]
