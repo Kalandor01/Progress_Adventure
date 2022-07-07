@@ -14,6 +14,7 @@ import save_file_manager as sfm
 r = np.random.RandomState()
 
 # package versions
+PYTHON_MIN_VERSION = "3.10.5"
 PIP_NP_MIN_VERSION = "1.22.1"
 PIP_COLOR_MIN_VERSION = "0.4.5"
 
@@ -362,13 +363,28 @@ def check_p_version(min_version:str, curr_version:str):
             return False
     return True
 
-def package_response(bad_packages:list):
+def package_response(bad_packages:list, py_good:bool):
+    # python
+    if py_good:
+        log_info("Python up to date")
+    else:
+        from platform import python_version
+        log_info("Python not up to date", f"{python_version()} -> {PYTHON_MIN_VERSION}", "WARN")
+        print(f"Python not up to date: {python_version()} -> {PYTHON_MIN_VERSION}")
+    # packages
     if len(bad_packages) == 0:
         log_info("All packages up to date")
+    else:
+        bad_packages_str = []
+        for package in bad_packages:
+            bad_packages_str.append(f"{package[2]}({package[1]}) -> {package[0]}")
+        log_info("Some packages are not up to date", ", ".join([p for p in bad_packages_str]), "WARN")
+        print(f"{'Some packages are' if len(bad_packages) > 1 else 'A package is'} not up to date:\n\t" + "\n\t".join([p for p in bad_packages_str]))
+    # return
+    if len(bad_packages) == 0 and py_good:
         return True
     else:
-        log_info("Some packages are not up to date", bad_packages, "WARN")
-        if input(str(", ".join(bad_packages)) + " packages out of date. Do you want to continue?(Y/N): ").upper() == "Y":
+        if input("Do you want to continue?(Y/N): ").upper() == "Y":
             log_info("Continuing anyways")
             return True
         else:
@@ -376,20 +392,30 @@ def package_response(bad_packages:list):
 
 def check_package_versions():
     """
-    Checks if all tested packages are up do date.\n
+    Checks if all tested packages and python are up do date.\n
     Checks:
+    - python
     - numpy
     - colorama
     - Save File Manager
     - random sentance
     """
+    from platform import python_version
     import random_sentance as rs
 
+    log_info("Checking python version")
+    py_good = True
+    if not check_p_version(PYTHON_MIN_VERSION, python_version()):
+        py_good = False
     log_info("Checking package versions")
-    packages = [[PIP_NP_MIN_VERSION, np], [PIP_COLOR_MIN_VERSION, colorama], [PIP_SFM_MIN_VERSION, sfm], [PIP_RS_MIN_VERSION, rs]]
+    packages = [[PIP_NP_MIN_VERSION, np.__version__, "numpy"],
+                [PIP_COLOR_MIN_VERSION, colorama.__version__, "colorama"],
+                [PIP_SFM_MIN_VERSION, sfm.__version__, "Save File Manager"],
+                [PIP_RS_MIN_VERSION, rs.__version__, "Random Sentance"]]
+
     bad_packages = []
     for package in packages:
-        if not check_p_version(package[0], package[1].__version__):
-            bad_packages.append(package[1].__name__)
-    return package_response(bad_packages)
+        if not check_p_version(package[0], package[1]):
+            bad_packages.append(package)
+    return package_response(bad_packages, py_good)
 

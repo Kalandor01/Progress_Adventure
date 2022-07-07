@@ -1,10 +1,14 @@
+import json
+import os
 
+import colorama
 import classes as cl
 import tools as ts
-from tools import sfm
+from tools import BACKUP_EXT, BACKUPS_FOLDER_PATH, sfm
 from tools import MAIN_THREAD_NAME, TEST_THREAD_NAME
 from tools import SAVES_FOLDER_PATH, SAVE_NAME, SAVE_EXT, SAVE_FILE_PATH
 from tools import ENCODING, SETTINGS_ENCODE_SEED, FILE_ENCODING_VERSION
+from tools import C_F_GREEN, C_F_RED, SAVE_VERSION
 
 def decode_save_file(save_num=1, save_name=SAVE_FILE_PATH):
     """
@@ -46,8 +50,96 @@ def recompile_save_file(save_num=1, new_save_num=1, save_name=SAVE_FILE_PATH, ne
         save_data = sfm.decode_save(save_num, save_name, save_ext, ENCODING)
     except FileNotFoundError:
         print("recompile_save_file: FILE NOT FOUND!")
+        return False
     else:
         sfm.encode_save(save_data, new_save_num, new_save_name, new_save_ext, ENCODING, FILE_ENCODING_VERSION)
+        return True
+
+
+
+
+def file_reader(save_name:str=SAVE_NAME, save_ext:str=BACKUP_EXT, dir_name:str=BACKUPS_FOLDER_PATH, decode_until:int=1):
+    """
+    sfm.file_reader but for backups
+    """
+    from os import path, listdir
+
+    # get existing file numbers
+    file_names = listdir(dir_name)
+    existing_files = []
+    for name in file_names:
+        if path.isfile(path.join(dir_name, name)) and name.find(save_ext) and name.find(save_name.replace("*", "")):
+            try: file_number = int(name.replace(f".{save_ext}", "").split(save_name.replace("*", ""))[1])
+            except ValueError: continue
+            existing_files.append([name, file_number])
+    existing_files.sort()
+
+    file_data = []
+    for files in existing_files:
+        try:
+            try:
+                data = sfm.decode_save(files[1], path.join(dir_name, files[0]), "", decode_until=decode_until)
+            except ValueError:
+                data = -1
+        except FileNotFoundError: print("not found " + str(files))
+        else:
+            file_data.append([files[0].replace("." + BACKUP_EXT, ""), data])
+    return file_data
+
+def get_saves_data():
+    """
+    main.get_saves_data but for backups
+    """
+    ts.recreate_backups_folder()
+    ts.recreate_saves_folder()
+    # read saves
+    datas = file_reader()
+    # process file data
+    datas_processed = []
+    for data in datas:
+        if data[1] == -1:
+            ts.press_key(f"Save file {data[0]} is corrupted!")
+        else:
+            try:
+                data[1] = json.loads(data[1][0])
+                data_processed = ""
+                data_processed += f"Save file {data[0]}: {data[1]['player_name']}\n"
+                last_access = data[1]["last_access"]
+                data_processed += f"Last opened: {ts.make_date(last_access, '.')} {ts.make_time(last_access[3:])}"
+                # check version
+                try: save_version = data[1]["save_version"]
+                except KeyError: save_version = 0.0
+                data_processed += ts.text_c(f" v.{save_version}", (C_F_GREEN if save_version == SAVE_VERSION else C_F_RED))
+                datas_processed.append([data[0], data_processed])
+            except (TypeError, IndexError):
+                ts.press_key(f"Save file {data[0]} could not be parsed!")
+    return datas_processed
+
+def load_backup_menu():
+    """
+    W.I.P. Backup loading menu.
+    """
+    colorama.init()
+    files_data = get_saves_data()
+    while True:
+        # get data from file_data
+        list_data = []
+        for data in files_data:
+            list_data.append(data[1])
+            list_data.append(None)
+        option = sfm.UI_list_s(list_data, " Backup loading", True, True, exclude_none=True).display()
+        # load
+        if option == -1:
+            break
+        else:
+            file_name = str(files_data[int(option)][0])
+            file_num = int(file_name.replace(f".{BACKUP_EXT}", "").split(SAVE_NAME.replace("*", ""))[1])
+            print(file_name, file_num)
+            if recompile_save_file(file_num, file_num, os.path.join(BACKUPS_FOLDER_PATH, file_name), SAVE_FILE_PATH, BACKUP_EXT, SAVE_EXT):
+                input("\n" + file_name + " loaded!")
+    colorama.deinit()
+
+
 
 # thread_1 = threading.Thread(target="function", name="Thread name", args=["argument list"])
 # thread_1.start()

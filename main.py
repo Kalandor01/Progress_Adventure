@@ -36,7 +36,7 @@ if __name__ == "__main__":
         else:
             GOOD_PACKAGES = False
     except:
-        ts.log_info("Preloading crahed", sys.exc_info(), "ERROR")
+        ts.log_info("Preloading crashed", sys.exc_info(), "ERROR")
         raise
 
 
@@ -260,7 +260,7 @@ def auto_saver():
             else:
                 break
     except:
-        ts.log_info("Thread crahed", sys.exc_info(), "ERROR")
+        ts.log_info("Thread crashed", sys.exc_info(), "ERROR")
         raise
 
 
@@ -280,7 +280,7 @@ def quit_game():
             else:
                 break
     except:
-        ts.log_info("Thread crahed", sys.exc_info(), "ERROR")
+        ts.log_info("Thread crashed", sys.exc_info(), "ERROR")
         raise
     
 
@@ -536,6 +536,8 @@ def main():
     # dt.decode_save_file(1)
     # dt.encode_save_file(1)
     # dt.recompile_save_file(1, 4, SAVE_FILE_PATH + "_2022-06-18_19;00;17.570787", SAVE_FILE_PATH, BACKUP_EXT, SAVE_EXT)
+    
+    # dt.load_backup_menu()
     main_menu()
 
 
@@ -551,7 +553,7 @@ if __name__ == "__main__":
                 ts.log_info("Beginning new instance")
                 main()
         except:
-            ts.log_info("Instance crahed", sys.exc_info(), "ERROR")
+            ts.log_info("Instance crashed", sys.exc_info(), "ERROR")
             if error_handling:
                 print(f"ERROR: {sys.exc_info()[1]}")
                 ans = input("Restart?(Y/N): ")
