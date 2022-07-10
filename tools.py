@@ -36,6 +36,7 @@ SAVE_NAME = "save*"
 SAVE_EXT = "sav"
 SAVE_FILE_PATH = os.path.join(SAVES_FOLDER_PATH, SAVE_NAME)
     #logs
+LOGGING = True
 LOGS_FOLDER = "logs"
 LOGS_FOLDER_PATH = os.path.join(ROOT_FOLDER, LOGS_FOLDER)
 LOG_EXT = "log"
@@ -83,27 +84,29 @@ def make_time(time_lis:list|dtime, sep=":", write_ms=False, ms_sep:str="."):
 
 
 def begin_log():
-    current_date = make_date(dtime.now())
-    recreate_logs_folder()
-    f = open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a")
-    f.write("\n")
+    if LOGGING:
+        current_date = make_date(dtime.now())
+        recreate_logs_folder()
+        f = open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a")
+        f.write("\n")
 
 def log_info(message:str, detail="", message_type="INFO", write_out=False, new_line=False):
     """
     Progress Adventure logger.
     """
-    current_date = make_date(dtime.now())
-    current_time = make_time(dtime.now(), write_ms=LOG_MS)
-    recreate_logs_folder()
-    f = open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a")
-    if new_line:
-        f.write("\n")
-    f.write(f"[{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}\n")
-    f.close()
-    if write_out:
+    if LOGGING:
+        current_date = make_date(dtime.now())
+        current_time = make_time(dtime.now(), write_ms=LOG_MS)
+        recreate_logs_folder()
+        f = open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a")
         if new_line:
-            print("\n")
-        print(f'{os.path.join(LOGS_FOLDER, f"{current_date}.{LOG_EXT}")} -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
+            f.write("\n")
+        f.write(f"[{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}\n")
+        f.close()
+        if write_out:
+            if new_line:
+                print("\n")
+            print(f'{os.path.join(LOGS_FOLDER, f"{current_date}.{LOG_EXT}")} -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
 
 
 def recreate_folder(folder_name:str, folder_path:str=None, display_name:str=None):

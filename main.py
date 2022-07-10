@@ -348,7 +348,7 @@ def load_save(save_num=1):
     except KeyError: save_version = 0.0
     if save_version != SAVE_VERSION:
         is_older = ts.check_p_version(str(save_version), str(SAVE_VERSION))
-        ts.log_info("Trying to load save with an incorrect version", f"{SAVE_VERSION} -> {save_version}")
+        ts.log_info("Trying to load save with an incorrect version", f"{SAVE_VERSION} -> {save_version}", "WARN")
         ans = sfm.UI_list(["Yes", "No"], f"Save file {save_num} is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to back up the save file before loading it?").display(SETTINGS.keybind_mapping)
         if ans == 0:
             ts.make_backup(save_num)
