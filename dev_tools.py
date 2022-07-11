@@ -164,33 +164,21 @@ class Self_Checks:
         from tools import colorama
 
         try:
-            if ts.check_package_versions():
-                colorama.init()
+            ts.check_package_versions()
+            colorama.init()
 
-                # GLOBAL VARIABLES
-                GOOD_PACKAGES = True
-                SETTINGS = cl.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
-                SETTINGS.save_keybind_mapping()
-                SAVE_DATA = cl.Save_data
-                GLOBALS = cl.Globals(False, False, False)
-            else:
-                GOOD_PACKAGES = False
+            # GLOBAL VARIABLES
+            GOOD_PACKAGES = True
+            SETTINGS = cl.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
+            SETTINGS.save_keybind_mapping()
+            SAVE_DATA = cl.Save_data
+            GLOBALS = cl.Globals(False, False, False)
         except:
             print("Crashed")
             ts.log_info("Initialization check", "Preloading crahed: " + str(sys.exc_info()), "FAIL")
-
-        exit_game = False
-        while not exit_game:
-            exit_game = True
-            try:
-                if GOOD_PACKAGES:
-                    pass
-            except:
-                print("Crashed")
-                ts.log_info("Initialization check", "Instance crahed: " + str(sys.exc_info()), "FAIL")
-            else:
-                print("Passed")
-                ts.log_info("Initialization check", "Passed", "PASS")
+        else:
+            print("Passed")
+            ts.log_info("Initialization check", "Passed", "PASS")
     
 
     def settings_checks(self, seprate=True):
