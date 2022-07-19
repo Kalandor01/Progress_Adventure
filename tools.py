@@ -5,6 +5,7 @@ import shutil
 import threading
 from datetime import datetime as dtime
 from msvcrt import getch
+from typing import Any
 import numpy as np
 import colorama
 
@@ -82,6 +83,17 @@ def make_time(time_lis:list|dtime, sep=":", write_ms=False, ms_sep:str="."):
     else:
         return f"{pad_zero(time_lis[0])}{sep}{pad_zero(time_lis[1])}{sep}{pad_zero(time_lis[2])}{f'{ms_sep}{time_lis[3]}' if write_ms else ''}"
 
+
+def change_logging(value:bool):
+    global LOGGING
+    print(LOGGING, value)
+    if LOGGING != value:
+        if value:
+            LOGGING = value
+            log_info("Logging enabled")
+        else:
+            log_info("Logging disabled")
+            LOGGING = value
 
 def begin_log():
     if LOGGING:
@@ -269,10 +281,11 @@ def decode_keybinds(settings:dict):
         settings['keybinds'][x][0] = bytes(settings['keybinds'][x][0], ENCODING)
     return settings
 
-def settings_manager(line_name:str, write_value=None):
+def settings_manager(line_name:str, write_value=None) -> Any | None:
     """
     STRUCTURE:\n
     - auto_save
+    - logging
     - keybinds
     \t- esc
     \t- up
@@ -282,32 +295,53 @@ def settings_manager(line_name:str, write_value=None):
     \t- enter
     """
 
+    # default values
+    settings_lines = ["auto_save", "logging", "keybinds"]
+    def_settings = {"auto_save": True, "logging": True, "keybinds": {"esc": [b"\x1b"], "up": [b"H", 1], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
+
     def recreate_settings():
-        settings = {"auto_save": True, "keybinds": {"esc": [b"\x1b"], "up": [b"H", 1], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
-        sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
+        sfm.encode_save(json.dumps(encode_keybinds(def_settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
         # log
         log_info("Recreated settings")
-        return settings
+        return def_settings
 
-    # default values
+
     try:
         settings = decode_keybinds(json.loads(sfm.decode_save(SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING)[0]))
     except ValueError:
         log_info("Decode error", "settings", "ERROR")
-        press_key(f"The settings file is corrupted, and will now be recreated!")
+        press_key("The settings file is corrupted, and will now be recreated!")
         settings = recreate_settings()
     except FileNotFoundError:
         settings = recreate_settings()
+    # return
     if write_value == None:
         if line_name == None:
             return settings
         else:
-            return settings[line_name]
+            try:
+                return settings[line_name]
+            except KeyError:
+                if line_name in settings_lines:
+                    log_info("Missing key in settings", line_name, "WARN")
+                    settings_manager(line_name, def_settings[line_name])
+                    return def_settings[line_name]
+                else:
+                    raise
+    # write
     else:
-        if settings[line_name] != write_value:
-            log_info("Changed settings", f"{line_name}: {settings[line_name]} -> {write_value}")
-            settings[line_name] = write_value
-            sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
+        if line_name in settings.keys():
+            if settings[line_name] != write_value:
+                log_info("Changed settings", f"{line_name}: {settings[line_name]} -> {write_value}")
+                settings[line_name] = write_value
+                sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
+        else:
+            if line_name in settings_lines:
+                log_info("Recreating key in settings", line_name, "WARN")
+                settings[line_name] = def_settings[line_name]
+                sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
+            else:
+                raise KeyError(line_name)
 
 
 def random_state_converter(random_state:np.random.RandomState | dict | tuple):

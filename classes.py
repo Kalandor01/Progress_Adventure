@@ -52,13 +52,21 @@ class Settings:
 
     DOUBLE_KEYS = DOUBLE_KEYS
 
-    def __init__(self, auto_save:bool, keybinds:dict[list]):
+    def __init__(self, auto_save:bool, logging:bool, keybinds:dict[list]):
         self.auto_save = auto_save
-        for x in keybinds:
-            keybinds[x] = Key(keybinds[x])
+        self.logging = logging
+        for key in keybinds:
+            keybinds[key] = Key(keybinds[key])
         self.keybinds = dict[Key](keybinds)
         self.keybind_mapping = []
         self.save_keybind_mapping()
+    
+    def change_others(self, auto_save, logging):
+        self.auto_save = bool(auto_save)
+        self.logging = bool(logging)
+        ts.settings_manager("auto_save", self.auto_save)
+        ts.settings_manager("logging", self.logging)
+        ts.change_logging(self.logging)
     
     def encode_keybinds(self):
         return {"esc": self.keybinds["esc"].value.copy(),
@@ -71,12 +79,13 @@ class Settings:
     def save_keybind_mapping(self):
         # [[keybinds["esc"], keybinds["up"], keybinds["down"], keybinds["left"], keybinds["right"], keybinds["enter"]], [b"\xe0", b"\x00"]]
         # [[[b"\x1b"], [b"H", 1], [b"P", 1], [b"K", 1], [b"M", 1], [b"\r"]], [b"\xe0", b"\x00"]]
-        self.keybind_mapping:list[list[list[bytes|int]]|list[bytes]] = [[self.keybinds["esc"].value,
-        self.keybinds["up"].value,
-        self.keybinds["down"].value,
-        self.keybinds["left"].value,
-        self.keybinds["right"].value,
-        self.keybinds["enter"].value], self.DOUBLE_KEYS]
+        self.keybind_mapping:list[list[list[bytes|int]]|list[bytes]] = [[
+            self.keybinds["esc"].value,
+            self.keybinds["up"].value,
+            self.keybinds["down"].value,
+            self.keybinds["left"].value,
+            self.keybinds["right"].value,
+            self.keybinds["enter"].value], self.DOUBLE_KEYS]
         ts.settings_manager("keybinds", self.encode_keybinds())
 
 

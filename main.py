@@ -29,7 +29,11 @@ if __name__ == "__main__":
 
             # GLOBAL VARIABLES
             GOOD_PACKAGES = True
-            SETTINGS = cl.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
+            SETTINGS = cl.Settings(
+                ts.settings_manager("auto_save"),
+                ts.settings_manager("logging"),
+                ts.settings_manager("keybinds"))
+            ts.change_logging(SETTINGS.logging)
             SETTINGS.save_keybind_mapping()
             SAVE_DATA = cl.Save_data
             GLOBALS = cl.Globals(False, False, False)
@@ -409,11 +413,11 @@ def main_menu():
     # action functions
     def other_options():
         auto_save = sfm.Toggle(SETTINGS.auto_save, "Auto save: ")
-        other_settings = [auto_save, None, sfm.UI_list(["Done"])]
+        logging = sfm.Toggle(SETTINGS.logging, "Logging: ", "on", "minimal")
+        other_settings = [auto_save, logging, None, sfm.UI_list(["Done"])]
         response = sfm.options_ui(other_settings, " Other options", key_mapping=SETTINGS.keybind_mapping)
         if response != None:
-            SETTINGS.auto_save = bool(auto_save.value)
-            ts.settings_manager("auto_save", SETTINGS.auto_save)
+            SETTINGS.change_others(auto_save.value, logging.value)
 
     def set_keybind(name:str):
         print("\n\nPress any key\n\n", end="")
