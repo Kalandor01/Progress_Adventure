@@ -102,23 +102,46 @@ def begin_log():
         f = open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a")
         f.write("\n")
 
-def log_info(message:str, detail="", message_type="INFO", write_out=False, new_line=False):
+def log_info(message:str, detail="", message_type=0, write_out=False, new_line=False):
     """
-    Progress Adventure logger.
+    Progress Adventure logger.\n
+    Message types:
+    - 0: INFO
+    - 1: WARN
+    - 2: ERROR
+    - 3: CRASH
+    - -1: OTHER
     """
-    if LOGGING:
-        current_date = make_date(dtime.now())
-        current_time = make_time(dtime.now(), write_ms=LOG_MS)
-        recreate_logs_folder()
-        f = open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a")
-        if new_line:
-            f.write("\n")
-        f.write(f"[{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}\n")
-        f.close()
-        if write_out:
+    try:
+        if LOGGING:
+            match message_type:
+                case 0:
+                    m_type = "INFO"
+                case 1:
+                    m_type = "WARN"
+                case 2:
+                    m_type = "ERROR"
+                case 3:
+                    m_type = "CRASH"
+                case _:
+                    m_type = "OTHER"
+            current_date = make_date(dtime.now())
+            current_time = make_time(dtime.now(), write_ms=LOG_MS)
+            recreate_logs_folder()
+            f = open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a")
             if new_line:
-                print("\n")
-            print(f'{os.path.join(LOGS_FOLDER, f"{current_date}.{LOG_EXT}")} -> [{current_time}] [{threading.current_thread().name}/{message_type}]\t: |{message}| {detail}')
+                f.write("\n")
+            f.write(f"[{current_time}] [{threading.current_thread().name}/{m_type}]\t: |{message}| {detail}\n")
+            f.close()
+            if write_out:
+                if new_line:
+                    print("\n")
+                print(f'{os.path.join(LOGS_FOLDER, f"{current_date}.{LOG_EXT}")} -> [{current_time}] [{threading.current_thread().name}/{m_type}]\t: |{message}| {detail}')
+    except:
+        if LOGGING:
+            f = open(os.path.join(ROOT_FOLDER, "CRASH.log"), "a")
+            f.write(f"\n[{make_date(dtime.now())}_{make_time(dtime.now(), write_ms=True)}] [CRASH]\t: |Logging error|\n")
+            f.close()
 
 
 def recreate_folder(folder_name:str, folder_path:str=None, display_name:str=None):
@@ -157,7 +180,7 @@ def make_backup(save_num:int, is_temporary=False):
         log_info(f"Made {('temporary ' if is_temporary else ' ')}backup", display_backup_name)
         return [backup_name, display_backup_name]
     else:
-        log_info("Backup failed", f"save file not found: {display_save_name}", "WARN")
+        log_info("Backup failed", f"save file not found: {display_save_name}", 1)
         return False
     
 
@@ -309,7 +332,7 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
     try:
         settings = decode_keybinds(json.loads(sfm.decode_save(SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING)[0]))
     except ValueError:
-        log_info("Decode error", "settings", "ERROR")
+        log_info("Decode error", "settings", 2)
         press_key("The settings file is corrupted, and will now be recreated!")
         settings = recreate_settings()
     except FileNotFoundError:
@@ -323,7 +346,7 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
                 return settings[line_name]
             except KeyError:
                 if line_name in settings_lines:
-                    log_info("Missing key in settings", line_name, "WARN")
+                    log_info("Missing key in settings", line_name, 1)
                     settings_manager(line_name, def_settings[line_name])
                     return def_settings[line_name]
                 else:
@@ -337,7 +360,7 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
                 sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
         else:
             if line_name in settings_lines:
-                log_info("Recreating key in settings", line_name, "WARN")
+                log_info("Recreating key in settings", line_name, 1)
                 settings[line_name] = def_settings[line_name]
                 sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
             else:
@@ -406,7 +429,7 @@ def package_response(bad_packages:list, py_good:bool):
         log_info("Python up to date")
     else:
         from platform import python_version
-        log_info("Python not up to date", f"{python_version()} -> {PYTHON_MIN_VERSION}", "WARN")
+        log_info("Python not up to date", f"{python_version()} -> {PYTHON_MIN_VERSION}", 1)
         print(f"Python not up to date: {python_version()} -> {PYTHON_MIN_VERSION}")
     # packages
     if len(bad_packages) == 0:
@@ -415,7 +438,7 @@ def package_response(bad_packages:list, py_good:bool):
         bad_packages_str = []
         for package in bad_packages:
             bad_packages_str.append(f"{package[2]}({package[1]}) -> {package[0]}")
-        log_info("Some packages are not up to date", ", ".join([p for p in bad_packages_str]), "WARN")
+        log_info("Some packages are not up to date", ", ".join([p for p in bad_packages_str]), 1)
         print(f"{'Some packages are' if len(bad_packages) > 1 else 'A package is'} not up to date:\n\t" + "\n\t".join([p for p in bad_packages_str]))
     # return
     if len(bad_packages) == 0 and py_good:

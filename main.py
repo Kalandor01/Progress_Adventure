@@ -40,7 +40,7 @@ if __name__ == "__main__":
         else:
             GOOD_PACKAGES = False
     except:
-        ts.log_info("Preloading crashed", sys.exc_info(), "ERROR")
+        ts.log_info("Preloading crashed", sys.exc_info(), 3)
         raise
 
 
@@ -264,7 +264,7 @@ def auto_saver():
             else:
                 break
     except:
-        ts.log_info("Thread crashed", sys.exc_info(), "ERROR")
+        ts.log_info("Thread crashed", sys.exc_info(), 3)
         raise
 
 
@@ -284,7 +284,7 @@ def quit_game():
             else:
                 break
     except:
-        ts.log_info("Thread crashed", sys.exc_info(), "ERROR")
+        ts.log_info("Thread crashed", sys.exc_info(), 3)
         raise
     
 
@@ -352,7 +352,7 @@ def load_save(save_num=1):
     except KeyError: save_version = 0.0
     if save_version != SAVE_VERSION:
         is_older = ts.check_p_version(str(save_version), str(SAVE_VERSION))
-        ts.log_info("Trying to load save with an incorrect version", f"{SAVE_VERSION} -> {save_version}", "WARN")
+        ts.log_info("Trying to load save with an incorrect version", f"{SAVE_VERSION} -> {save_version}", 1)
         ans = sfm.UI_list(["Yes", "No"], f"Save file {save_num} is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to back up the save file before loading it?").display(SETTINGS.keybind_mapping)
         if ans == 0:
             ts.make_backup(save_num)
@@ -388,7 +388,7 @@ def get_saves_data():
     datas_processed = []
     for data in datas:
         if data[1] == -1:
-            ts.log_info("Decode error", f"Slot number: {data[0]}", "ERROR")
+            ts.log_info("Decode error", f"Slot number: {data[0]}", 2)
             ts.press_key(f"Save file {data[0]} is corrupted!")
         else:
             try:
@@ -403,7 +403,7 @@ def get_saves_data():
                 data_processed += ts.text_c(f" v.{save_version}", (C_F_GREEN if save_version == SAVE_VERSION else C_F_RED))
                 datas_processed.append([data[0], data_processed])
             except (TypeError, IndexError):
-                ts.log_info("Parse error", f"Slot number: {data[0]}", "ERROR")
+                ts.log_info("Parse error", f"Slot number: {data[0]}", 2)
                 ts.press_key(f"Save file {data[0]} could not be parsed!")
     return datas_processed
 
@@ -557,7 +557,7 @@ if __name__ == "__main__":
                 ts.log_info("Beginning new instance")
                 main()
         except:
-            ts.log_info("Instance crashed", sys.exc_info(), "ERROR")
+            ts.log_info("Instance crashed", sys.exc_info(), 3)
             if error_handling:
                 print(f"ERROR: {sys.exc_info()[1]}")
                 ans = input("Restart?(Y/N): ")
