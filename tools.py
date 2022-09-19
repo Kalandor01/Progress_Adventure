@@ -19,7 +19,7 @@ PYTHON_MIN_VERSION = "3.10.5"
 PIP_NP_MIN_VERSION = "1.22.1"
 PIP_COLOR_MIN_VERSION = "0.4.5"
 
-PIP_SFM_MIN_VERSION = "1.10.6"
+PIP_SFM_MIN_VERSION = "1.11.1.1"
 PIP_RS_MIN_VERSION = "1.5.1"
 # language
 ENCODING = "windows-1250"
@@ -33,9 +33,8 @@ ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__))
     #save
 SAVES_FOLDER = "saves"
 SAVES_FOLDER_PATH = os.path.join(ROOT_FOLDER, SAVES_FOLDER)
-SAVE_NAME = "save*"
 SAVE_EXT = "sav"
-SAVE_FILE_PATH = os.path.join(SAVES_FOLDER_PATH, SAVE_NAME)
+SAVE_SEED = 87531
     #logs
 LOGGING = True
 LOGS_FOLDER = "logs"
@@ -86,7 +85,6 @@ def make_time(time_lis:list|dtime, sep=":", write_ms=False, ms_sep:str="."):
 
 def change_logging(value:bool):
     global LOGGING
-    print(LOGGING, value)
     if LOGGING != value:
         if value:
             LOGGING = value
@@ -165,18 +163,18 @@ def recreate_logs_folder():
     recreate_folder(LOGS_FOLDER)
 
 
-def make_backup(save_num:int, is_temporary=False):
+def make_backup(save_name:str, is_temporary=False):
     recreate_saves_folder()
     recreate_backups_folder()
     now = dtime.now()
-    backup_name_end = f'{make_date(now)};{make_time(now, "-", is_temporary, "-")};{SAVE_NAME.replace("*", str(save_num))}.{BACKUP_EXT}'
-    save_name = f'{SAVE_FILE_PATH.replace("*", str(save_num))}.{SAVE_EXT}'
-    display_save_name = f'{os.path.join(SAVES_FOLDER, SAVE_NAME).replace("*", str(save_num))}.{SAVE_EXT}'
+    backup_name_end = f'{make_date(now)};{make_time(now, "-", is_temporary, "-")};{save_name}.{BACKUP_EXT}'
+    full_save_name = f'{os.path.join(SAVES_FOLDER_PATH, save_name)}.{SAVE_EXT}'
+    display_save_name = f'{os.path.join(SAVES_FOLDER, save_name)}.{SAVE_EXT}'
     backup_name = os.path.join(BACKUPS_FOLDER_PATH, backup_name_end)
     display_backup_name = os.path.join(BACKUPS_FOLDER, backup_name_end)
 
-    if os.path.isfile(save_name):
-        shutil.copyfile(save_name, backup_name)
+    if os.path.isfile(full_save_name):
+        shutil.copyfile(full_save_name, backup_name)
         log_info(f"Made {('temporary ' if is_temporary else ' ')}backup", display_backup_name)
         return [backup_name, display_backup_name]
     else:

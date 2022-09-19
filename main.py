@@ -14,7 +14,7 @@ import classes as cl
 
 from tools import r, colorama, sfm
 from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME
-from tools import SAVES_FOLDER_PATH, SAVE_NAME, SAVE_EXT, SAVE_FILE_PATH
+from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
 from tools import AUTO_SAVE_DELAY, ENCODING, SETTINGS_ENCODE_SEED, FILE_ENCODING_VERSION, SAVE_VERSION
 from tools import C_F_RED, C_F_GREEN
 
@@ -239,8 +239,8 @@ def make_save(frozen_data:cl.Save_data):
     # randomstate
     save_data["seed"] = ts.random_state_converter(r)
     # create new save
-    backup_status = ts.make_backup(frozen_data.save_num, True)
-    sfm.encode_save([json.dumps(display_data), json.dumps(save_data)], frozen_data.save_num, SAVE_FILE_PATH, SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
+    backup_status = ts.make_backup(frozen_data.save_name, True)
+    sfm.encode_save([json.dumps(display_data), json.dumps(save_data)], SAVE_SEED, os.path.join(SAVES_FOLDER_PATH, frozen_data.save_name), SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
     if backup_status != False:
         os.remove(backup_status[0])
         ts.log_info("Removed temporary backup", backup_status[1])
@@ -249,7 +249,7 @@ def make_save(frozen_data:cl.Save_data):
 def save_game():
     frozen_data = copy.deepcopy(SAVE_DATA)
     make_save(frozen_data)
-    ts.log_info("Game saved", f'slot number: {frozen_data.save_num}, player name: "{frozen_data.player.name}"')
+    ts.log_info("Game saved", f'save name: {frozen_data.save_name}, player name: "{frozen_data.player.name}"')
 
 
 # Auto save thread
@@ -259,7 +259,7 @@ def auto_saver():
             time.sleep(AUTO_SAVE_DELAY)
             if GLOBALS.in_game_loop:
                 if not GLOBALS.in_fight:
-                    ts.log_info("Beginning auto save", f"slot number: {SAVE_DATA.save_num}")
+                    ts.log_info("Beginning auto save", f"save name: {SAVE_DATA.save_name}")
                     save_game()
             else:
                 break
@@ -275,7 +275,7 @@ def quit_game():
             if GLOBALS.in_game_loop:
                 if ts.is_key(SETTINGS.keybinds["esc"]):
                     if not GLOBALS.in_fight:
-                        ts.log_info("Beginning manual save", f"slot number: {SAVE_DATA.save_num}")
+                        ts.log_info("Beginning manual save", f"save name: {SAVE_DATA.save_name}")
                         GLOBALS.exiting = True
                         save_game()
                         break
@@ -315,18 +315,20 @@ def game_loop():
     ts.log_info("Game loop ended")
 
     
-def new_save(save_num=1):
+def new_save():
     ts.log_info("Preparing game data")
     # make player
-    player = cl.Player(input("What is your name?: "))
+    p_name = input("What is your name?: ")
+    player = cl.Player(p_name)
+    save_name = p_name + "_" + ts.make_time(ts.dtime.now(), "_")
     # last_access
     now = dtime.now()
     last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
     # load to class
     global SAVE_DATA
-    SAVE_DATA = cl.Save_data(save_num, last_access, player, r.get_state())
+    SAVE_DATA = cl.Save_data(save_name, last_access, player, r.get_state())
     make_save(SAVE_DATA)
-    ts.log_info("Created save", f'slot number: {save_num}, player name: "{player.name}"')
+    ts.log_info("Created save", f'save_name: {save_name}, player name: "{player.name}"')
     game_loop()
 
 
@@ -344,18 +346,21 @@ def correct_save_data(data, save_version):
     return data
 
 
-def load_save(save_num=1):
+def load_save(save_name:str=None):
+    global SAVE_DATA
+    if save_name == None:
+        save_name = SAVE_DATA.save_name
     # read data
-    data = json.loads(sfm.decode_save(save_num, SAVE_FILE_PATH, SAVE_EXT, ENCODING)[1])
+    data = json.loads(sfm.decode_save(SAVE_SEED, os.path.join(SAVES_FOLDER_PATH, save_name), SAVE_EXT, ENCODING)[1])
     # save version
     try: save_version = data["save_version"]
     except KeyError: save_version = 0.0
     if save_version != SAVE_VERSION:
         is_older = ts.check_p_version(str(save_version), str(SAVE_VERSION))
         ts.log_info("Trying to load save with an incorrect version", f"{SAVE_VERSION} -> {save_version}", 1)
-        ans = sfm.UI_list(["Yes", "No"], f"Save file {save_num} is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to back up the save file before loading it?").display(SETTINGS.keybind_mapping)
+        ans = sfm.UI_list(["Yes", "No"], f"\"{save_name}\" is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to back up the save file before loading it?").display(SETTINGS.keybind_mapping)
         if ans == 0:
-            ts.make_backup(save_num)
+            ts.make_backup(save_name)
         data = correct_save_data(data, save_version)
     # last access
     last_access = data["last_access"]
@@ -368,33 +373,32 @@ def load_save(save_num=1):
     player.speed = float(player_data["speed"])
     player.inventory.items = list(ts.inventory_converter(player_data["inventory"]))
     # log
-    ts.log_info("Loaded save", f'slot number: {save_num}, hero name: "{player.name}", last saved: {ts.make_date(last_access)} {ts.make_time(last_access[3:])}')
+    ts.log_info("Loaded save", f'save name: {save_name}, hero name: "{player.name}", last saved: {ts.make_date(last_access)} {ts.make_time(last_access[3:])}')
     
     # PREPARING
     ts.log_info("Preparing game data")
     # load random state
     r.set_state(ts.random_state_converter(data["seed"]))
     # load to class
-    global SAVE_DATA
-    SAVE_DATA = cl.Save_data(save_num, last_access, player, r.get_state())
+    SAVE_DATA = cl.Save_data(save_name, last_access, player, r.get_state())
     game_loop()
 
 
 def get_saves_data():
     ts.recreate_saves_folder()
     # read saves
-    datas = sfm.file_reader_s(SAVE_NAME, SAVES_FOLDER_PATH, 1)
+    datas = sfm.file_reader_blank(SAVE_SEED, SAVES_FOLDER_PATH, 1)
     # process file data
     datas_processed = []
     for data in datas:
         if data[1] == -1:
-            ts.log_info("Decode error", f"Slot number: {data[0]}", 2)
-            ts.press_key(f"Save file {data[0]} is corrupted!")
+            ts.log_info("Decode error", f"Save name: {data[0]}", 2)
+            ts.press_key(f"\"{data[0]}\" is corrupted!")
         else:
             try:
                 data[1] = json.loads(data[1][0])
                 data_processed = ""
-                data_processed += f"Save file {data[0]}: {data[1]['player_name']}\n"
+                data_processed += f"Save name {data[0]}: {data[1]['player_name']}\n"
                 last_access = data[1]["last_access"]
                 data_processed += f"Last opened: {ts.make_date(last_access, '.')} {ts.make_time(last_access[3:])}"
                 # check version
@@ -403,8 +407,8 @@ def get_saves_data():
                 data_processed += ts.text_c(f" v.{save_version}", (C_F_GREEN if save_version == SAVE_VERSION else C_F_RED))
                 datas_processed.append([data[0], data_processed])
             except (TypeError, IndexError):
-                ts.log_info("Parse error", f"Slot number: {data[0]}", 2)
-                ts.press_key(f"Save file {data[0]} could not be parsed!")
+                ts.log_info("Parse error", f"Save name: {data[0]}", 2)
+                ts.press_key(f"\"{data[0]}\" could not be parsed!")
     return datas_processed
 
 
@@ -502,11 +506,11 @@ def main_menu():
                     if option != -1 and option < (len(list_data) - 1) / 2:
                         if sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(SETTINGS.keybind_mapping):
                             # log
-                            datas = json.loads(sfm.decode_save(files_data[option][0], SAVE_FILE_PATH, SAVE_EXT, ENCODING, 1)[0])
+                            datas = json.loads(sfm.decode_save(SAVE_SEED, os.path.join(SAVES_FOLDER_PATH, files_data[option][0]), SAVE_EXT, ENCODING, 1)[0])
                             last_access = datas["last_access"]
                             ts.log_info("Deleted save", f'slot number: {files_data[option][0]}, hero name: "{datas["player_name"]}", last saved: {ts.make_date(last_access)} {ts.make_time(last_access[3:])}')
                             # remove
-                            os.remove(f'{SAVE_FILE_PATH.replace("*", str(files_data[option][0]))}.{SAVE_EXT}')
+                            os.remove(f'{os.path.join(SAVES_FOLDER_PATH, files_data[option][0])}.{SAVE_EXT}')
                             list_data.pop(option * 2)
                             list_data.pop(option * 2)
                             files_data.pop(option)
@@ -524,21 +528,20 @@ def main_menu():
         # action
         # new save
         if status[0] == 1:
-            ts.press_key(f"\nNew game in slot {status[1]}!\n")
+            ts.press_key(f"\nCreating new save!\n")
             # new slot?
-            new_save(status[1])
+            new_save()
             files_data = get_saves_data()
         # load
         elif status[0] == 0:
-            ts.press_key(f"\nLoading slot {status[1]}!")
-            load_save(status[1])
+            ts.press_key(f"\nLoading save: {SAVE_DATA.save_name}!")
+            load_save()
             files_data = get_saves_data()
 
 
 def main():
     # dt.decode_save_file(SETTINGS_ENCODE_SEED, "settings")
     # dt.decode_save_file(1)
-    # dt.encode_save_file(1)
     # dt.recompile_save_file(1, 4, SAVE_FILE_PATH + "_2022-06-18_19;00;17.570787", SAVE_FILE_PATH, BACKUP_EXT, SAVE_EXT)
     
     # dt.load_backup_menu()
