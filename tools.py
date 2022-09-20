@@ -49,11 +49,11 @@ C_F_RED = colorama.Fore.RED
 C_F_GREEN = colorama.Fore.GREEN
 # other
 AUTO_SAVE_DELAY = 3
-SETTINGS_ENCODE_SEED = 1
+SETTINGS_SEED = 1
 FILE_ENCODING_VERSION = 2
 DOUBLE_KEYS = [b"\xe0", b"\x00"]
 LOG_MS = False
-SAVE_VERSION = 1.1
+SAVE_VERSION = 1.2
 
 
 def pad_zero(num:int|str):
@@ -143,6 +143,10 @@ def log_info(message:str, detail="", message_type=0, write_out=False, new_line=F
 
 
 def recreate_folder(folder_name:str, folder_path:str=None, display_name:str=None):
+    """
+    Recreates the folder, if it doesn't exist.\n
+    Returns if the folder needed to be recreated.
+    """
     if folder_path == None:
         folder_path = os.path.join(ROOT_FOLDER, folder_name)
     if display_name == None:
@@ -150,17 +154,29 @@ def recreate_folder(folder_name:str, folder_path:str=None, display_name:str=None
     if not os.path.isdir(folder_path):
         os.mkdir(folder_name)
         log_info(f"Recreating {display_name} folder")
+        return True
+    else:
+        return False
 
 def recreate_saves_folder():
-    recreate_folder(SAVES_FOLDER)
+    """
+    `recreate_folder` for the saves folder.
+    """
+    return recreate_folder(SAVES_FOLDER)
 
 
 def recreate_backups_folder():
-    recreate_folder(BACKUPS_FOLDER)
+    """
+    `recreate_folder` for the backups folder.
+    """
+    return recreate_folder(BACKUPS_FOLDER)
 
 
 def recreate_logs_folder():
-    recreate_folder(LOGS_FOLDER)
+    """
+    `recreate_folder` for the logs folder.
+    """
+    return recreate_folder(LOGS_FOLDER)
 
 
 def make_backup(save_name:str, is_temporary=False):
@@ -321,14 +337,14 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
     def_settings = {"auto_save": True, "logging": True, "keybinds": {"esc": [b"\x1b"], "up": [b"H", 1], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
 
     def recreate_settings():
-        sfm.encode_save(json.dumps(encode_keybinds(def_settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
+        sfm.encode_save(json.dumps(encode_keybinds(def_settings)), SETTINGS_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
         # log
         log_info("Recreated settings")
         return def_settings
 
 
     try:
-        settings = decode_keybinds(json.loads(sfm.decode_save(SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING)[0]))
+        settings = decode_keybinds(json.loads(sfm.decode_save(SETTINGS_SEED, "settings", SAVE_EXT, ENCODING)[0]))
     except ValueError:
         log_info("Decode error", "settings", 2)
         press_key("The settings file is corrupted, and will now be recreated!")
@@ -355,12 +371,12 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
             if settings[line_name] != write_value:
                 log_info("Changed settings", f"{line_name}: {settings[line_name]} -> {write_value}")
                 settings[line_name] = write_value
-                sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
+                sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
         else:
             if line_name in settings_lines:
                 log_info("Recreating key in settings", line_name, 1)
                 settings[line_name] = def_settings[line_name]
-                sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_ENCODE_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
+                sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
             else:
                 raise KeyError(line_name)
 
@@ -477,3 +493,25 @@ def check_package_versions():
             bad_packages.append(package)
     return package_response(bad_packages, py_good)
 
+def check_save_name(save_name:str):
+    """
+    Checks if the file name exists in the saves directory.
+    """
+    if not recreate_saves_folder():
+        for name in os.listdir(SAVES_FOLDER_PATH):
+            if os.path.isfile(os.path.join(SAVES_FOLDER_PATH, name)) and name.endswith("." + SAVE_EXT):
+                    if name.replace("." + SAVE_EXT, "") == save_name:
+                        return True
+        return False
+    else:
+        return False
+
+def remove_bad_characters(save_name:str):
+    """
+    Removes all characters that can't be in file names.\n
+    (\/:*"?:<>|)
+    """
+    bad_chars = ["\\", "/", ":", "*", "\"", "?", ":", "<", ">", "|"]
+    for char in bad_chars:
+        save_name = save_name.replace(char, "")
+    return save_name

@@ -15,7 +15,8 @@ import classes as cl
 from tools import r, colorama, sfm
 from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME
 from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
-from tools import AUTO_SAVE_DELAY, ENCODING, SETTINGS_ENCODE_SEED, FILE_ENCODING_VERSION, SAVE_VERSION
+from tools import BACKUPS_FOLDER_PATH, ROOT_FOLDER, BACKUP_EXT
+from tools import AUTO_SAVE_DELAY, ENCODING, SETTINGS_SEED, FILE_ENCODING_VERSION, SAVE_VERSION
 from tools import C_F_RED, C_F_GREEN
 
 if __name__ == "__main__":
@@ -25,7 +26,7 @@ if __name__ == "__main__":
         if ts.check_package_versions():
             ts.log_info("Preloading global variables")
             colorama.init()
-            # dt.decode_save_file(SETTINGS_ENCODE_SEED, "settings")
+            # dt.decode_save_file(SETTINGS_SEED, "settings")
 
             # GLOBAL VARIABLES
             GOOD_PACKAGES = True
@@ -227,6 +228,9 @@ def make_save(frozen_data:cl.Save_data):
     # save_version
     display_data["save_version"] = SAVE_VERSION
     save_data["save_version"] = SAVE_VERSION
+    # display_name
+    display_data["display_name"] = frozen_data.display_save_name
+    save_data["display_name"] = frozen_data.display_save_name
     # last_access
     now = dtime.now()
     last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
@@ -317,22 +321,28 @@ def game_loop():
     
 def new_save():
     ts.log_info("Preparing game data")
+    # make save name
+    display_save_name = input("Name your save: ")
+    save_name = ts.remove_bad_characters(display_save_name)
+    if ts.check_save_name(save_name):
+        extra_num = 1
+        while ts.check_save_name(save_name):
+            extra_num += 1
+        save_name += "_" + extra_num
     # make player
-    p_name = input("What is your name?: ")
-    player = cl.Player(p_name)
-    save_name = p_name + "_" + ts.make_time(ts.dtime.now(), "_")
+    player = cl.Player(input("What is your name?: "))
     # last_access
     now = dtime.now()
     last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
     # load to class
     global SAVE_DATA
-    SAVE_DATA = cl.Save_data(save_name, last_access, player, r.get_state())
+    SAVE_DATA = cl.Save_data(save_name, display_save_name, last_access, player, r.get_state())
     make_save(SAVE_DATA)
     ts.log_info("Created save", f'save_name: {save_name}, player name: "{player.name}"')
     game_loop()
 
 
-def correct_save_data(data, save_version):
+def correct_save_data(data:dict, save_version:int, extra_data:dict):
     ts.log_info("Correcting save data")
     # 0.0 -> 1.0
     if save_version == 0.0:
@@ -343,13 +353,15 @@ def correct_save_data(data, save_version):
         data["player"]["inventory"] = []
         save_version = 1.1
         ts.log_info("Corrected save data", "1.0 -> 1.1")
+    # 1.1 -> 1.2
+    if save_version == 1.1:
+        data["display_name"] = extra_data["save_name"]
+        save_version = 1.2
+        ts.log_info("Corrected save data", "1.1 -> 1.2")
     return data
 
 
-def load_save(save_name:str=None):
-    global SAVE_DATA
-    if save_name == None:
-        save_name = SAVE_DATA.save_name
+def load_save(save_name:str):
     # read data
     data = json.loads(sfm.decode_save(SAVE_SEED, os.path.join(SAVES_FOLDER_PATH, save_name), SAVE_EXT, ENCODING)[1])
     # save version
@@ -361,7 +373,9 @@ def load_save(save_name:str=None):
         ans = sfm.UI_list(["Yes", "No"], f"\"{save_name}\" is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to back up the save file before loading it?").display(SETTINGS.keybind_mapping)
         if ans == 0:
             ts.make_backup(save_name)
-        data = correct_save_data(data, save_version)
+        data = correct_save_data(data, save_version, {"save_name": save_name})
+    # display_name
+    display_name = data["display_name"]
     # last access
     last_access = data["last_access"]
     # player
@@ -380,7 +394,8 @@ def load_save(save_name:str=None):
     # load random state
     r.set_state(ts.random_state_converter(data["seed"]))
     # load to class
-    SAVE_DATA = cl.Save_data(save_name, last_access, player, r.get_state())
+    global SAVE_DATA
+    SAVE_DATA = cl.Save_data(save_name, display_name, last_access, player, r.get_state())
     game_loop()
 
 
@@ -398,7 +413,11 @@ def get_saves_data():
             try:
                 data[1] = json.loads(data[1][0])
                 data_processed = ""
-                data_processed += f"Save name {data[0]}: {data[1]['player_name']}\n"
+                try:
+                    dispaly_name = data[1]['display_name']
+                except KeyError:
+                    dispaly_name = data[0]
+                data_processed += f"{dispaly_name}: {data[1]['player_name']}\n"
                 last_access = data[1]["last_access"]
                 data_processed += f"Last opened: {ts.make_date(last_access, '.')} {ts.make_time(last_access[3:])}"
                 # check version
@@ -476,11 +495,7 @@ def main_menu():
             in_main_menu = True
         # new file
         if option == 0:
-            new_slot = 1
-            for data in files_data:
-                if data[0] == new_slot:
-                    new_slot += 1
-            status = [1, new_slot]
+            status = [1, ""]
         elif option == -1:
             break
         # load/delete
@@ -534,15 +549,15 @@ def main_menu():
             files_data = get_saves_data()
         # load
         elif status[0] == 0:
-            ts.press_key(f"\nLoading save: {SAVE_DATA.save_name}!")
-            load_save()
+            ts.press_key(f"\nLoading save: {status[1]}!")
+            load_save(status[1])
             files_data = get_saves_data()
 
 
 def main():
-    # dt.decode_save_file(SETTINGS_ENCODE_SEED, "settings")
-    # dt.decode_save_file(1)
-    # dt.recompile_save_file(1, 4, SAVE_FILE_PATH + "_2022-06-18_19;00;17.570787", SAVE_FILE_PATH, BACKUP_EXT, SAVE_EXT)
+    # dt.decode_save_file("settings", ROOT_FOLDER, SETTINGS_SEED)
+    # dt.decode_save_file("plz_work_00_52_16")
+    # dt.recompile_save_file("2022-07-10;16-58-51;save2", "old_save2", BACKUPS_FOLDER_PATH, SAVES_FOLDER_PATH, BACKUP_EXT, SAVE_EXT, 2, SAVE_SEED)
     
     # dt.load_backup_menu()
     main_menu()

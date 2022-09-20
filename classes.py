@@ -90,8 +90,9 @@ class Settings:
 
 
 class Save_data:
-    def __init__(self, save_name:str, last_access:list[int], player:Player, seed:tuple):
+    def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player, seed:tuple):
         self.save_name = str(save_name)
+        self.display_save_name = str(display_save_name)
         self.last_access = list[int](last_access)
         self.player = copy.deepcopy(player)
         self.seed = tuple(seed)
