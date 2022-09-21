@@ -323,12 +323,16 @@ def new_save():
     ts.log_info("Preparing game data")
     # make save name
     display_save_name = input("Name your save: ")
+    if display_save_name == "":
+        display_save_name = "new save"
     save_name = ts.remove_bad_characters(display_save_name)
+    if save_name == "":
+        save_name = "new_save"
     if ts.check_save_name(save_name):
         extra_num = 1
-        while ts.check_save_name(save_name):
+        while ts.check_save_name(save_name + "_" + str(extra_num)):
             extra_num += 1
-        save_name += "_" + extra_num
+        save_name += "_" + str(extra_num)
     # make player
     player = cl.Player(input("What is your name?: "))
     # last_access
@@ -523,7 +527,7 @@ def main_menu():
                             # log
                             datas = json.loads(sfm.decode_save(SAVE_SEED, os.path.join(SAVES_FOLDER_PATH, files_data[option][0]), SAVE_EXT, ENCODING, 1)[0])
                             last_access = datas["last_access"]
-                            ts.log_info("Deleted save", f'slot number: {files_data[option][0]}, hero name: "{datas["player_name"]}", last saved: {ts.make_date(last_access)} {ts.make_time(last_access[3:])}')
+                            ts.log_info("Deleted save", f'save name: {files_data[option][0]}, hero name: "{datas["player_name"]}", last saved: {ts.make_date(last_access)} {ts.make_time(last_access[3:])}')
                             # remove
                             os.remove(f'{os.path.join(SAVES_FOLDER_PATH, files_data[option][0])}.{SAVE_EXT}')
                             list_data.pop(option * 2)
@@ -544,7 +548,6 @@ def main_menu():
         # new save
         if status[0] == 1:
             ts.press_key(f"\nCreating new save!\n")
-            # new slot?
             new_save()
             files_data = get_saves_data()
         # load
