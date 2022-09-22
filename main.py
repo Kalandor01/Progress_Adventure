@@ -18,6 +18,7 @@ from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
 from tools import BACKUPS_FOLDER_PATH, ROOT_FOLDER, BACKUP_EXT
 from tools import AUTO_SAVE_DELAY, ENCODING, SETTINGS_SEED, FILE_ENCODING_VERSION, SAVE_VERSION
 from tools import C_F_RED, C_F_GREEN
+from tools import STANDARD_CURSOR_ICONS, DELETE_CURSOR_ICONS
 
 if __name__ == "__main__":
     try:
@@ -512,7 +513,7 @@ def main_menu():
                 list_data.append(None)
             list_data.append("Delete file")
             list_data.append("Back")
-            option = sfm.UI_list_s(list_data, " Level select", True, True, exclude_none=True).display(SETTINGS.keybind_mapping)
+            option = sfm.UI_list_s(list_data, " Level select", True, True, exclude_nones=True).display(SETTINGS.keybind_mapping)
             # load
             if option != -1 and option < len(files_data):
                 status = [0, files_data[int(option)][0]]
@@ -521,7 +522,7 @@ def main_menu():
                 # remove "delete file"
                 list_data.pop(len(list_data) - 2)
                 while len(files_data) > 0:
-                    option = sfm.UI_list(list_data, " Delete mode!", "X ", "  ", multiline=True, can_esc=True, exclude_none=True).display(SETTINGS.keybind_mapping)
+                    option = sfm.UI_list(list_data, " Delete mode!", DELETE_CURSOR_ICONS, True, True, exclude_nones=True).display(SETTINGS.keybind_mapping)
                     if option != -1 and option < (len(list_data) - 1) / 2:
                         if sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(SETTINGS.keybind_mapping):
                             # log
@@ -541,7 +542,7 @@ def main_menu():
             else:
                 in_main_menu = True
         elif (option == 2 and len(files_data)) or (option == 1 and not len(files_data)):
-            sfm.UI_list_s(["Keybinds", "Other", None, "Back"], " Options", False, True, [keybind_setting, other_options], True).display(SETTINGS.keybind_mapping)
+            sfm.UI_list(["Keybinds", "Other", None, "Back"], " Options", None, False, True, [keybind_setting, other_options], True).display(SETTINGS.keybind_mapping)
             in_main_menu = True
 
         # action
@@ -566,7 +567,7 @@ def main():
     main_menu()
 
 
-if __name__ == "__main__":
+def main_error_handler():
     # ultimate error handlind (release only)
     error_handling = False
 
@@ -590,3 +591,7 @@ if __name__ == "__main__":
         else:
             # end log
             ts.log_info("Instance ended succesfuly")
+
+
+if __name__ == "__main__":
+    main_error_handler()

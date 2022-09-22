@@ -19,7 +19,7 @@ PYTHON_MIN_VERSION = "3.10.5"
 PIP_NP_MIN_VERSION = "1.22.1"
 PIP_COLOR_MIN_VERSION = "0.4.5"
 
-PIP_SFM_MIN_VERSION = "1.11.1.1"
+PIP_SFM_MIN_VERSION = "1.12.1"
 PIP_RS_MIN_VERSION = "1.5.1"
 # language
 ENCODING = "windows-1250"
@@ -54,6 +54,10 @@ FILE_ENCODING_VERSION = 2
 DOUBLE_KEYS = [b"\xe0", b"\x00"]
 LOG_MS = False
 SAVE_VERSION = 1.2
+STANDARD_CURSOR_ICONS = sfm.Cursor_icon(selected_icon=">", selected_icon_right="",
+                                        not_selected_icon=" ", not_selected_icon_right="")
+DELETE_CURSOR_ICONS = sfm.Cursor_icon(selected_icon=" X", selected_icon_right="",
+                                        not_selected_icon="  ", not_selected_icon_right="")
 
 
 def pad_zero(num:int|str):

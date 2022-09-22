@@ -9,6 +9,7 @@ from tools import MAIN_THREAD_NAME, TEST_THREAD_NAME
 from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
 from tools import ENCODING, SETTINGS_SEED, FILE_ENCODING_VERSION
 from tools import C_F_GREEN, C_F_RED, SAVE_VERSION
+from tools import STANDARD_CURSOR_ICONS
 
 def decode_save_file(save_name:str, save_name_pre=SAVES_FOLDER_PATH, save_num=SAVE_SEED, save_ext=SAVE_EXT):
     """
@@ -148,7 +149,7 @@ def load_backup_menu():
             for data in files_data:
                 list_data.append(data[1])
                 list_data.append(None)
-            option = sfm.UI_list_s(list_data, " Backup loading", True, True, exclude_none=True).display()
+            option = sfm.UI_list_s(list_data, " Backup loading", True, True, True).display()
             # load
             if option == -1:
                 break
