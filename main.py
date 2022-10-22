@@ -224,6 +224,9 @@ def prepair_fight():
 def make_save(data:cl.Save_data):
     # make backup
     backup_status = ts.make_backup(data.save_name, True)
+    # FOLDER
+    ts.recreate_folder(data.save_name, SAVES_FOLDER_PATH)
+    save_folder = os.path.join(SAVES_FOLDER_PATH, data.save_name)
     # DATA FILE
     # make player
     player = data.player
@@ -248,7 +251,10 @@ def make_save(data:cl.Save_data):
     # randomstate
     save_data["seed"] = ts.random_state_converter(r)
     # create new save
-    ts.encode_save_s([display_data, save_data], os.path.join(SAVES_FOLDER_PATH, data.save_name, SAVE_FILE_NAME_DATA))
+    ts.encode_save_s([display_data, save_data], os.path.join(save_folder, SAVE_FILE_NAME_DATA))
+    # CHUNKS FOLDER
+    ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder)
+    # ts.encode_save_s(chunks_data, os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
     # remove backup
     if backup_status != False:
         os.remove(backup_status[0])

@@ -186,17 +186,16 @@ def log_info(message:str, detail="", log_type=Log_type.INFO, write_out=False, ne
             f.close()
 
 
-def recreate_folder(folder_name:str, folder_path:str=None, display_name:str=None):
+def recreate_folder(folder_name:str, parent_folder_path:str=ROOT_FOLDER, display_name:str=None):
     """
     Recreates the folder, if it doesn't exist.\n
     Returns if the folder needed to be recreated.
     """
-    if folder_path == None:
-        folder_path = os.path.join(ROOT_FOLDER, folder_name)
+    folder_path = os.path.join(parent_folder_path, folder_name)
     if display_name == None:
         display_name = folder_name.lower()
     if not os.path.isdir(folder_path):
-        os.mkdir(folder_name)
+        os.mkdir(folder_path)
         log_info(f"Recreating {display_name} folder")
         return True
     else:
