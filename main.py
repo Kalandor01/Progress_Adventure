@@ -12,12 +12,14 @@ import tools as ts
 import dev_tools as dt
 import classes as cl
 
-from tools import r, colorama, sfm
+from tools import r, sfm
 from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME
 from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
 from tools import BACKUPS_FOLDER_PATH, ROOT_FOLDER, BACKUP_EXT
 from tools import AUTO_SAVE_DELAY, ENCODING, SETTINGS_SEED, FILE_ENCODING_VERSION, SAVE_VERSION
-from tools import C_F_RED, C_F_GREEN
+from tools import SAVE_FILE_NAME_DATA
+from tools import SAVE_FOLDER_NAME_CHUNKS
+from tools import Color, Style, Log_type
 from tools import STANDARD_CURSOR_ICONS, DELETE_CURSOR_ICONS
 
 if __name__ == "__main__":
@@ -26,7 +28,6 @@ if __name__ == "__main__":
         ts.begin_log()
         if ts.check_package_versions():
             ts.log_info("Preloading global variables")
-            colorama.init()
             # dt.decode_save_file(SETTINGS_SEED, "settings")
 
             # GLOBAL VARIABLES
@@ -42,7 +43,7 @@ if __name__ == "__main__":
         else:
             GOOD_PACKAGES = False
     except:
-        ts.log_info("Preloading crashed", sys.exc_info(), 3)
+        ts.log_info("Preloading crashed", sys.exc_info(), Log_type.CRASH)
         raise
 
 
@@ -220,9 +221,12 @@ def prepair_fight():
     GLOBALS.in_fight = False
 
 
-def make_save(frozen_data:cl.Save_data):
+def make_save(data:cl.Save_data):
+    # make backup
+    backup_status = ts.make_backup(data.save_name, True)
+    # DATA FILE
     # make player
-    player = frozen_data.player
+    player = data.player
     # make new save data
     display_data = {}
     save_data = {}
@@ -230,8 +234,8 @@ def make_save(frozen_data:cl.Save_data):
     display_data["save_version"] = SAVE_VERSION
     save_data["save_version"] = SAVE_VERSION
     # display_name
-    display_data["display_name"] = frozen_data.display_save_name
-    save_data["display_name"] = frozen_data.display_save_name
+    display_data["display_name"] = data.display_save_name
+    save_data["display_name"] = data.display_save_name
     # last_access
     now = dtime.now()
     last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
@@ -244,8 +248,8 @@ def make_save(frozen_data:cl.Save_data):
     # randomstate
     save_data["seed"] = ts.random_state_converter(r)
     # create new save
-    backup_status = ts.make_backup(frozen_data.save_name, True)
-    sfm.encode_save([json.dumps(display_data), json.dumps(save_data)], SAVE_SEED, os.path.join(SAVES_FOLDER_PATH, frozen_data.save_name), SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
+    ts.encode_save_s([display_data, save_data], os.path.join(SAVES_FOLDER_PATH, data.save_name, SAVE_FILE_NAME_DATA))
+    # remove backup
     if backup_status != False:
         os.remove(backup_status[0])
         ts.log_info("Removed temporary backup", backup_status[1])
@@ -269,7 +273,7 @@ def auto_saver():
             else:
                 break
     except:
-        ts.log_info("Thread crashed", sys.exc_info(), 3)
+        ts.log_info("Thread crashed", sys.exc_info(), Log_type.CRASH)
         raise
 
 
@@ -289,7 +293,7 @@ def quit_game():
             else:
                 break
     except:
-        ts.log_info("Thread crashed", sys.exc_info(), 3)
+        ts.log_info("Thread crashed", sys.exc_info(), Log_type.CRASH)
         raise
     
 
@@ -368,13 +372,13 @@ def correct_save_data(data:dict, save_version:int, extra_data:dict):
 
 def load_save(save_name:str):
     # read data
-    data = json.loads(sfm.decode_save(SAVE_SEED, os.path.join(SAVES_FOLDER_PATH, save_name), SAVE_EXT, ENCODING)[1])
+    data = ts.decode_save_s(os.path.join(SAVES_FOLDER_PATH, save_name), 1)
     # save version
     try: save_version = data["save_version"]
     except KeyError: save_version = 0.0
     if save_version != SAVE_VERSION:
         is_older = ts.check_p_version(str(save_version), str(SAVE_VERSION))
-        ts.log_info("Trying to load save with an incorrect version", f"{SAVE_VERSION} -> {save_version}", 1)
+        ts.log_info("Trying to load save with an incorrect version", f"{SAVE_VERSION} -> {save_version}", Log_type.WARN)
         ans = sfm.UI_list(["Yes", "No"], f"\"{save_name}\" is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to back up the save file before loading it?").display(SETTINGS.keybind_mapping)
         if ans == 0:
             ts.make_backup(save_name)
@@ -412,7 +416,7 @@ def get_saves_data():
     datas_processed = []
     for data in datas:
         if data[1] == -1:
-            ts.log_info("Decode error", f"Save name: {data[0]}", 2)
+            ts.log_info("Decode error", f"Save name: {data[0]}", Log_type.ERROR)
             ts.press_key(f"\"{data[0]}\" is corrupted!")
         else:
             try:
@@ -428,10 +432,10 @@ def get_saves_data():
                 # check version
                 try: save_version = data[1]["save_version"]
                 except KeyError: save_version = 0.0
-                data_processed += ts.text_c(f" v.{save_version}", (C_F_GREEN if save_version == SAVE_VERSION else C_F_RED))
+                data_processed += ts.stylized_text(f" v.{save_version}", (Color.GREEN if save_version == SAVE_VERSION else Color.RED))
                 datas_processed.append([data[0], data_processed])
             except (TypeError, IndexError):
-                ts.log_info("Parse error", f"Save name: {data[0]}", 2)
+                ts.log_info("Parse error", f"Save name: {data[0]}", Log_type.ERROR)
                 ts.press_key(f"\"{data[0]}\" could not be parsed!")
     return datas_processed
 
@@ -526,7 +530,7 @@ def main_menu():
                     if option != -1 and option < (len(list_data) - 1) / 2:
                         if sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(SETTINGS.keybind_mapping):
                             # log
-                            datas = json.loads(sfm.decode_save(SAVE_SEED, os.path.join(SAVES_FOLDER_PATH, files_data[option][0]), SAVE_EXT, ENCODING, 1)[0])
+                            datas = ts.decode_save_s(os.path.join(SAVES_FOLDER_PATH, files_data[option][0]), 0)
                             last_access = datas["last_access"]
                             ts.log_info("Deleted save", f'save name: {files_data[option][0]}, hero name: "{datas["player_name"]}", last saved: {ts.make_date(last_access)} {ts.make_time(last_access[3:])}')
                             # remove

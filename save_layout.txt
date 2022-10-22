@@ -1,25 +1,28 @@
-Display data:
-    - save_version: int
-    - display_name: str
-    - last_access: [year, month, day, hour, min, sec]: int
-    - player_name: str
+data.sav
+    Display data:
+        - save_version: int
+        - display_name: str
+        - last_access: [year, month, day, hour, min, sec]: int
+        - player_name: str
 
-Save data:
-    - save_version: int
-    - display_name: str
-    - last_access: [year, month, day, hour, min, sec]: int
-    - player:
-        - name: str
-        - hp: int
-        - attack: int
-        - defence: int
-        - speed: int
-        - inventory:
-            - item
-            - item
-    - seed:
-        - type: str
-        - state: [int * 624]
-        - pos: int
-        - has_gauss: int
-        - cached_gaussian: float
+    Save data:
+        - save_version: int
+        - display_name: str
+        - last_access: [year, month, day, hour, min, sec]: int
+        - player:
+            - name: str
+            - hp: int
+            - attack: int
+            - defence: int
+            - speed: int
+            - inventory:
+                - item
+                - item
+        - seed:
+            - type: str
+            - state: [int * 624]
+            - pos: int
+            - has_gauss: int
+            - cached_gaussian: float
+chunks
+    

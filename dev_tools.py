@@ -8,7 +8,7 @@ from tools import BACKUP_EXT, BACKUPS_FOLDER_PATH, sfm
 from tools import MAIN_THREAD_NAME, TEST_THREAD_NAME
 from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
 from tools import ENCODING, SETTINGS_SEED, FILE_ENCODING_VERSION
-from tools import C_F_GREEN, C_F_RED, SAVE_VERSION
+from tools import Color, SAVE_VERSION
 from tools import STANDARD_CURSOR_ICONS
 
 def decode_save_file(save_name:str, save_name_pre=SAVES_FOLDER_PATH, save_num=SAVE_SEED, save_ext=SAVE_EXT):
@@ -110,7 +110,7 @@ def get_saves_data():
                 # check version
                 try: save_version = data[1]["save_version"]
                 except KeyError: save_version = 0.0
-                data_processed += ts.text_c(f" v.{save_version}", (C_F_GREEN if save_version == SAVE_VERSION else C_F_RED))
+                data_processed += ts.stylized_text(f" v.{save_version}", (Color.GREEN if save_version == SAVE_VERSION else Color.RED))
                 if old_files:
                     file_number = int(data[0].replace(f".{BACKUP_EXT}", "").split("save")[1])
                 else:

@@ -7,7 +7,6 @@ from datetime import datetime as dtime
 from msvcrt import getch
 from typing import Any
 import numpy as np
-import colorama
 
 import save_file_manager as sfm
 
@@ -17,7 +16,6 @@ r = np.random.RandomState()
 # package versions
 PYTHON_MIN_VERSION = "3.10.5"
 PIP_NP_MIN_VERSION = "1.22.1"
-PIP_COLOR_MIN_VERSION = "0.4.5"
 
 PIP_SFM_MIN_VERSION = "1.12.1"
 PIP_RS_MIN_VERSION = "1.5.1"
@@ -30,26 +28,27 @@ MANUAL_SAVE_THREAD_NAME = "Quit manager"
 TEST_THREAD_NAME = "Test"
 # paths/folders/file names
 ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__))
-    #save
+    #saves folder
 SAVES_FOLDER = "saves"
 SAVES_FOLDER_PATH = os.path.join(ROOT_FOLDER, SAVES_FOLDER)
 SAVE_EXT = "sav"
-SAVE_SEED = 87531
-    #logs
+    #logs folder
 LOGGING = True
 LOGS_FOLDER = "logs"
 LOGS_FOLDER_PATH = os.path.join(ROOT_FOLDER, LOGS_FOLDER)
 LOG_EXT = "log"
-    #backups
+    #backups folder
 BACKUPS_FOLDER = "backups"
 BACKUPS_FOLDER_PATH = os.path.join(ROOT_FOLDER, BACKUPS_FOLDER)
 BACKUP_EXT = SAVE_EXT + ".bak"
-# colorama color
-C_F_RED = colorama.Fore.RED
-C_F_GREEN = colorama.Fore.GREEN
+    # save folder structure
+SAVE_FILE_NAME_DATA = "data"
+SAVE_FOLDER_NAME_CHUNKS = "chunks"
+# seeds
+SAVE_SEED = 87531
+SETTINGS_SEED = 1
 # other
 AUTO_SAVE_DELAY = 3
-SETTINGS_SEED = 1
 FILE_ENCODING_VERSION = 2
 DOUBLE_KEYS = [b"\xe0", b"\x00"]
 LOG_MS = False
@@ -58,6 +57,42 @@ STANDARD_CURSOR_ICONS = sfm.Cursor_icon(selected_icon=">", selected_icon_right="
                                         not_selected_icon=" ", not_selected_icon_right="")
 DELETE_CURSOR_ICONS = sfm.Cursor_icon(selected_icon=" X", selected_icon_right="",
                                         not_selected_icon="  ", not_selected_icon_right="")
+
+
+class Color(Enum):
+    BLACK           = 0
+    RED             = 1
+    GREEN           = 2
+    YELLOW          = 3
+    BLUE            = 4
+    MAGENTA         = 5
+    CYAN            = 6
+    WHITE           = 7
+    RESET           = 9
+
+    LIGHTBLACK      = 60
+    LIGHTRED        = 61
+    LIGHTGREEN      = 62
+    LIGHTYELLOW     = 63
+    LIGHTBLUE       = 64
+    LIGHTMAGENTA    = 65
+    LIGHTCYAN       = 66
+    LIGHTWHITE      = 67
+
+
+class Style(Enum):
+    BRIGHT    = 1
+    DIM       = 2
+    NORMAL    = 22
+    RESET_ALL = 0
+    
+
+class Log_type(Enum):
+    INFO    = 0
+    WARN    = 1
+    ERROR   = 2
+    CRASH   = 3
+    OTHER   = 4
 
 
 def pad_zero(num:int|str):
@@ -87,6 +122,27 @@ def make_time(time_lis:list|dtime, sep=":", write_ms=False, ms_sep:str="."):
         return f"{pad_zero(time_lis[0])}{sep}{pad_zero(time_lis[1])}{sep}{pad_zero(time_lis[2])}{f'{ms_sep}{time_lis[3]}' if write_ms else ''}"
 
 
+def encode_save_s(data:list[dict]|dict, file_path:str, seed=SAVE_SEED, extension=SAVE_EXT):
+    """
+    Shorthand for `sfm.encode_save` + convert from json to string.
+    """
+    # convert from json to string
+    if type(data) == dict:
+        json_data = json.dumps(data)
+    else:
+        json_data = []
+        for dat in data:
+            json_data.append(json.dumps(dat))
+        
+    sfm.encode_save(json_data, seed, file_path, extension, ENCODING, FILE_ENCODING_VERSION)
+
+def decode_save_s(file_path, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT) -> dict:
+    """
+    Shorthand for `sfm.decode_save` + convert from string to json.\n
+    `line_num` is the line, that you want go get back (starting from 0).
+    """
+    return json.loads(sfm.decode_save(seed, file_path, extension, ENCODING, line_num + 1)[line_num])
+
 def change_logging(value:bool):
     global LOGGING
     if LOGGING != value:
@@ -104,41 +160,25 @@ def begin_log():
         f = open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a")
         f.write("\n")
 
-def log_info(message:str, detail="", message_type=0, write_out=False, new_line=False):
+def log_info(message:str, detail="", log_type=Log_type.INFO, write_out=False, new_line=False):
     """
-    Progress Adventure logger.\n
-    Message types:
-    - 0: INFO
-    - 1: WARN
-    - 2: ERROR
-    - 3: CRASH
-    - -1: OTHER
+    Progress Adventure logger.
     """
     try:
         if LOGGING:
-            match message_type:
-                case 0:
-                    m_type = "INFO"
-                case 1:
-                    m_type = "WARN"
-                case 2:
-                    m_type = "ERROR"
-                case 3:
-                    m_type = "CRASH"
-                case _:
-                    m_type = "OTHER"
+            l_type = log_type.name
             current_date = make_date(dtime.now())
             current_time = make_time(dtime.now(), write_ms=LOG_MS)
             recreate_logs_folder()
             f = open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a")
             if new_line:
                 f.write("\n")
-            f.write(f"[{current_time}] [{threading.current_thread().name}/{m_type}]\t: |{message}| {detail}\n")
+            f.write(f"[{current_time}] [{threading.current_thread().name}/{l_type}]\t: |{message}| {detail}\n")
             f.close()
             if write_out:
                 if new_line:
                     print("\n")
-                print(f'{os.path.join(LOGS_FOLDER, f"{current_date}.{LOG_EXT}")} -> [{current_time}] [{threading.current_thread().name}/{m_type}]\t: |{message}| {detail}')
+                print(f'{os.path.join(LOGS_FOLDER, f"{current_date}.{LOG_EXT}")} -> [{current_time}] [{threading.current_thread().name}/{l_type}]\t: |{message}| {detail}')
     except:
         if LOGGING:
             f = open(os.path.join(ROOT_FOLDER, "CRASH.log"), "a")
@@ -198,7 +238,7 @@ def make_backup(save_name:str, is_temporary=False):
         log_info(f"Made {('temporary ' if is_temporary else ' ')}backup", display_backup_name)
         return [backup_name, display_backup_name]
     else:
-        log_info("Backup failed", f"save file not found: {display_save_name}", 1)
+        log_info("Backup failed", f"save file not found: {display_save_name}", Log_type.WARN)
         return False
     
 
@@ -228,11 +268,12 @@ def is_key(key:object) -> bool:
     return ((len(key.value) == 1 and not arrow) or (len(key.value) > 1 and arrow)) and key_in == key.value[0]
 
 
-def text_c(text:str, color):
+def stylized_text(text:str, fore_color:Color, back_color=Color.RESET, style=Style.NORMAL):
     """
     Colors text fore/background.
     """
-    return color + text + colorama.Back.RESET + colorama.Fore.RESET
+    # sys.stdout.write
+    return f"\x1b[{30 + fore_color.value}m" + f"\x1b[{40 + back_color.value}m" + f"\x1b[{style.value}m" + text + "\x1b[0m"
 
 
 # FILE_DATA_MERGER ABANDONED!!!
@@ -341,16 +382,16 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
     def_settings = {"auto_save": True, "logging": True, "keybinds": {"esc": [b"\x1b"], "up": [b"H", 1], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
 
     def recreate_settings():
-        sfm.encode_save(json.dumps(encode_keybinds(def_settings)), SETTINGS_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
+        encode_save_s(encode_keybinds(def_settings), os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
         # log
         log_info("Recreated settings")
         return def_settings
 
 
     try:
-        settings = decode_keybinds(json.loads(sfm.decode_save(SETTINGS_SEED, "settings", SAVE_EXT, ENCODING)[0]))
+        settings = decode_keybinds(decode_save_s(os.path.join(ROOT_FOLDER, "settings"), 0, SETTINGS_SEED))
     except ValueError:
-        log_info("Decode error", "settings", 2)
+        log_info("Decode error", "settings", Log_type.ERROR)
         press_key("The settings file is corrupted, and will now be recreated!")
         settings = recreate_settings()
     except FileNotFoundError:
@@ -364,7 +405,7 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
                 return settings[line_name]
             except KeyError:
                 if line_name in settings_lines:
-                    log_info("Missing key in settings", line_name, 1)
+                    log_info("Missing key in settings", line_name, Log_type.WARN)
                     settings_manager(line_name, def_settings[line_name])
                     return def_settings[line_name]
                 else:
@@ -375,12 +416,12 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
             if settings[line_name] != write_value:
                 log_info("Changed settings", f"{line_name}: {settings[line_name]} -> {write_value}")
                 settings[line_name] = write_value
-                sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
+                encode_save_s(encode_keybinds(settings), os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
         else:
             if line_name in settings_lines:
-                log_info("Recreating key in settings", line_name, 1)
+                log_info("Recreating key in settings", line_name, Log_type.WARN)
                 settings[line_name] = def_settings[line_name]
-                sfm.encode_save(json.dumps(encode_keybinds(settings)), SETTINGS_SEED, "settings", SAVE_EXT, ENCODING, FILE_ENCODING_VERSION)
+                encode_save_s(encode_keybinds(settings), os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
             else:
                 raise KeyError(line_name)
 
@@ -447,7 +488,7 @@ def package_response(bad_packages:list, py_good:bool):
         log_info("Python up to date")
     else:
         from platform import python_version
-        log_info("Python not up to date", f"{python_version()} -> {PYTHON_MIN_VERSION}", 1)
+        log_info("Python not up to date", f"{python_version()} -> {PYTHON_MIN_VERSION}", Log_type.WARN)
         print(f"Python not up to date: {python_version()} -> {PYTHON_MIN_VERSION}")
     # packages
     if len(bad_packages) == 0:
@@ -456,7 +497,7 @@ def package_response(bad_packages:list, py_good:bool):
         bad_packages_str = []
         for package in bad_packages:
             bad_packages_str.append(f"{package[2]}({package[1]}) -> {package[0]}")
-        log_info("Some packages are not up to date", ", ".join([p for p in bad_packages_str]), 1)
+        log_info("Some packages are not up to date", ", ".join([p for p in bad_packages_str]), Log_type.WARN)
         print(f"{'Some packages are' if len(bad_packages) > 1 else 'A package is'} not up to date:\n\t" + "\n\t".join([p for p in bad_packages_str]))
     # return
     if len(bad_packages) == 0 and py_good:
@@ -474,7 +515,6 @@ def check_package_versions():
     Checks:
     - python
     - numpy
-    - colorama
     - Save File Manager
     - random sentance
     """
@@ -487,7 +527,6 @@ def check_package_versions():
         py_good = False
     log_info("Checking package versions")
     packages = [[PIP_NP_MIN_VERSION, np.__version__, "numpy"],
-                [PIP_COLOR_MIN_VERSION, colorama.__version__, "colorama"],
                 [PIP_SFM_MIN_VERSION, sfm.__version__, "Save File Manager"],
                 [PIP_RS_MIN_VERSION, rs.__version__, "Random Sentance"]]
 
