@@ -1,15 +1,15 @@
 import json
 import os
 
-import colorama
-import classes as cl
+from utils import Color
+import utils as u
 import tools as ts
 from tools import BACKUP_EXT, BACKUPS_FOLDER_PATH, sfm
-from tools import MAIN_THREAD_NAME, TEST_THREAD_NAME
+from tools import TEST_THREAD_NAME
 from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
-from tools import ENCODING, SETTINGS_SEED, FILE_ENCODING_VERSION
-from tools import Color, SAVE_VERSION
-from tools import STANDARD_CURSOR_ICONS
+from tools import ENCODING, FILE_ENCODING_VERSION
+from tools import SAVE_VERSION
+import data_management as dm
 
 def decode_save_file(save_name:str, save_name_pre=SAVES_FOLDER_PATH, save_num=SAVE_SEED, save_ext=SAVE_EXT):
     """
@@ -74,6 +74,7 @@ def old_file_reader(save_name:str="save*", save_ext:str=BACKUP_EXT, dir_name:str
         if path.isfile(path.join(dir_name, name)) and name.find(save_ext) and name.find(save_name.replace("*", "")):
             try: file_number = int(name.replace(f".{save_ext}", "").split(save_name.replace("*", ""))[1])
             except ValueError: continue
+            except IndexError: continue
             existing_files.append([name, file_number])
     existing_files.sort()
 
@@ -106,11 +107,11 @@ def get_saves_data():
                 data_processed = ""
                 data_processed += f"\"{data[0]}\"{'(old)' if old_files else ''}: {data[1]['player_name']}\n"
                 last_access = data[1]["last_access"]
-                data_processed += f"Last opened: {ts.make_date(last_access, '.')} {ts.make_time(last_access[3:])}"
+                data_processed += f"Last opened: {u.make_date(last_access, '.')} {u.make_time(last_access[3:])}"
                 # check version
                 try: save_version = data[1]["save_version"]
                 except KeyError: save_version = 0.0
-                data_processed += ts.stylized_text(f" v.{save_version}", (Color.GREEN if save_version == SAVE_VERSION else Color.RED))
+                data_processed += u.stylized_text(f" v.{save_version}", (Color.GREEN if save_version == SAVE_VERSION else Color.RED))
                 if old_files:
                     file_number = int(data[0].replace(f".{BACKUP_EXT}", "").split("save")[1])
                 else:
@@ -142,7 +143,6 @@ def load_backup_menu():
     """
     files_data = get_saves_data()
     if len(files_data) > 0:
-        colorama.init()
         while True:
             # get data from file_data
             list_data = []
@@ -158,9 +158,8 @@ def load_backup_menu():
                 save_num = files_data[int(option)][2]
                 if recompile_save_file(file_name, file_name, BACKUPS_FOLDER_PATH, SAVES_FOLDER_PATH, BACKUP_EXT, SAVE_EXT, save_num):
                     input("\n" + file_name + " loaded!")
-        colorama.deinit()
     else:
-        ts.press_key("No backups found!")
+        dm.press_key("No backups found!")
 
 
 
@@ -184,18 +183,16 @@ class Self_Checks:
         ts.log_info("Initialization check", "Running...")
 
         import sys
-        from tools import colorama
 
         try:
             ts.check_package_versions()
-            colorama.init()
 
             # GLOBAL VARIABLES
             GOOD_PACKAGES = True
-            SETTINGS = cl.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
+            SETTINGS = dm.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
             SETTINGS.save_keybind_mapping()
-            SAVE_DATA = cl.Save_data
-            GLOBALS = cl.Globals(False, False, False)
+            SAVE_DATA = dm.Save_data
+            GLOBALS = dm.Globals(False, False, False)
         except:
             print("Crashed")
             ts.log_info("Initialization check", "Preloading crahed: " + str(sys.exc_info()), "FAIL")
@@ -210,7 +207,7 @@ class Self_Checks:
         good = False
         print(end="Settings checks...")
         ts.log_info("Settings checks", "Running...")
-        settings = cl.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
+        settings = dm.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
         settings.save_keybind_mapping()
         if settings.auto_save == True or settings.auto_save == False:
             if settings.DOUBLE_KEYS == ts.DOUBLE_KEYS and type(settings.keybinds) == dict:

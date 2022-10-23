@@ -10,6 +10,9 @@ import numpy as np
 
 import save_file_manager as sfm
 
+import utils as u
+
+
 # random
 r = np.random.RandomState()
 
@@ -52,40 +55,12 @@ AUTO_SAVE_DELAY = 3
 FILE_ENCODING_VERSION = 2
 DOUBLE_KEYS = [b"\xe0", b"\x00"]
 LOG_MS = False
-SAVE_VERSION = 1.2
+SAVE_VERSION = 1.3
 STANDARD_CURSOR_ICONS = sfm.Cursor_icon(selected_icon=">", selected_icon_right="",
                                         not_selected_icon=" ", not_selected_icon_right="")
 DELETE_CURSOR_ICONS = sfm.Cursor_icon(selected_icon=" X", selected_icon_right="",
                                         not_selected_icon="  ", not_selected_icon_right="")
 
-
-class Color(Enum):
-    BLACK           = 0
-    RED             = 1
-    GREEN           = 2
-    YELLOW          = 3
-    BLUE            = 4
-    MAGENTA         = 5
-    CYAN            = 6
-    WHITE           = 7
-    RESET           = 9
-
-    LIGHTBLACK      = 60
-    LIGHTRED        = 61
-    LIGHTGREEN      = 62
-    LIGHTYELLOW     = 63
-    LIGHTBLUE       = 64
-    LIGHTMAGENTA    = 65
-    LIGHTCYAN       = 66
-    LIGHTWHITE      = 67
-
-
-class Style(Enum):
-    BRIGHT    = 1
-    DIM       = 2
-    NORMAL    = 22
-    RESET_ALL = 0
-    
 
 class Log_type(Enum):
     INFO    = 0
@@ -93,33 +68,6 @@ class Log_type(Enum):
     ERROR   = 2
     CRASH   = 3
     OTHER   = 4
-
-
-def pad_zero(num:int|str):
-    """
-    Converts numbers that are smaller than 10 to have a trailing 0.
-    """
-    return ('0' if int(num) < 10 else '') + str(num)
-
-
-def make_date(date_lis:list|dtime, sep="-"):
-    """
-    Turns a datetime object's date part or a list into a formated string.
-    """
-    if type(date_lis) == dtime:
-        return f"{pad_zero(date_lis.year)}{sep}{pad_zero(date_lis.month)}{sep}{pad_zero(date_lis.day)}"
-    else:
-        return f"{pad_zero(date_lis[0])}{sep}{pad_zero(date_lis[1])}{sep}{pad_zero(date_lis[2])}"
-
-
-def make_time(time_lis:list|dtime, sep=":", write_ms=False, ms_sep:str="."):
-    """
-    Turns a datetime object's time part or a list into a formated string.
-    """
-    if type(time_lis) == dtime:
-        return f"{pad_zero(time_lis.hour)}{sep}{pad_zero(time_lis.minute)}{sep}{pad_zero(time_lis.second)}{f'{ms_sep}{time_lis.microsecond}' if write_ms else ''}"
-    else:
-        return f"{pad_zero(time_lis[0])}{sep}{pad_zero(time_lis[1])}{sep}{pad_zero(time_lis[2])}{f'{ms_sep}{time_lis[3]}' if write_ms else ''}"
 
 
 def encode_save_s(data:list[dict]|dict, file_path:str, seed=SAVE_SEED, extension=SAVE_EXT):
@@ -136,12 +84,14 @@ def encode_save_s(data:list[dict]|dict, file_path:str, seed=SAVE_SEED, extension
         
     sfm.encode_save(json_data, seed, file_path, extension, ENCODING, FILE_ENCODING_VERSION)
 
+
 def decode_save_s(file_path, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT) -> dict:
     """
     Shorthand for `sfm.decode_save` + convert from string to json.\n
     `line_num` is the line, that you want go get back (starting from 0).
     """
     return json.loads(sfm.decode_save(seed, file_path, extension, ENCODING, line_num + 1)[line_num])
+
 
 def change_logging(value:bool):
     global LOGGING
@@ -153,12 +103,14 @@ def change_logging(value:bool):
             log_info("Logging disabled")
             LOGGING = value
 
+
 def begin_log():
     if LOGGING:
-        current_date = make_date(dtime.now())
+        current_date = u.make_date(dtime.now())
         recreate_logs_folder()
         f = open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a")
         f.write("\n")
+
 
 def log_info(message:str, detail="", log_type=Log_type.INFO, write_out=False, new_line=False):
     """
@@ -167,8 +119,8 @@ def log_info(message:str, detail="", log_type=Log_type.INFO, write_out=False, ne
     try:
         if LOGGING:
             l_type = log_type.name
-            current_date = make_date(dtime.now())
-            current_time = make_time(dtime.now(), write_ms=LOG_MS)
+            current_date = u.make_date(dtime.now())
+            current_time = u.make_time(dtime.now(), write_ms=LOG_MS)
             recreate_logs_folder()
             f = open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a")
             if new_line:
@@ -182,7 +134,7 @@ def log_info(message:str, detail="", log_type=Log_type.INFO, write_out=False, ne
     except:
         if LOGGING:
             f = open(os.path.join(ROOT_FOLDER, "CRASH.log"), "a")
-            f.write(f"\n[{make_date(dtime.now())}_{make_time(dtime.now(), write_ms=True)}] [CRASH]\t: |Logging error|\n")
+            f.write(f"\n[{u.make_date(dtime.now())}_{u.make_time(dtime.now(), write_ms=True)}] [CRASH]\t: |Logging error|\n")
             f.close()
 
 
@@ -207,13 +159,11 @@ def recreate_saves_folder():
     """
     return recreate_folder(SAVES_FOLDER)
 
-
 def recreate_backups_folder():
     """
     `recreate_folder` for the backups folder.
     """
     return recreate_folder(BACKUPS_FOLDER)
-
 
 def recreate_logs_folder():
     """
@@ -226,7 +176,7 @@ def make_backup(save_name:str, is_temporary=False):
     recreate_saves_folder()
     recreate_backups_folder()
     now = dtime.now()
-    backup_name_end = f'{make_date(now)};{make_time(now, "-", is_temporary, "-")};{save_name}.{BACKUP_EXT}'
+    backup_name_end = f'{u.make_date(now)};{u.make_time(now, "-", is_temporary, "-")};{save_name}.{BACKUP_EXT}'
     full_save_name = f'{os.path.join(SAVES_FOLDER_PATH, save_name)}.{SAVE_EXT}'
     display_save_name = f'{os.path.join(SAVES_FOLDER, save_name)}.{SAVE_EXT}'
     backup_name = os.path.join(BACKUPS_FOLDER_PATH, backup_name_end)
@@ -239,40 +189,6 @@ def make_backup(save_name:str, is_temporary=False):
     else:
         log_info("Backup failed", f"save file not found: {display_save_name}", Log_type.WARN)
         return False
-    
-
-
-def press_key(text=""):
-    """
-    Writes out text, and then stalls until the user presses any key.
-    """
-
-    print(text, end="", flush=True)
-    if DOUBLE_KEYS.count(getch()):
-        getch()
-    print()
-
-
-def is_key(key:object) -> bool:
-    """
-    Waits for a specific key.\n
-    key should be a Key object.
-    """
-
-    key_in = getch()
-    arrow = False
-    if key_in in DOUBLE_KEYS:
-        arrow = True
-        key_in = getch()
-    return ((len(key.value) == 1 and not arrow) or (len(key.value) > 1 and arrow)) and key_in == key.value[0]
-
-
-def stylized_text(text:str, fore_color:Color, back_color=Color.RESET, style=Style.NORMAL):
-    """
-    Colors text fore/background.
-    """
-    # sys.stdout.write
-    return f"\x1b[{30 + fore_color.value}m" + f"\x1b[{40 + back_color.value}m" + f"\x1b[{style.value}m" + text + "\x1b[0m"
 
 
 # FILE_DATA_MERGER ABANDONED!!!
@@ -357,10 +273,12 @@ def encode_keybinds(settings:dict[list[bytes|int]]):
         settings['keybinds'][x][0] = settings['keybinds'][x][0].decode(ENCODING)
     return settings
 
+
 def decode_keybinds(settings:dict):
     for x in settings["keybinds"]:
         settings['keybinds'][x][0] = bytes(settings['keybinds'][x][0], ENCODING)
     return settings
+
 
 def settings_manager(line_name:str, write_value=None) -> Any | None:
     """
@@ -390,6 +308,8 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
     try:
         settings = decode_keybinds(decode_save_s(os.path.join(ROOT_FOLDER, "settings"), 0, SETTINGS_SEED))
     except ValueError:
+        from data_management import press_key
+        
         log_info("Decode error", "settings", Log_type.ERROR)
         press_key("The settings file is corrupted, and will now be recreated!")
         settings = recreate_settings()
@@ -442,34 +362,8 @@ def random_state_converter(random_state:np.random.RandomState | dict | tuple):
             state_nums.append(int(num))
         return {"type": state[0], "state": state_nums, "pos": state[2], "has_gauss": state[3], "cached_gaussian": state[4]}
 
-def item_finder(name:str) -> Enum|None:
-    """
-    Gives back the item enum, from the item name.\n
-    Returns ``None`` if it doesn't exist.
-    """
-    from classes import Item_categories
 
-    for enum in Item_categories._value2member_map_:
-        try: return enum._member_map_[name]
-        except KeyError: pass
-
-def inventory_converter(inventory:list):
-    """
-    Can convert between the json and object versions of the inventory items list.
-    """
-    from classes import Item
-
-    items = []
-    for item in inventory:
-        if type(item) == list:
-            items.append(Item(item_finder(item[0]), item[1]))
-        else:
-            item:Item
-            items.append([item.name.name, item.amount])
-    return items
-
-
-def check_p_version(min_version:str, curr_version:str):
+def is_up_to_date(min_version:str, curr_version:str):
     version = curr_version.split(".")
     min_v = min_version.split(".")
 
@@ -481,7 +375,8 @@ def check_p_version(min_version:str, curr_version:str):
             return False
     return True
 
-def package_response(bad_packages:list, py_good:bool):
+
+def _package_response(bad_packages:list, py_good:bool):
     # python
     if py_good:
         log_info("Python up to date")
@@ -522,7 +417,7 @@ def check_package_versions():
 
     log_info("Checking python version")
     py_good = True
-    if not check_p_version(PYTHON_MIN_VERSION, python_version()):
+    if not is_up_to_date(PYTHON_MIN_VERSION, python_version()):
         py_good = False
     log_info("Checking package versions")
     packages = [[PIP_NP_MIN_VERSION, np.__version__, "numpy"],
@@ -531,29 +426,27 @@ def check_package_versions():
 
     bad_packages = []
     for package in packages:
-        if not check_p_version(package[0], package[1]):
+        if not is_up_to_date(package[0], package[1]):
             bad_packages.append(package)
-    return package_response(bad_packages, py_good)
+    return _package_response(bad_packages, py_good)
 
-def check_save_name(save_name:str):
+
+def _check_save_name(save_name:str):
     """
     Checks if the file name exists in the saves directory.
     """
     if not recreate_saves_folder():
-        for name in os.listdir(SAVES_FOLDER_PATH):
-            if os.path.isfile(os.path.join(SAVES_FOLDER_PATH, name)) and name.endswith("." + SAVE_EXT):
-                    if name.replace("." + SAVE_EXT, "") == save_name:
-                        return True
-        return False
+        return os.path.isdir(os.path.join(SAVES_FOLDER_PATH, save_name))
     else:
         return False
 
-def remove_bad_characters(save_name:str):
-    """
-    Removes all characters that can't be in file names.\n
-    (\/:*"?:<>|)
-    """
-    bad_chars = ["\\", "/", ":", "*", "\"", "?", ":", "<", ">", "|"]
-    for char in bad_chars:
-        save_name = save_name.replace(char, "")
+def correct_save_name(raw_save_name:str):
+    save_name = u.remove_bad_characters(raw_save_name)
+    if save_name == "":
+        save_name = "new_save"
+    if _check_save_name(save_name):
+        extra_num = 1
+        while _check_save_name(save_name + "_" + str(extra_num)):
+            extra_num += 1
+        save_name += "_" + str(extra_num)
     return save_name
