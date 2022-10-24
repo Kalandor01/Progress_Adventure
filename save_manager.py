@@ -77,6 +77,7 @@ def make_save(data:dm.Save_data):
     ts.encode_save_s([display_data, save_data], os.path.join(save_folder, SAVE_FILE_NAME_DATA))
     # CHUNKS FOLDER
     ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder)
+    ts.log_info("Saving chunks")
     _create_chunks_json(data.chunks, save_folder)
     # remove backup
     if backup_status != False:

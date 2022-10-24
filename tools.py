@@ -173,21 +173,23 @@ def recreate_logs_folder():
 
 
 def make_backup(save_name:str, is_temporary=False):
+    # UPDATE BACKUP FOR FOLDERS WITH ZIP
     recreate_saves_folder()
     recreate_backups_folder()
     now = dtime.now()
-    backup_name_end = f'{u.make_date(now)};{u.make_time(now, "-", is_temporary, "-")};{save_name}.{BACKUP_EXT}'
-    full_save_name = f'{os.path.join(SAVES_FOLDER_PATH, save_name)}.{SAVE_EXT}'
-    display_save_name = f'{os.path.join(SAVES_FOLDER, save_name)}.{SAVE_EXT}'
+    backup_name_end = f'{u.make_date(now)};{u.make_time(now, "-", is_temporary, "-")};{save_name}'
+    save_folder = os.path.join(SAVES_FOLDER_PATH, save_name)
+    display_save_folder = os.path.join(SAVES_FOLDER, save_name)
     backup_name = os.path.join(BACKUPS_FOLDER_PATH, backup_name_end)
     display_backup_name = os.path.join(BACKUPS_FOLDER, backup_name_end)
 
-    if os.path.isfile(full_save_name):
-        shutil.copyfile(full_save_name, backup_name)
+    if os.path.isdir(save_folder):
+        # REPLACE WITH ZIP
+        # shutil.copyfile(save_folder, backup_name)
         log_info(f"Made {('temporary ' if is_temporary else ' ')}backup", display_backup_name)
         return [backup_name, display_backup_name]
     else:
-        log_info("Backup failed", f"save file not found: {display_save_name}", Log_type.WARN)
+        log_info("Backup failed", f"save file not found: {display_save_folder}", Log_type.WARN)
         return False
 
 
