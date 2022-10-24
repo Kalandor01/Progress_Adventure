@@ -8,9 +8,9 @@ import time
 
 import dev_tools as dt
 import tools as ts
-import data_management as dm
+import data_manager as dm
 import entities as es
-import save_management as sm
+import save_manager as sm
 
 from tools import r, sfm, getch
 from tools import Log_type
@@ -282,7 +282,7 @@ def game_loop():
     
 def new_save():
     global SAVE_DATA
-    SAVE_DATA = sm.create_save()
+    SAVE_DATA = sm.create_save_data()
     sm.make_save(SAVE_DATA)
     ts.log_info("Created save", f'save_name: {SAVE_DATA.save_name}, player name: "{SAVE_DATA.player.name}"')
     game_loop()
@@ -420,8 +420,9 @@ def main_menu():
 
 def main():
     # dt.decode_save_file("settings", ROOT_FOLDER, SETTINGS_SEED)
-    # dt.decode_save_file("plz_work_00_52_16")
+    # dt.decode_save_file("new save")
     # dt.recompile_save_file("2022-07-10;16-58-51;save2", "old_save2", BACKUPS_FOLDER_PATH, SAVES_FOLDER_PATH, BACKUP_EXT, SAVE_EXT, 2, SAVE_SEED)
+    # dt.encode_save_file("file_test")
     
     # dt.load_backup_menu()
     main_menu()
@@ -439,7 +440,7 @@ def main_error_handler():
                 ts.log_info("Beginning new instance")
                 main()
         except:
-            ts.log_info("Instance crashed", sys.exc_info(), 3)
+            ts.log_info("Instance crashed", sys.exc_info(), Log_type.CRASH)
             if error_handling:
                 print(f"ERROR: {sys.exc_info()[1]}")
                 ans = input("Restart?(Y/N): ")

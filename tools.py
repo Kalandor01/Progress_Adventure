@@ -308,7 +308,7 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
     try:
         settings = decode_keybinds(decode_save_s(os.path.join(ROOT_FOLDER, "settings"), 0, SETTINGS_SEED))
     except ValueError:
-        from data_management import press_key
+        from data_manager import press_key
         
         log_info("Decode error", "settings", Log_type.ERROR)
         press_key("The settings file is corrupted, and will now be recreated!")

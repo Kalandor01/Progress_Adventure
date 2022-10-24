@@ -9,7 +9,7 @@ from tools import TEST_THREAD_NAME
 from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
 from tools import ENCODING, FILE_ENCODING_VERSION
 from tools import SAVE_VERSION
-import data_management as dm
+import data_manager as dm
 
 def decode_save_file(save_name:str, save_name_pre=SAVES_FOLDER_PATH, save_num=SAVE_SEED, save_ext=SAVE_EXT):
     """

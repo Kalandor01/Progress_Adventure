@@ -5,6 +5,7 @@ from tools import getch
 from tools import ENCODING, DOUBLE_KEYS
 
 from entities import Player
+from chunk import Chunk
 
 
 class Globals:
@@ -93,12 +94,16 @@ class Settings:
 
 
 class Save_data:
-    def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player, seed:tuple):
+    def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player, seed:tuple, chunks:list[Chunk]=None):
         self.save_name = str(save_name)
         self.display_save_name = str(display_save_name)
         self.last_access = list[int](last_access)
         self.player = copy.deepcopy(player)
         self.seed = tuple(seed)
+        self.chunks:list[Chunk] = []
+        if chunks != None:
+            for chunk in chunks:
+                self.chunks.append(copy.deepcopy(chunk))
 
 
 def press_key(text=""):
