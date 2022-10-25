@@ -421,7 +421,7 @@ def main_menu():
 def main():
     # dt.decode_save_file("settings", ROOT_FOLDER, SETTINGS_SEED)
     # dt.decode_save_file("new save")
-    # dt.recompile_save_file("2022-07-10;16-58-51;save2", "old_save2", BACKUPS_FOLDER_PATH, SAVES_FOLDER_PATH, BACKUP_EXT, SAVE_EXT, 2, SAVE_SEED)
+    # dt.recompile_save_file("2022-07-10;16-58-51;save2", "old_save2", BACKUPS_FOLDER_PATH, SAVES_FOLDER_PATH, OLD_BACKUP_EXT, SAVE_EXT, 2, SAVE_SEED)
     # dt.encode_save_file("file_test")
     
     # dt.load_backup_menu()

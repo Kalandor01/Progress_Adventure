@@ -43,7 +43,8 @@ LOG_EXT = "log"
     #backups folder
 BACKUPS_FOLDER = "backups"
 BACKUPS_FOLDER_PATH = os.path.join(ROOT_FOLDER, BACKUPS_FOLDER)
-BACKUP_EXT = SAVE_EXT + ".bak"
+OLD_BACKUP_EXT = SAVE_EXT + ".bak"
+BACKUP_EXT = "zip"
     # save folder structure
 SAVE_FILE_NAME_DATA = "data"
 SAVE_FOLDER_NAME_CHUNKS = "chunks"
@@ -173,23 +174,39 @@ def recreate_logs_folder():
 
 
 def make_backup(save_name:str, is_temporary=False):
-    # UPDATE BACKUP FOR FOLDERS WITH ZIP
+    # recreate folders
     recreate_saves_folder()
     recreate_backups_folder()
     now = dtime.now()
-    backup_name_end = f'{u.make_date(now)};{u.make_time(now, "-", is_temporary, "-")};{save_name}'
-    save_folder = os.path.join(SAVES_FOLDER_PATH, save_name)
-    display_save_folder = os.path.join(SAVES_FOLDER, save_name)
-    backup_name = os.path.join(BACKUPS_FOLDER_PATH, backup_name_end)
-    display_backup_name = os.path.join(BACKUPS_FOLDER, backup_name_end)
 
-    if os.path.isdir(save_folder):
-        # REPLACE WITH ZIP
-        # shutil.copyfile(save_folder, backup_name)
+    # make common variables
+    save_file = f'{os.path.join(SAVES_FOLDER_PATH, save_name)}.{SAVE_EXT}'
+    save_folder = os.path.join(SAVES_FOLDER_PATH, save_name)
+    display_save_path = f'{os.path.join(SAVES_FOLDER, save_name)}'
+    if os.path.isdir(save_folder) or os.path.isfile(save_file):
+        # make more variables
+        if os.path.isfile(save_file):
+            backup_name_end = f'{u.make_date(now)};{u.make_time(now, "-", is_temporary, "-")};{save_name}.{OLD_BACKUP_EXT}'
+        else:
+            backup_name_end = f'{u.make_date(now)};{u.make_time(now, "-", is_temporary, "-")};{save_name}'
+
+        backup_name = os.path.join(BACKUPS_FOLDER_PATH, backup_name_end)
+        display_backup_name = os.path.join(BACKUPS_FOLDER, backup_name_end)
+        # file copy
+        if os.path.isfile(save_file):
+            shutil.copyfile(save_file, backup_name)
+        # make zip
+        else:
+            base_a = os.path.join(BACKUPS_FOLDER_PATH, save_name)
+            base_d = os.path.join(SAVES_FOLDER_PATH, save_name)
+            shutil.make_archive(base_a,
+                    BACKUP_EXT,
+                    BACKUPS_FOLDER_PATH,
+                    base_d)
         log_info(f"Made {('temporary ' if is_temporary else ' ')}backup", display_backup_name)
         return [backup_name, display_backup_name]
     else:
-        log_info("Backup failed", f"save file not found: {display_save_folder}", Log_type.WARN)
+        log_info("Backup failed", f"save file/folder not found: {display_save_path}(.{SAVE_EXT})", Log_type.WARN)
         return False
 
 
