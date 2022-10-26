@@ -9,10 +9,11 @@ from chunk import Chunk
 
 
 class Globals:
-    def __init__(self, in_game_loop:bool, in_fight:bool, exiting:bool):
+    def __init__(self, in_game_loop:bool, in_fight:bool, exiting:bool, saving:bool):
         self.in_game_loop = bool(in_game_loop)
         self.in_fight = bool(in_fight)
         self.exiting = bool(exiting)
+        self.saving = bool(saving)
 
 
 class Key:

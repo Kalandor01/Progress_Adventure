@@ -37,7 +37,7 @@ if __name__ == "__main__":
             ts.change_logging(SETTINGS.logging)
             SETTINGS.save_keybind_mapping()
             SAVE_DATA = dm.Save_data
-            GLOBALS = dm.Globals(False, False, False)
+            GLOBALS = dm.Globals(False, False, False, False)
         else:
             GOOD_PACKAGES = False
     except:
@@ -223,9 +223,11 @@ def auto_saver():
         while True:
             time.sleep(AUTO_SAVE_DELAY)
             if GLOBALS.in_game_loop:
-                if not GLOBALS.in_fight:
+                if not GLOBALS.in_fight and not GLOBALS.saving:
+                    GLOBALS.saving = True
                     ts.log_info("Beginning auto save", f"save name: {SAVE_DATA.save_name}")
                     save_game()
+                    GLOBALS.saving = False
             else:
                 break
     except:
@@ -239,13 +241,15 @@ def quit_game():
         while True:
             if GLOBALS.in_game_loop:
                 if dm.is_key(SETTINGS.keybinds["esc"]):
-                    if not GLOBALS.in_fight:
+                    if not GLOBALS.in_fight and not GLOBALS.saving:
+                        GLOBALS.saving = True
                         ts.log_info("Beginning manual save", f"save name: {SAVE_DATA.save_name}")
                         GLOBALS.exiting = True
                         save_game()
+                        GLOBALS.saving = False
                         break
                     else:
-                        print("You can't exit while a fight is happening!")
+                        print("You can't exit now!")
             else:
                 break
     except:

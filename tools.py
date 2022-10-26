@@ -174,6 +174,10 @@ def recreate_logs_folder():
 
 
 def make_backup(save_name:str, is_temporary=False):
+    """
+    Makes a backup of a save from the saves folder into the backups folder (as a zip file).\n
+    Returns the name of the backup normaly, and in a way that doesn't contain the root directories.
+    """
     # recreate folders
     recreate_saves_folder()
     recreate_backups_folder()
@@ -188,7 +192,7 @@ def make_backup(save_name:str, is_temporary=False):
         if os.path.isfile(save_file):
             backup_name_end = f'{u.make_date(now)};{u.make_time(now, "-", is_temporary, "-")};{save_name}.{OLD_BACKUP_EXT}'
         else:
-            backup_name_end = f'{u.make_date(now)};{u.make_time(now, "-", is_temporary, "-")};{save_name}'
+            backup_name_end = f'{u.make_date(now)};{u.make_time(now, "-", is_temporary, "-")};{save_name}.{BACKUP_EXT}'
 
         backup_name = os.path.join(BACKUPS_FOLDER_PATH, backup_name_end)
         display_backup_name = os.path.join(BACKUPS_FOLDER, backup_name_end)
@@ -197,12 +201,13 @@ def make_backup(save_name:str, is_temporary=False):
             shutil.copyfile(save_file, backup_name)
         # make zip
         else:
-            base_a = os.path.join(BACKUPS_FOLDER_PATH, save_name)
-            base_d = os.path.join(SAVES_FOLDER_PATH, save_name)
-            shutil.make_archive(base_a,
-                    BACKUP_EXT,
-                    BACKUPS_FOLDER_PATH,
-                    base_d)
+            # REWORK SO IT'S SIMPLER!!!            
+            base = os.path.basename(backup_name)
+            name = base.split('.')[0]
+            archive_from = os.path.dirname(save_folder)
+            archive_to = os.path.basename(save_folder.strip(os.sep))
+            shutil.make_archive(name, BACKUP_EXT, archive_from, archive_to)
+            shutil.move('%s.%s'%(name,BACKUP_EXT), backup_name)
         log_info(f"Made {('temporary ' if is_temporary else ' ')}backup", display_backup_name)
         return [backup_name, display_backup_name]
     else:

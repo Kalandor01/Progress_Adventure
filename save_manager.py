@@ -67,7 +67,7 @@ def make_save(data:dm.Save_data):
     # make backup
     backup_status = ts.make_backup(data.save_name, True)
     # FOLDER
-    ts.recreate_folder(data.save_name, SAVES_FOLDER_PATH)
+    ts.recreate_folder(data.save_name, SAVES_FOLDER_PATH, "save file")
     save_folder = os.path.join(SAVES_FOLDER_PATH, data.save_name)
     # DATA FILE
     # display data
@@ -162,7 +162,7 @@ def load_save(save_name:str, keybind_mapping:list):
     player.speed = float(player_data["speed"])
     player.inventory.items = list(iy.inventory_converter(player_data["inventory"]))
     # log
-    ts.log_info("Loaded save", f'save name: {save_name}, hero name: "{player.name}", last saved: {u.make_date(last_access)} {u.make_time(last_access[3:])}')
+    ts.log_info("Loaded save", f'save name: {save_name}, player name: "{player.name}", last saved: {u.make_date(last_access)} {u.make_time(last_access[3:])}')
     
     # PREPARING
     ts.log_info("Preparing game data")

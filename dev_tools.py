@@ -192,7 +192,7 @@ class Self_Checks:
             SETTINGS = dm.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
             SETTINGS.save_keybind_mapping()
             SAVE_DATA = dm.Save_data
-            GLOBALS = dm.Globals(False, False, False)
+            GLOBALS = dm.Globals(False, False, False, False)
         except:
             print("Crashed")
             ts.log_info("Initialization check", "Preloading crahed: " + str(sys.exc_info()), "FAIL")
