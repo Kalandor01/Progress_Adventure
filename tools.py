@@ -17,10 +17,10 @@ import utils as u
 r = np.random.RandomState()
 
 # package versions
-PYTHON_MIN_VERSION = "3.10.5"
-PIP_NP_MIN_VERSION = "1.22.1"
+PYTHON_MIN_VERSION = "3.11.0"
+PIP_NP_MIN_VERSION = "1.23.4"
 
-PIP_SFM_MIN_VERSION = "1.12.1"
+PIP_SFM_MIN_VERSION = "1.12.2.2"
 PIP_RS_MIN_VERSION = "1.5.1"
 # language
 ENCODING = "windows-1250"
@@ -364,15 +364,24 @@ def random_state_converter(random_state:np.random.RandomState | dict | tuple):
 
 
 def is_up_to_date(min_version:str, curr_version:str):
+    """
+    Returns if the current version string is equal or higher than the minimum version.
+    """
     version = curr_version.split(".")
     min_v = min_version.split(".")
 
     for x in range(len(version)):
+        # min v. shorter
         if len(min_v) < (x + 1):
             return True
         # print(f"{version[x]} >=? {min_v[x]}")
-        if (x == len(version) - 1 and len(version) < len(min_v)) or (int(version[x]) < int(min_v[x])):
+        # v. > min v. ?
+        if int(version[x]) > int(min_v[x]):
+            return True
+        # v. < min v. ?
+        elif int(version[x]) < int(min_v[x]):
             return False
+    # v. shorter
     return True
 
 
