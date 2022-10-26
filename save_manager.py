@@ -4,9 +4,10 @@ from datetime import datetime as dtime
 
 import utils as u
 import tools as ts
-import data_management as dm
+import data_manager as dm
 import entities as es
 import inventory as iy
+import chunk_manager as ch
 
 from utils import Color, Style
 from tools import r, sfm
@@ -17,6 +18,51 @@ from tools import SAVE_FILE_NAME_DATA
 from tools import SAVE_FOLDER_NAME_CHUNKS
 
 
+def _create_display_json(data:dm.Save_data):
+    display_data = {}
+    display_data["save_version"] = SAVE_VERSION
+    display_data["display_name"] = data.display_save_name
+    now = dtime.now()
+    last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
+    display_data["last_access"] = last_access
+    display_data["player_name"] = data.player.name
+    return display_data
+
+
+def _create_player_json(player_data:es.Player):
+    player_json = {"name": player_data.name, "hp": player_data.hp, "attack": player_data.attack, "defence": player_data.defence, "speed": player_data.speed}
+    player_json["inventory"] = list(iy.inventory_converter(player_data.inventory.items))
+    return player_json
+
+
+def _create_data_json(data:dm.Save_data):
+    save_data_json = {}
+    # save_version
+    save_data_json["save_version"] = SAVE_VERSION
+    # display_name
+    save_data_json["display_name"] = data.display_save_name
+    # last_access
+    now = dtime.now()
+    last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
+    save_data_json["last_access"] = last_access
+    # player
+    save_data_json["player"] = _create_player_json(data.player)
+    # randomstate
+    save_data_json["seed"] = ts.random_state_converter(r)
+    return save_data_json
+
+
+def _create_chunk_json(chunk:ch.Chunk, save_folder:str):
+    chunk_data = chunk.to_json()
+    chunk_file_name = f"{chunk.base_x}_{chunk.base_y}"
+    ts.encode_save_s(chunk_data, os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
+
+
+def _create_chunks_json(chunks:list[ch.Chunk], save_folder:str):
+    for chunk in chunks:
+        _create_chunk_json(chunk, save_folder)
+
+
 def make_save(data:dm.Save_data):
     # make backup
     backup_status = ts.make_backup(data.save_name, True)
@@ -24,40 +70,22 @@ def make_save(data:dm.Save_data):
     ts.recreate_folder(data.save_name, SAVES_FOLDER_PATH)
     save_folder = os.path.join(SAVES_FOLDER_PATH, data.save_name)
     # DATA FILE
-    # make player
-    player = data.player
-    # make new save data
-    display_data = {}
-    save_data = {}
-    # save_version
-    display_data["save_version"] = SAVE_VERSION
-    save_data["save_version"] = SAVE_VERSION
-    # display_name
-    display_data["display_name"] = data.display_save_name
-    save_data["display_name"] = data.display_save_name
-    # last_access
-    now = dtime.now()
-    last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
-    display_data["last_access"] = last_access
-    save_data["last_access"] = last_access
-    # player
-    display_data["player_name"] = player.name
-    save_data["player"] = {"name": player.name, "hp": player.hp, "attack": player.attack, "defence": player.defence, "speed": player.speed}
-    save_data["player"]["inventory"] = list(iy.inventory_converter(player.inventory.items))
-    # randomstate
-    save_data["seed"] = ts.random_state_converter(r)
+    # display data
+    display_data = _create_display_json(data)
+    save_data = _create_data_json(data)
     # create new save
     ts.encode_save_s([display_data, save_data], os.path.join(save_folder, SAVE_FILE_NAME_DATA))
     # CHUNKS FOLDER
     ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder)
-    # ts.encode_save_s(chunks_data, os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
+    ts.log_info("Saving chunks")
+    _create_chunks_json(data.chunks, save_folder)
     # remove backup
     if backup_status != False:
         os.remove(backup_status[0])
         ts.log_info("Removed temporary backup", backup_status[1])
 
 
-def create_save():
+def create_save_data():
     ts.log_info("Preparing game data")
     # make save name
     display_save_name = input("Name your save: ")
@@ -98,8 +126,19 @@ def correct_save_data(data:dict, save_version:int, extra_data:dict):
 
 
 def load_save(save_name:str, keybind_mapping:list):
+    """
+    Loads a save file.
+    """
+    full_save_name = os.path.join(SAVES_FOLDER_PATH, save_name)
+    # get if save if a file
+    if os.path.isfile(f'{full_save_name}.{SAVE_EXT}'):
+        data = ts.decode_save_s(full_save_name, 1)
+        os.remove(f'{full_save_name}.{SAVE_EXT}')
+        ts.log_info("Removed save file", "single save files have been deprecated", Log_type.WARN)
+    else:
+        data = ts.decode_save_s(os.path.join(full_save_name, SAVE_FILE_NAME_DATA, ), 1)
     # read data
-    data = ts.decode_save_s(os.path.join(SAVES_FOLDER_PATH, save_name), 1)
+    
     # save version
     try: save_version = data["save_version"]
     except KeyError: save_version = 0.0

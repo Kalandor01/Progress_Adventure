@@ -4,12 +4,12 @@ import os
 from utils import Color
 import utils as u
 import tools as ts
-from tools import BACKUP_EXT, BACKUPS_FOLDER_PATH, sfm
+from tools import OLD_BACKUP_EXT, BACKUPS_FOLDER_PATH, sfm
 from tools import TEST_THREAD_NAME
 from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
 from tools import ENCODING, FILE_ENCODING_VERSION
 from tools import SAVE_VERSION
-import data_management as dm
+import data_manager as dm
 
 def decode_save_file(save_name:str, save_name_pre=SAVES_FOLDER_PATH, save_num=SAVE_SEED, save_ext=SAVE_EXT):
     """
@@ -61,7 +61,7 @@ def recompile_save_file(save_name:str, new_save_name:str, pre_save_name=SAVES_FO
 
 
 
-def old_file_reader(save_name:str="save*", save_ext:str=BACKUP_EXT, dir_name:str=BACKUPS_FOLDER_PATH, decode_until:int=1):
+def old_file_reader(save_name:str="save*", save_ext:str=OLD_BACKUP_EXT, dir_name:str=BACKUPS_FOLDER_PATH, decode_until:int=1):
     """
     sfm.file_reader but for backups
     """
@@ -87,7 +87,7 @@ def old_file_reader(save_name:str="save*", save_ext:str=BACKUP_EXT, dir_name:str
                 data = -1
         except FileNotFoundError: print("not found " + str(files))
         else:
-            file_data.append([files[0].replace("." + BACKUP_EXT, ""), data])
+            file_data.append([files[0].replace("." + OLD_BACKUP_EXT, ""), data])
     return file_data
 
 def get_saves_data():
@@ -113,7 +113,7 @@ def get_saves_data():
                 except KeyError: save_version = 0.0
                 data_processed += u.stylized_text(f" v.{save_version}", (Color.GREEN if save_version == SAVE_VERSION else Color.RED))
                 if old_files:
-                    file_number = int(data[0].replace(f".{BACKUP_EXT}", "").split("save")[1])
+                    file_number = int(data[0].replace(f".{OLD_BACKUP_EXT}", "").split("save")[1])
                 else:
                     file_number = SAVE_SEED
                 datas_processed.append([data[0], data_processed, file_number])
@@ -123,7 +123,7 @@ def get_saves_data():
     ts.recreate_backups_folder()
     ts.recreate_saves_folder()
     # read saves
-    datas = sfm.file_reader(-1, None, BACKUP_EXT, BACKUPS_FOLDER_PATH, save_num=SAVE_SEED)
+    datas = sfm.file_reader(-1, None, OLD_BACKUP_EXT, BACKUPS_FOLDER_PATH, save_num=SAVE_SEED)
     datas_old = old_file_reader()
     errored_new = []
     errored_both = []
@@ -156,7 +156,7 @@ def load_backup_menu():
             else:
                 file_name = str(files_data[int(option)][0])
                 save_num = files_data[int(option)][2]
-                if recompile_save_file(file_name, file_name, BACKUPS_FOLDER_PATH, SAVES_FOLDER_PATH, BACKUP_EXT, SAVE_EXT, save_num):
+                if recompile_save_file(file_name, file_name, BACKUPS_FOLDER_PATH, SAVES_FOLDER_PATH, OLD_BACKUP_EXT, SAVE_EXT, save_num):
                     input("\n" + file_name + " loaded!")
     else:
         dm.press_key("No backups found!")
