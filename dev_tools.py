@@ -20,10 +20,9 @@ def decode_save_file(save_name:str, save_name_pre=SAVES_FOLDER_PATH, save_num=SA
     except FileNotFoundError:
         print(f"decode_save_file: FILE {save_name} NOT FOUND!")
     else:
-        f = open(f'{save_name}.decoded.json', "w")
-        for line in save_data:
-            f.write(line + "\n")
-        f.close()
+        with open(f'{save_name}.decoded.json', "w") as f:
+            for line in save_data:
+                f.write(line + "\n")
 
 
 def encode_save_file(save_name:str, pre_save_name=SAVES_FOLDER_PATH, save_num=SAVE_SEED, save_ext=SAVE_EXT):
@@ -31,9 +30,8 @@ def encode_save_file(save_name:str, pre_save_name=SAVES_FOLDER_PATH, save_num=SA
     Encodes a json file into a .sav file.
     """
     try:
-        f = open(f'{save_name}.decoded.json', "r")
-        save_data = f.readlines()
-        f.close()
+        with open(f'{save_name}.decoded.json', "r") as f:
+            save_data = f.readlines()
         save_data_new = []
         for line in save_data:
             save_data_new.append(line.replace("\n", ""))
@@ -210,7 +208,7 @@ class Self_Checks:
         settings = dm.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
         settings.save_keybind_mapping()
         if settings.auto_save == True or settings.auto_save == False:
-            if settings.DOUBLE_KEYS == ts.DOUBLE_KEYS and type(settings.keybinds) == dict:
+            if settings.DOUBLE_KEYS == ts.DOUBLE_KEYS and type(settings.keybinds) is dict:
                 print("Passed")
                 ts.log_info("Settings checks", "Passed", "PASS")
                 good = True

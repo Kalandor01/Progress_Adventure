@@ -76,7 +76,7 @@ def encode_save_s(data:list[dict]|dict, file_path:str, seed=SAVE_SEED, extension
     Shorthand for `sfm.encode_save` + convert from json to string.
     """
     # convert from json to string
-    if type(data) == dict:
+    if type(data) is dict:
         json_data = json.dumps(data)
     else:
         json_data = []
@@ -109,8 +109,8 @@ def begin_log():
     if LOGGING:
         current_date = u.make_date(dtime.now())
         recreate_logs_folder()
-        f = open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a")
-        f.write("\n")
+        with open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a") as f:
+            f.write("\n")
 
 
 def log_info(message:str, detail="", log_type=Log_type.INFO, write_out=False, new_line=False):
@@ -123,20 +123,18 @@ def log_info(message:str, detail="", log_type=Log_type.INFO, write_out=False, ne
             current_date = u.make_date(dtime.now())
             current_time = u.make_time(dtime.now(), write_ms=LOG_MS)
             recreate_logs_folder()
-            f = open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a")
-            if new_line:
-                f.write("\n")
-            f.write(f"[{current_time}] [{threading.current_thread().name}/{l_type}]\t: |{message}| {detail}\n")
-            f.close()
+            with open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a") as f:
+                if new_line:
+                    f.write("\n")
+                f.write(f"[{current_time}] [{threading.current_thread().name}/{l_type}]\t: |{message}| {detail}\n")
             if write_out:
                 if new_line:
                     print("\n")
                 print(f'{os.path.join(LOGS_FOLDER, f"{current_date}.{LOG_EXT}")} -> [{current_time}] [{threading.current_thread().name}/{l_type}]\t: |{message}| {detail}')
     except:
         if LOGGING:
-            f = open(os.path.join(ROOT_FOLDER, "CRASH.log"), "a")
-            f.write(f"\n[{u.make_date(dtime.now())}_{u.make_time(dtime.now(), write_ms=True)}] [CRASH]\t: |Logging error|\n")
-            f.close()
+            with open(os.path.join(ROOT_FOLDER, "CRASH.log"), "a") as f:
+                f.write(f"\n[{u.make_date(dtime.now())}_{u.make_time(dtime.now(), write_ms=True)}] [CRASH]\t: |Logging error|\n")
 
 
 def recreate_folder(folder_name:str, parent_folder_path:str=ROOT_FOLDER, display_name:str=None):
@@ -239,20 +237,20 @@ def make_backup(save_name:str, is_temporary=False):
         return merged_data
 
     def is_good(data:list|dict, write=False):
-        good = (type(data) == dict and "file_merger_code" in data.keys() and "file_merger_value" in data.keys() and data["file_merger_code"] != 0)
+        good = (type(data) is dict and "file_merger_code" in data.keys() and "file_merger_value" in data.keys() and data["file_merger_code"] != 0)
         if write:
             print(f"{data}:", good)
         return good
 
     def file_data_merger(def_data:list|dict, file_data:list|dict):
         def_data_c = copy.deepcopy(def_data)
-        if type(def_data_c) == list:
+        if type(def_data_c) is list:
             merged_data = []
             for x in range(len(def_data_c)):
                 print("\nlist", type(def_data_c[x]))
                 good = is_good(def_data_c[x], True)
                 try:
-                    if type(def_data_c[x]) == list or type(def_data_c[x]) == dict:
+                    if type(def_data_c[x]) is list or type(def_data_c[x]) is dict:
                         if good:
                             sp_merge = file_data_merger_special(def_data_c[x], file_data, x, list)
                             if sp_merge != {"file_merger_nothing_to_add": None}:
@@ -270,7 +268,7 @@ def make_backup(save_name:str, is_temporary=False):
                 print("\ndict", type(def_data_c[key]))
                 good = is_good(def_data_c[key], True)
                 try:
-                    if type(def_data_c[key]) == list or type(def_data_c[key]) == dict:
+                    if type(def_data_c[key]) is list or type(def_data_c[key]) is dict:
                         if good:
                             merged_data[key] = file_data_merger_special(def_data_c[key], file_data, key, dict)
                         else:
@@ -373,11 +371,11 @@ def random_state_converter(random_state:np.random.RandomState | dict | tuple):
     """
     Can convert a numpy RandomState.getstate() into a json format and back.
     """
-    if type(random_state) == dict:
+    if type(random_state) is dict:
         states = [int(num) for num in random_state["state"]]
         return (str(random_state["type"]), np.array(states, dtype=np.uint32), int(random_state["pos"]), int(random_state["has_gauss"]), float(random_state["cached_gaussian"]))
     else:
-        if type(random_state) == tuple:
+        if type(random_state) is tuple:
             state = random_state
         else:
             state = random_state.get_state()

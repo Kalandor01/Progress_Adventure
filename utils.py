@@ -36,7 +36,7 @@ def imput(ask="Num: ", type=int):
     """
     while True:
         try: return type(input(ask))
-        except ValueError: print(f'Not{" whole" if type == int else ""} number!')
+        except ValueError: print(f'Not{" whole" if type is int else ""} number!')
         
 
 def pad_zero(num:int|str):
@@ -50,7 +50,7 @@ def make_date(date_lis:list|dtime, sep="-"):
     """
     Turns a datetime object's date part or a list into a formated string.
     """
-    if type(date_lis) == dtime:
+    if type(date_lis) is dtime:
         return f"{pad_zero(date_lis.year)}{sep}{pad_zero(date_lis.month)}{sep}{pad_zero(date_lis.day)}"
     else:
         return f"{pad_zero(date_lis[0])}{sep}{pad_zero(date_lis[1])}{sep}{pad_zero(date_lis[2])}"
@@ -60,7 +60,7 @@ def make_time(time_lis:list|dtime, sep=":", write_ms=False, ms_sep:str="."):
     """
     Turns a datetime object's time part or a list into a formated string.
     """
-    if type(time_lis) == dtime:
+    if type(time_lis) is dtime:
         return f"{pad_zero(time_lis.hour)}{sep}{pad_zero(time_lis.minute)}{sep}{pad_zero(time_lis.second)}{f'{ms_sep}{time_lis.microsecond}' if write_ms else ''}"
     else:
         return f"{pad_zero(time_lis[0])}{sep}{pad_zero(time_lis[1])}{sep}{pad_zero(time_lis[2])}{f'{ms_sep}{time_lis[3]}' if write_ms else ''}"

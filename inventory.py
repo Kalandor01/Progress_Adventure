@@ -120,7 +120,7 @@ def inventory_converter(inventory:list):
 
     items = []
     for item in inventory:
-        if type(item) == list:
+        if type(item) is list:
             items.append(Item(item_finder(item[0]), item[1]))
         else:
             item:Item

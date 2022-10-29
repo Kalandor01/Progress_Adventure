@@ -10,7 +10,7 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
     
     def configure_stat(stat_value:int|range):
         # int or range
-        if type(stat_value) == int:
+        if type(stat_value) is int:
             stat_value = range(stat_value - fluc_small, stat_value + fluc_big)
         # fluctuation
         if stat_value.start == stat_value.stop:
@@ -53,7 +53,7 @@ class Loot_controller:
     def __init__(self, item:Item_categories, chance=1.0, item_num:int|range=1, rolls=1):
         self.item = item
         self.chance = float(chance)
-        if type(item_num) == int:
+        if type(item_num) is int:
             item_num = range(item_num, item_num)
         self.item_num = item_num
         self.rolls = int(rolls)
