@@ -21,7 +21,7 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
             stat_value = 0
         return int(stat_value)
     
-    if name == None:
+    if name is None:
         stack = inspect.stack()
         name = stack[1][0].f_locals["self"].__class__.__name__
     name = name.replace("_", " ")
@@ -71,9 +71,9 @@ def loot_manager(drops:list[Loot_controller]=None):
 
 class Entity:
     def __init__(self, traits:list=None, drops:list=None):
-        if traits == None:
+        if traits is None:
             traits = entity_master(1, 1, 1, 1, name="test")
-        if drops == None:
+        if drops is None:
             drops = []
         self.name = str(traits[0])
         self.hp = int(traits[1])

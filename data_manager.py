@@ -64,11 +64,11 @@ class Settings:
     
     def change_others(self, auto_save=None, logging=None):
         # auto save
-        if auto_save != None:
+        if auto_save is not None:
             self.auto_save = bool(auto_save)
             ts.settings_manager("auto_save", self.auto_save)
         # logging
-        if auto_save != None:
+        if auto_save is not None:
             self.logging = bool(logging)
             ts.settings_manager("logging", self.logging)
             ts.change_logging(self.logging)
@@ -102,7 +102,7 @@ class Save_data:
         self.player = copy.deepcopy(player)
         self.seed = tuple(seed)
         self.chunks:list[Chunk] = []
-        if chunks != None:
+        if chunks is not None:
             for chunk in chunks:
                 self.chunks.append(copy.deepcopy(chunk))
 

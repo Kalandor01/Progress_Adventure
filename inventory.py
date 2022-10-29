@@ -106,7 +106,7 @@ class Inventory:
 def item_finder(name:str) -> Enum|None:
     """
     Gives back the item enum, from the item name.\n
-    Returns ``None`` if it doesn't exist.
+    Returns `None` if it doesn't exist.
     """
 
     for enum in Item_categories._value2member_map_:

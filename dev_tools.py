@@ -45,7 +45,7 @@ def recompile_save_file(save_name:str, new_save_name:str, pre_save_name=SAVES_FO
     """
     Recompiles a save file to a different name/number.
     """
-    if new_save_name == None:
+    if new_save_name is None:
         new_save_name = save_name
     try:
         save_data = sfm.decode_save(save_num, os.path.join(pre_save_name, save_name), save_ext, ENCODING)

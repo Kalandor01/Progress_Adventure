@@ -143,7 +143,7 @@ def recreate_folder(folder_name:str, parent_folder_path:str=ROOT_FOLDER, display
     Returns if the folder needed to be recreated.
     """
     folder_path = os.path.join(parent_folder_path, folder_name)
-    if display_name == None:
+    if display_name is None:
         display_name = folder_name.lower()
     if not os.path.isdir(folder_path):
         os.mkdir(folder_path)
@@ -338,8 +338,8 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
     except FileNotFoundError:
         settings = recreate_settings()
     # return
-    if write_value == None:
-        if line_name == None:
+    if write_value is None:
+        if line_name is None:
             return settings
         else:
             try:

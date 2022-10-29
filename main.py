@@ -96,7 +96,7 @@ def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=False):
 # attacking with oop functions
 def fight(monster_l:list[es.Entity]=None):
     player = SAVE_DATA.player
-    if monster_l == None:
+    if monster_l is None:
         monster_l = [es.Test()]
     # variables
     szum = 0
@@ -306,7 +306,7 @@ def main_menu():
         logging = sfm.Toggle(SETTINGS.logging, "Logging: ", "on", "minimal")
         other_settings = [auto_save, logging, None, sfm.UI_list(["Done"])]
         response = sfm.options_ui(other_settings, " Other options", key_mapping=SETTINGS.keybind_mapping)
-        if response != None:
+        if response is not None:
             SETTINGS.change_others(auto_save.value, logging.value)
 
     def set_keybind(name:str):

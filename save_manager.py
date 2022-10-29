@@ -227,6 +227,6 @@ def get_saves_data():
             dm.press_key(f"\"{data[0]}\" is corrupted!")
         else:
             processed_data = _process_save_display_data(data)
-            if processed_data != None:
+            if processed_data is not None:
                 datas_processed.append(processed_data)
     return datas_processed
