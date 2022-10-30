@@ -12,7 +12,7 @@ import data_manager as dm
 import entities as es
 import save_manager as sm
 
-from tools import r, sfm, getch
+from tools import r, sfm, col, getch
 from tools import Log_type
 from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME
 from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
@@ -38,6 +38,8 @@ if __name__ == "__main__":
             SETTINGS.save_keybind_mapping()
             SAVE_DATA = dm.Save_data
             GLOBALS = dm.Globals(False, False, False, False)
+            
+            col.init()
         else:
             GOOD_PACKAGES = False
     except:
@@ -454,6 +456,7 @@ def main_error_handler():
             else:
                 raise
         else:
+            col.deinit()
             # end log
             ts.log_info("Instance ended succesfuly")
 

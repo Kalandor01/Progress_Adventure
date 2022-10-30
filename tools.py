@@ -7,6 +7,7 @@ from datetime import datetime as dtime
 from msvcrt import getch
 from typing import Any
 import numpy as np
+import colorama as col
 
 import save_file_manager as sfm
 
@@ -19,6 +20,7 @@ r = np.random.RandomState()
 # package versions
 PYTHON_MIN_VERSION = "3.11.0"
 PIP_NP_MIN_VERSION = "1.23.4"
+PIP_COL_MIN_VERSION = "0.4.6"
 
 PIP_SFM_MIN_VERSION = "1.13"
 PIP_RS_MIN_VERSION = "1.5.1"
@@ -446,6 +448,7 @@ def check_package_versions():
     Checks:
     - python
     - numpy
+    - colorama
     - Save File Manager
     - random sentance
     """
@@ -458,6 +461,7 @@ def check_package_versions():
         py_good = False
     log_info("Checking package versions")
     packages = [[PIP_NP_MIN_VERSION, np.__version__, "numpy"],
+                [PIP_COL_MIN_VERSION, col.__version__, "colorama"],
                 [PIP_SFM_MIN_VERSION, sfm.__version__, "Save File Manager"],
                 [PIP_RS_MIN_VERSION, rs.__version__, "Random Sentance"]]
 
