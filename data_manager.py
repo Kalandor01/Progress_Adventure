@@ -1,11 +1,12 @@
 import copy
 
+from utils import Double_Keys
 import tools as ts
 from tools import getch
 from tools import ENCODING, DOUBLE_KEYS
 
 from entities import Player
-from chunk import Chunk
+from chunk_manager import Chunk
 
 
 class Globals:
@@ -17,36 +18,91 @@ class Globals:
 
 
 class Key:
-    def __init__(self, value:list[bytes, int]):
+    def __init__(self, value:list[list[bytes]]):
         self.value = value
-        self.name = self.value[0].decode(ENCODING)
         self.set_name()
     
     def set_name(self):
-        match self.value:
-            case [(b"H"|b"P"|b"K"|b"M"), 1]:
-                match self.value[0]:
-                    case b"H":
-                        self.name = "up"
-                    case b"P":
-                        self.name = "down"
-                    case b"K":
-                        self.name = "left"
-                    case b"M":
-                        self.name = "right"
-                self.name += " arrow"
-            case _:
-                match self.value[0]:
-                    case b"\r":
-                        self.name = "enter"
-                    case b"\x1b":
-                        self.name = "escape"
-                    case _:
-                        self.name = self.value[0].decode(ENCODING)
-    
-    def change(self, key:list):
-        self.value = key
+        if len(self.value[0]) > 0:
+            match self.value[0][0]:
+                case b"\r":
+                    self.name = "enter"
+                case b"\x1b":
+                    self.name = "escape"
+                case b" ":
+                    self.name = "space"
+                case b"\x94":
+                    self.name = "ö"
+                case b"\x99":
+                    self.name = "Ö"
+                case b"\x81":
+                    self.name = "ü"
+                case b"\x9a":
+                    self.name = "Ü"
+                case b"\xa2":
+                    self.name = "ó"
+                # case b"\xe0":
+                #     self.name = "Ó"
+                case b"\xa3":
+                    self.name = "ú"
+                case b"\xe9":
+                    self.name = "Ú"
+                case b"\xfb":
+                    self.name = "ű"
+                case b"\xeb":
+                    self.name = "Ű"
+                case b"\xa0":
+                    self.name = "á"
+                case b"\xb5":
+                    self.name = "Á"
+                case b"\x82":
+                    self.name = "é"
+                case b"\x90":
+                    self.name = "É"
+                case b"\xa1":
+                    self.name = "í"
+                case b"\xd6":
+                    self.name = "Í"
+                case b"\x8b":
+                    self.name = "ő"
+                case b"\x8a":
+                    self.name = "Ő"
+                case _:
+                    self.name = self.value[0][0].decode(ENCODING)
+        elif len(self.value) > 1 and len(self.value[1]) > 0:
+            match self.value[1][0]:
+                case Double_Keys.ARROW_UP.value:
+                    self.name = "up arrow"
+                case Double_Keys.ARROW_DOWN.value:
+                    self.name = "down arrow"
+                case Double_Keys.ARROW_LEFT.value:
+                    self.name = "left arrow"
+                case Double_Keys.ARROW_RIGHT.value:
+                    self.name = "right arrow"
+                case Double_Keys.NUM_0.value:
+                    self.name = "num 0"
+                case Double_Keys.NUM_1.value:
+                    self.name = "num 1"
+                case Double_Keys.NUM_3.value:
+                    self.name = "num 3"
+                case Double_Keys.NUM_7.value:
+                    self.name = "num 7"
+                case Double_Keys.NUM_9.value:
+                    self.name = "num 9"
+                case Double_Keys.DELETE.value:
+                    self.name = "delete"
+                case _:
+                    self.name = self.value[1][0].decode(ENCODING)
+        else:
+            self.name = "key error"
+
+    def change(self, key_value:list[list[bytes]]):
+        self.value = key_value
         self.set_name()
+        print(self.name, self.value)
+    
+    def __str__(self):
+        return f"{self.name}: {self.value}"
 
 
 class Settings:
@@ -74,17 +130,17 @@ class Settings:
             ts.change_logging(self.logging)
     
     def encode_keybinds(self):
-        return {"esc": self.keybinds["esc"].value.copy(),
-        "up": self.keybinds["up"].value.copy(),
-        "down": self.keybinds["down"].value.copy(),
-        "left": self.keybinds["left"].value.copy(),
-        "right": self.keybinds["right"].value.copy(),
-        "enter": self.keybinds["enter"].value.copy()}
+        return {"esc": copy.deepcopy(self.keybinds["esc"].value),
+        "up": copy.deepcopy(self.keybinds["up"].value),
+        "down": copy.deepcopy(self.keybinds["down"].value),
+        "left": copy.deepcopy(self.keybinds["left"].value),
+        "right": copy.deepcopy(self.keybinds["right"].value),
+        "enter": copy.deepcopy(self.keybinds["enter"].value)}
     
     def save_keybind_mapping(self):
         # [[keybinds["esc"], keybinds["up"], keybinds["down"], keybinds["left"], keybinds["right"], keybinds["enter"]], [b"\xe0", b"\x00"]]
-        # [[[b"\x1b"], [b"H", 1], [b"P", 1], [b"K", 1], [b"M", 1], [b"\r"]], [b"\xe0", b"\x00"]]
-        self.keybind_mapping:list[list[list[bytes|int]]|list[bytes]] = [[
+        # [[[[b"\x1b"]],     [[], [b"H"]],   [[], [b"P"]],     [[], [b"K"]],     [[], [b"M"]],      [[b"\r"]]],         [b"\xe0", b"\x00"]]
+        self.keybind_mapping:list[list[list[list[bytes]]|bytes]] = [[
             self.keybinds["esc"].value,
             self.keybinds["up"].value,
             self.keybinds["down"].value,
@@ -92,7 +148,6 @@ class Settings:
             self.keybinds["right"].value,
             self.keybinds["enter"].value], self.DOUBLE_KEYS]
         ts.settings_manager("keybinds", self.encode_keybinds())
-
 
 class Save_data:
     def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player, seed:tuple, chunks:list[Chunk]=None):
@@ -113,7 +168,7 @@ def press_key(text=""):
     """
 
     print(text, end="", flush=True)
-    if DOUBLE_KEYS.count(getch()):
+    if getch() in DOUBLE_KEYS:
         getch()
     print()
 
@@ -129,4 +184,6 @@ def is_key(key:Key) -> bool:
     if key_in in DOUBLE_KEYS:
         arrow = True
         key_in = getch()
-    return ((len(key.value) == 1 and not arrow) or (len(key.value) > 1 and arrow)) and key_in == key.value[0]
+    
+    return ((not arrow and len(key.value) > 0 and key_in in key.value[0]) or
+            (arrow and len(key.value) > 1 and key_in in key.value[1]))

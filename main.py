@@ -16,7 +16,7 @@ from tools import r, sfm, getch
 from tools import Log_type
 from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME
 from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
-from tools import AUTO_SAVE_DELAY
+from tools import AUTO_SAVE_DELAY, DOUBLE_KEYS
 from tools import STANDARD_CURSOR_ICONS, DELETE_CURSOR_ICONS
 
 
@@ -312,11 +312,11 @@ def main_menu():
     def set_keybind(name:str):
         print("\n\nPress any key\n\n", end="")
         key = getch()
-        if key in [b"\xe0", b"\x00"]:
+        if key in DOUBLE_KEYS:
             key = getch()
-            key = [key, 1]
+            key = [[], [key]]
         else:
-            key = [key]
+            key = [[key], []]
         SETTINGS.keybinds[name].change(key)
 
     def keybind_setting():

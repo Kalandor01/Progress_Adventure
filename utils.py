@@ -30,6 +30,20 @@ class Style(Enum):
     RESET_ALL = 0
 
 
+class Double_Keys(Enum):
+    ARROW_UP    = b"H"
+    ARROW_DOWN  = b"P"
+    ARROW_LEFT  = b"K"
+    ARROW_RIGHT = b"M"
+    NUM_0       = b"R" # INSERT
+    NUM_1       = b"O" # END
+    NUM_3       = b"Q" # PGDWN
+    # NUM_5       = None
+    NUM_7       = b"G" # HOME
+    NUM_9       = b"I" # PGUP
+    DELETE      = B"S"
+
+
 def imput(ask="Num: ", type=int):
     """
     Only returns int/float.

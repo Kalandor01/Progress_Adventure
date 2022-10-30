@@ -20,7 +20,7 @@ r = np.random.RandomState()
 PYTHON_MIN_VERSION = "3.11.0"
 PIP_NP_MIN_VERSION = "1.23.4"
 
-PIP_SFM_MIN_VERSION = "1.12.2.2"
+PIP_SFM_MIN_VERSION = "1.13"
 PIP_RS_MIN_VERSION = "1.5.1"
 # language
 ENCODING = "windows-1250"
@@ -290,15 +290,21 @@ def make_backup(save_name:str, is_temporary=False):
     """
 
 
-def encode_keybinds(settings:dict[list[bytes|int]]):
+def encode_keybinds(settings:dict[list[list[bytes]]]):
     for x in settings["keybinds"]:
-        settings['keybinds'][x][0] = settings['keybinds'][x][0].decode(ENCODING)
+        if len(settings['keybinds'][x][0]) > 0:
+            settings['keybinds'][x][0][0] = settings['keybinds'][x][0][0].decode(ENCODING)
+        elif len(settings['keybinds'][x]) > 1 and len(settings['keybinds'][x][1]) > 0:
+            settings['keybinds'][x][1][0] = settings['keybinds'][x][1][0].decode(ENCODING)
     return settings
 
 
 def decode_keybinds(settings:dict):
     for x in settings["keybinds"]:
-        settings['keybinds'][x][0] = bytes(settings['keybinds'][x][0], ENCODING)
+        if len(settings['keybinds'][x][0]) > 0:
+            settings['keybinds'][x][0][0] = bytes(settings['keybinds'][x][0][0], ENCODING)
+        elif len(settings['keybinds'][x]) > 1 and len(settings['keybinds'][x][1]) > 0:
+            settings['keybinds'][x][1][0] = bytes(settings['keybinds'][x][1][0], ENCODING)
     return settings
 
 
@@ -318,7 +324,7 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
 
     # default values
     settings_lines = ["auto_save", "logging", "keybinds"]
-    def_settings = {"auto_save": True, "logging": True, "keybinds": {"esc": [b"\x1b"], "up": [b"H", 1], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
+    def_settings = {"auto_save": True, "logging": True, "keybinds": {"esc": [[b"\x1b"]], "up": [[], [b"H"]], "down": [[], [b"P"]], "left": [[], [b"K"]], "right": [[], [b"M"]], "enter": [[b"\r"]]}}
 
     def recreate_settings():
         encode_save_s(encode_keybinds(def_settings), os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
@@ -329,7 +335,7 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
 
     try:
         settings = decode_keybinds(decode_save_s(os.path.join(ROOT_FOLDER, "settings"), 0, SETTINGS_SEED))
-    except ValueError:
+    except (ValueError, TypeError):
         from data_manager import press_key
         
         log_info("Decode error", "settings", Log_type.ERROR)
