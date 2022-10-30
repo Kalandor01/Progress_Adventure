@@ -18,7 +18,8 @@ from tools import SAVE_FILE_NAME_DATA
 from tools import SAVE_FOLDER_NAME_CHUNKS
 
 
-def _create_display_json(data:dm.Save_data):
+def _convert_display_json(data:dm.Save_data):
+    """Converts the display save data to json format."""
     display_data = {}
     display_data["save_version"] = SAVE_VERSION
     display_data["display_name"] = data.display_save_name
@@ -29,13 +30,15 @@ def _create_display_json(data:dm.Save_data):
     return display_data
 
 
-def _create_player_json(player_data:es.Player):
+def _convert_player_json(player_data:es.Player):
+    """Converts the player save data to json format."""
     player_json = {"name": player_data.name, "hp": player_data.hp, "attack": player_data.attack, "defence": player_data.defence, "speed": player_data.speed}
     player_json["inventory"] = list(iy.inventory_converter(player_data.inventory.items))
     return player_json
 
 
-def _create_data_json(data:dm.Save_data):
+def _convert_data_json(data:dm.Save_data):
+    """Converts the micelanius save data to json format."""
     save_data_json = {}
     # save_version
     save_data_json["save_version"] = SAVE_VERSION
@@ -46,24 +49,30 @@ def _create_data_json(data:dm.Save_data):
     last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
     save_data_json["last_access"] = last_access
     # player
-    save_data_json["player"] = _create_player_json(data.player)
+    save_data_json["player"] = _convert_player_json(data.player)
     # randomstate
     save_data_json["seed"] = ts.random_state_converter(r)
     return save_data_json
 
 
-def _create_chunk_json(chunk:ch.Chunk, save_folder:str):
+def _convert_chunk_json(chunk:ch.Chunk, save_folder:str):
+    """Converts a chunk's data to json format."""
     chunk_data = chunk.to_json()
     chunk_file_name = f"{chunk.base_x}_{chunk.base_y}"
     ts.encode_save_s(chunk_data, os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
 
 
-def _create_chunks_json(chunks:list[ch.Chunk], save_folder:str):
+def _convert_chunks_json(chunks:list[ch.Chunk], save_folder:str):
+    """Converts the chunks save data to json format."""
     for chunk in chunks:
-        _create_chunk_json(chunk, save_folder)
+        _convert_chunk_json(chunk, save_folder)
 
 
 def make_save(data:dm.Save_data):
+    """
+    Creates a save file from the save data.\n
+    Makes a temporary backup.
+    """
     # make backup
     backup_status = ts.make_backup(data.save_name, True)
     # FOLDER
@@ -71,14 +80,14 @@ def make_save(data:dm.Save_data):
     save_folder = os.path.join(SAVES_FOLDER_PATH, data.save_name)
     # DATA FILE
     # display data
-    display_data = _create_display_json(data)
-    save_data = _create_data_json(data)
+    display_data = _convert_display_json(data)
+    save_data = _convert_data_json(data)
     # create new save
     ts.encode_save_s([display_data, save_data], os.path.join(save_folder, SAVE_FILE_NAME_DATA))
     # CHUNKS FOLDER
     ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder)
     ts.log_info("Saving chunks")
-    _create_chunks_json(data.chunks, save_folder)
+    _convert_chunks_json(data.chunks, save_folder)
     # remove backup
     if backup_status != False:
         os.remove(backup_status[0])
@@ -86,6 +95,7 @@ def make_save(data:dm.Save_data):
 
 
 def create_save_data():
+    """Creates the data for a new save file."""
     ts.log_info("Preparing game data")
     # make save name
     display_save_name = input("Name your save: ")
@@ -102,6 +112,7 @@ def create_save_data():
 
 
 def correct_save_data(data:dict, save_version:int, extra_data:dict):
+    """Modifys the save data, to make it up to date, with the newest save file data structure."""
     ts.log_info("Correcting save data")
     # 0.0 -> 1.0
     if save_version == 0.0:
@@ -126,9 +137,7 @@ def correct_save_data(data:dict, save_version:int, extra_data:dict):
 
 
 def load_save(save_name:str, keybind_mapping:list):
-    """
-    Loads a save file.
-    """
+    """Loads a save file into a `Save_data` object."""
     full_save_name = os.path.join(SAVES_FOLDER_PATH, save_name)
     # get if save if a file
     if os.path.isfile(f'{full_save_name}.{SAVE_EXT}'):
@@ -173,6 +182,7 @@ def load_save(save_name:str, keybind_mapping:list):
 
 
 def _process_save_display_data(data):
+    """Turns the json display data from a file into more uniform data."""
     try:
         data_processed = ""
         try:
@@ -193,6 +203,7 @@ def _process_save_display_data(data):
         return None
 
 def _get_save_folders() -> list[str]:
+    """Gets all folders from the save folder."""
     folders = []
     items = os.listdir(SAVES_FOLDER_PATH)
     for item in items:
@@ -202,6 +213,7 @@ def _get_save_folders() -> list[str]:
     return folders
 
 def _get_valid_folders(folders:list[str]):
+    """Gets the display data from all readable save files in the save folder."""
     datas = []
     for folder in folders:
         data = ts.decode_save_s(os.path.join(SAVES_FOLDER_PATH, folder, SAVE_FILE_NAME_DATA), 0)
@@ -209,6 +221,7 @@ def _get_valid_folders(folders:list[str]):
     return datas
 
 def get_saves_data():
+    """Gets all save files from the save folder, and proceses them for diplay."""
     ts.recreate_saves_folder()
     # read saves
     datas = []
