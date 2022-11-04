@@ -3,6 +3,7 @@ __pycache__
 backups
 logs
 saves
+tests
 
 *.log
 *.sav

@@ -71,6 +71,8 @@ class Log_type(Enum):
     ERROR   = 2
     CRASH   = 3
     OTHER   = 4
+    PASS    = 5
+    FAIL    = 6
 
 
 def encode_save_s(data:list[dict]|dict, file_path:str, seed=SAVE_SEED, extension=SAVE_EXT):

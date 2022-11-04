@@ -1,5 +1,7 @@
 import json
 import os
+import sys
+from typing import Callable
 
 from utils import Color
 import utils as u
@@ -167,54 +169,75 @@ def load_backup_menu():
 # thread_1.join()
 
 class Self_Checks:
-    def __init__(self):
-        ts.threading.current_thread().name = TEST_THREAD_NAME
-        ts.begin_log()
-        self.initialization(False)
-        self.settings_checks(False)
 
-
-    def initialization(self, seprate=True):
-        if seprate:
+    def begin_check(self, check_function:Callable, separate=True):
+        check_name = check_function.__name__.capitalize().replace("_", " ")
+        if separate:
             ts.begin_log()
-        print(end="Initialization check...")
-        ts.log_info("Initialization check", "Running...")
+        print(end=check_name + "...")
+        ts.log_info(check_name, "Running...")
+        return check_name
 
-        import sys
+
+    def give_result(self, check_name:str, result_type=ts.Log_type.FAIL):
+        print(result_type.name)
+        ts.log_info(check_name,
+            result_type.name + (": " + str(sys.exc_info()) if result_type==ts.Log_type.CRASH else ""),
+            result_type)
+        
+    
+    def check(self, check_function:Callable, separate=True):
+        ts.threading.current_thread().name = TEST_THREAD_NAME
+        check_name = self.begin_check(check_function, separate)
 
         try:
-            ts.check_package_versions()
-
-            # GLOBAL VARIABLES
-            GOOD_PACKAGES = True
-            SETTINGS = dm.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
-            SETTINGS.save_keybind_mapping()
-            SAVE_DATA = dm.Save_data
-            GLOBALS = dm.Globals(False, False, False, False)
+            check_function(check_name)
         except:
-            print("Crashed")
-            ts.log_info("Initialization check", "Preloading crahed: " + str(sys.exc_info()), "FAIL")
-        else:
-            print("Passed")
-            ts.log_info("Initialization check", "Passed", "PASS")
+            self.give_result(check_name, ts.Log_type.CRASH)
+    
+    
+    def run_all_tests(self):
+        ts.begin_log()
+        self.check(self.initialization_check, False)
+        self.check(self.settings_checks, False)
+        # self.check(self.save_file_checks, False)
+
+
+    def initialization_check(self, check_name:str):
+        ts.check_package_versions()
+
+        # GLOBAL VARIABLES
+        GOOD_PACKAGES = True
+        SETTINGS = dm.Settings(
+            ts.settings_manager("auto_save"),
+            ts.settings_manager("logging"),
+            ts.settings_manager("keybinds"))
+        SETTINGS.save_keybind_mapping()
+        SAVE_DATA = dm.Save_data
+        GLOBALS = dm.Globals(False, False, False, False)
+        
+        self.give_result(check_name, ts.Log_type.PASS)
     
 
-    def settings_checks(self, seprate=True):
-        if seprate:
-            ts.begin_log()
+    def settings_checks(self, check_name:str):
         good = False
-        print(end="Settings checks...")
-        ts.log_info("Settings checks", "Running...")
-        settings = dm.Settings(ts.settings_manager("auto_save"), ts.settings_manager("keybinds"))
+        settings = dm.Settings(
+                ts.settings_manager("auto_save"),
+                ts.settings_manager("logging"),
+                ts.settings_manager("keybinds"))
         settings.save_keybind_mapping()
+        
         if settings.auto_save == True or settings.auto_save == False:
             if settings.DOUBLE_KEYS == ts.DOUBLE_KEYS and type(settings.keybinds) is dict:
-                print("Passed")
-                ts.log_info("Settings checks", "Passed", "PASS")
+                self.give_result(check_name, ts.Log_type.PASS)
                 good = True
         if not good:
-            print("Failed")
-            ts.log_info("Settings checks", "Failed", "FAIL")
+            self.give_result(check_name, ts.Log_type.FAIL)
+            
+            
+    # def save_file_checks(self, check_name:str):
+    #     self.give_result(check_name, ts.Log_type.PASS)
+    #     self.give_result(check_name, ts.Log_type.FAIL)
 
 
-# Self_Checks()
+# Self_Checks().run_all_tests()
