@@ -33,9 +33,20 @@ def unzipp(fromm, tooo):
         zip_ref.extractall(tooo)
 
 
+# ALMOST PERFECT!!!
+def zipdir(path):
+    with zipfile.ZipFile(f"{zip_to}.{BACKUP_EXT}", 'w') as zf:
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                zf.write(os.path.join(root, file), 
+                        os.path.relpath(os.path.join(root, file), 
+                                        os.path.join(path, '..')))
+
+
 # shutil.make_archive(save_name, BACKUP_EXT, SAVES_FOLDER_PATH, save_name)
 # make_archive(zip_from, zip_to)
 # unzipp(os.path.join(ROOT_FOLDER, save_name) + ".zip", os.path.join(BACKUPS_FOLDER_PATH, save_name))
-zipppppppp()
+# zipppppppp()
+zipdir(zip_from)
 
 # 87531
