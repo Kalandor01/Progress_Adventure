@@ -17,7 +17,7 @@ from tools import Log_type
 from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME
 from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
 from tools import AUTO_SAVE_DELAY, DOUBLE_KEYS
-from tools import STANDARD_CURSOR_ICONS, DELETE_CURSOR_ICONS
+from tools import STANDARD_CURSOR_ICONS, DELETE_CURSOR_ICONS, ERROR_HANDLING
 
 
 if __name__ == "__main__":
@@ -390,7 +390,6 @@ def main_menu():
                     if option != -1 and option < (len(list_data) - 1) / 2:
                         if sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(SETTINGS.keybind_mapping):
                             # log
-                            print(files_data[option])
                             ts.log_info("Deleted save", f'save name: {files_data[option][0]}')
                             # remove
                             if os.path.isfile(f'{os.path.join(SAVES_FOLDER_PATH, files_data[option][0])}.{SAVE_EXT}'):
@@ -435,8 +434,7 @@ def main():
 
 
 def main_error_handler():
-    # ultimate error handlind (release only)
-    error_handling = False
+    # general crash handler (release only)
 
     exit_game = False
     while not exit_game:
@@ -447,7 +445,7 @@ def main_error_handler():
                 main()
         except:
             ts.log_info("Instance crashed", sys.exc_info(), Log_type.CRASH)
-            if error_handling:
+            if ERROR_HANDLING:
                 print(f"ERROR: {sys.exc_info()[1]}")
                 ans = input("Restart?(Y/N): ")
                 if ans.upper() == "Y":

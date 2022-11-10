@@ -2,13 +2,14 @@ import json
 import os
 import sys
 from typing import Callable
+from zipfile import ZipFile
 
 from utils import Color
 import utils as u
 import tools as ts
 from tools import OLD_BACKUP_EXT, BACKUPS_FOLDER_PATH, sfm
 from tools import TEST_THREAD_NAME
-from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
+from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT, BACKUP_EXT
 from tools import ENCODING, FILE_ENCODING_VERSION
 from tools import SAVE_VERSION
 import data_manager as dm
@@ -59,6 +60,13 @@ def recompile_save_file(save_name:str, new_save_name:str, pre_save_name=SAVES_FO
         return True
 
 
+def unzipp(zip_from_path:str, zip_to_path:str):
+    if os.path.isdir(f"{zip_to_path}.{BACKUP_EXT}"):
+        with ZipFile(f"{zip_to_path}.{BACKUP_EXT}", 'r') as zip_ref:
+            zip_ref.extractall(zip_from_path)
+    else:
+        print(f"unzip: FILE {zip_to_path}.{BACKUP_EXT} NOT FOUND")
+
 
 
 def old_file_reader(save_name:str="save*", save_ext:str=OLD_BACKUP_EXT, dir_name:str=BACKUPS_FOLDER_PATH, decode_until:int=1):
@@ -69,7 +77,7 @@ def old_file_reader(save_name:str="save*", save_ext:str=OLD_BACKUP_EXT, dir_name
 
     # get existing file numbers
     file_names = listdir(dir_name)
-    existing_files = []
+    existing_files:list[list[str|int]] = []
     for name in file_names:
         if path.isfile(path.join(dir_name, name)) and name.find(save_ext) and name.find(save_name.replace("*", "")):
             try: file_number = int(name.replace(f".{save_ext}", "").split(save_name.replace("*", ""))[1])
@@ -179,7 +187,7 @@ class Self_Checks:
         return check_name
 
 
-    def give_result(self, check_name:str, result_type=ts.Log_type.FAIL):
+    def _give_result(self, check_name:str, result_type=ts.Log_type.FAIL):
         print(result_type.name)
         ts.log_info(check_name,
             result_type.name + (": " + str(sys.exc_info()) if result_type==ts.Log_type.CRASH else ""),
@@ -193,7 +201,7 @@ class Self_Checks:
         try:
             check_function(check_name)
         except:
-            self.give_result(check_name, ts.Log_type.CRASH)
+            self._give_result(check_name, ts.Log_type.CRASH)
     
     
     def run_all_tests(self):
@@ -216,7 +224,7 @@ class Self_Checks:
         SAVE_DATA = dm.Save_data
         GLOBALS = dm.Globals(False, False, False, False)
         
-        self.give_result(check_name, ts.Log_type.PASS)
+        self._give_result(check_name, ts.Log_type.PASS)
     
 
     def settings_checks(self, check_name:str):
@@ -229,10 +237,10 @@ class Self_Checks:
         
         if settings.auto_save == True or settings.auto_save == False:
             if settings.DOUBLE_KEYS == ts.DOUBLE_KEYS and type(settings.keybinds) is dict:
-                self.give_result(check_name, ts.Log_type.PASS)
+                self._give_result(check_name, ts.Log_type.PASS)
                 good = True
         if not good:
-            self.give_result(check_name, ts.Log_type.FAIL)
+            self._give_result(check_name, ts.Log_type.FAIL)
             
             
     # def save_file_checks(self, check_name:str):

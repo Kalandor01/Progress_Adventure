@@ -1,11 +1,15 @@
 __pycache__
+.vscode
 
 backups
 logs
 saves
 tests
+output
 
 *.log
 *.sav
 *.sav.bak
 *.decoded.json
+
+auto-py-to-exe_config.json

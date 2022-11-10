@@ -99,7 +99,6 @@ class Key:
     def change(self, key_value:list[list[bytes]]):
         self.value = key_value
         self.set_name()
-        print(self.name, self.value)
     
     def __str__(self):
         return f"{self.name}: {self.value}"

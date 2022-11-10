@@ -8,6 +8,7 @@ from msvcrt import getch
 from typing import Any
 import numpy as np
 import colorama as col
+from zipfile import ZipFile
 
 import save_file_manager as sfm
 
@@ -32,7 +33,7 @@ AUTO_SAVE_THREAD_NAME = "Auto saver"
 MANUAL_SAVE_THREAD_NAME = "Quit manager"
 TEST_THREAD_NAME = "Test"
 # paths/folders/file names
-ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__))
+ROOT_FOLDER = os.getcwd()
     #saves folder
 SAVES_FOLDER = "saves"
 SAVES_FOLDER_PATH = os.path.join(ROOT_FOLDER, SAVES_FOLDER)
@@ -54,6 +55,7 @@ SAVE_FOLDER_NAME_CHUNKS = "chunks"
 SAVE_SEED = 87531
 SETTINGS_SEED = 1
 # other
+ERROR_HANDLING = True
 AUTO_SAVE_DELAY = 3
 FILE_ENCODING_VERSION = 2
 DOUBLE_KEYS = [b"\xe0", b"\x00"]
@@ -175,6 +177,23 @@ def recreate_logs_folder():
     return recreate_folder(LOGS_FOLDER)
 
 
+def make_zip(save_name:str, save_name_path:str, full_zip_name:str):
+    """
+    Makes a zip archive from a save folder.
+    """
+    with ZipFile(full_zip_name, 'w') as zf:
+        for root, dirs, files in os.walk(save_name_path):
+            for dir in dirs:
+                dir_name = os.path.join(root, dir)
+                ar2 = os.path.join(save_name_path, '..')
+                arc_name = os.path.relpath(dir_name, ar2).removeprefix(save_name + os.sep)
+                zf.write(dir_name, arc_name)
+            for file in files:
+                file_name = os.path.join(root, file)
+                ar2 = os.path.join(save_name_path, '..')
+                arc_name = os.path.relpath(file_name, ar2).removeprefix(save_name + os.sep)
+                zf.write(file_name, arc_name)
+
 def make_backup(save_name:str, is_temporary=False):
     """
     Makes a backup of a save from the saves folder into the backups folder (as a zip file).\n
@@ -188,14 +207,9 @@ def make_backup(save_name:str, is_temporary=False):
     # make common variables
     save_file = f'{os.path.join(SAVES_FOLDER_PATH, save_name)}.{SAVE_EXT}'
     save_folder = os.path.join(SAVES_FOLDER_PATH, save_name)
-    display_save_path = f'{os.path.join(SAVES_FOLDER, save_name)}'
     if os.path.isdir(save_folder) or os.path.isfile(save_file):
         # make more variables
-        if os.path.isfile(save_file):
-            backup_name_end = f'{u.make_date(now)};{u.make_time(now, "-", is_temporary, "-")};{save_name}.{OLD_BACKUP_EXT}'
-        else:
-            backup_name_end = f'{u.make_date(now)};{u.make_time(now, "-", is_temporary, "-")};{save_name}.{BACKUP_EXT}'
-
+        backup_name_end = f'{u.make_date(now)};{u.make_time(now, "-", is_temporary, "-")};{save_name}.{OLD_BACKUP_EXT if os.path.isfile(save_file) else BACKUP_EXT}'
         backup_name = os.path.join(BACKUPS_FOLDER_PATH, backup_name_end)
         display_backup_name = os.path.join(BACKUPS_FOLDER, backup_name_end)
         # file copy
@@ -203,16 +217,11 @@ def make_backup(save_name:str, is_temporary=False):
             shutil.copyfile(save_file, backup_name)
         # make zip
         else:
-            # REWORK SO IT'S SIMPLER!!!            
-            base = os.path.basename(backup_name)
-            name = base.split('.')[0]
-            archive_from = os.path.dirname(save_folder)
-            archive_to = os.path.basename(save_folder.strip(os.sep))
-            shutil.make_archive(name, BACKUP_EXT, archive_from, archive_to)
-            shutil.move('%s.%s'%(name,BACKUP_EXT), backup_name)
-        log_info(f"Made {('temporary ' if is_temporary else ' ')}backup", display_backup_name)
+            make_zip(save_name, save_folder, backup_name)
+        log_info(f"Made {('temporary ' if is_temporary else '')}backup", display_backup_name)
         return [backup_name, display_backup_name]
     else:
+        display_save_path = os.path.join(SAVES_FOLDER, save_name)
         log_info("Backup failed", f"save file/folder not found: {display_save_path}(.{SAVE_EXT})", Log_type.WARN)
         return False
 
