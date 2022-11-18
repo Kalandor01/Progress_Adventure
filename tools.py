@@ -9,6 +9,7 @@ from typing import Any
 import numpy as np
 import colorama as col
 from zipfile import ZipFile
+from copy import deepcopy
 
 import save_file_manager as sfm
 
@@ -23,7 +24,7 @@ PYTHON_MIN_VERSION = "3.11.0"
 PIP_NP_MIN_VERSION = "1.23.4"
 PIP_COL_MIN_VERSION = "0.4.6"
 
-PIP_SFM_MIN_VERSION = "1.13"
+PIP_SFM_MIN_VERSION = "1.13.3"
 PIP_RS_MIN_VERSION = "1.5.1"
 # language
 ENCODING = "windows-1250"
@@ -77,22 +78,33 @@ class Log_type(Enum):
     FAIL    = 6
 
 
-def encode_save_s(data:list[dict]|dict, file_path:str, seed=SAVE_SEED, extension=SAVE_EXT):
+def press_key(text=""):
+    """
+    Writes out text, and then stalls until the user presses any key.
+    """
+
+    print(text, end="", flush=True)
+    if getch() in DOUBLE_KEYS:
+        getch()
+    print()
+
+
+def encode_save_s(data:list[dict[str, Any]]|dict[str, Any], file_path:str, seed=SAVE_SEED, extension=SAVE_EXT):
     """
     Shorthand for `sfm.encode_save` + convert from json to string.
     """
     # convert from json to string
     if type(data) is dict:
-        json_data = json.dumps(data)
+        json_data = [json.dumps(data)]
     else:
-        json_data = []
+        json_data:list[str] = []
         for dat in data:
             json_data.append(json.dumps(dat))
         
     sfm.encode_save(json_data, seed, file_path, extension, ENCODING, FILE_ENCODING_VERSION)
 
 
-def decode_save_s(file_path, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT) -> dict:
+def decode_save_s(file_path, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT) -> dict[str, Any]:
     """
     Shorthand for `sfm.decode_save` + convert from string to json.\n
     `line_num` is the line, that you want go get back (starting from 0).
@@ -303,22 +315,22 @@ def make_backup(save_name:str, is_temporary=False):
     """
 
 
-def encode_keybinds(settings:dict[list[list[bytes]]]):
-    for x in settings["keybinds"]:
-        if len(settings['keybinds'][x][0]) > 0:
-            settings['keybinds'][x][0][0] = settings['keybinds'][x][0][0].decode(ENCODING)
-        elif len(settings['keybinds'][x]) > 1 and len(settings['keybinds'][x][1]) > 0:
-            settings['keybinds'][x][1][0] = settings['keybinds'][x][1][0].decode(ENCODING)
-    return settings
+def encode_keybinds(keybinds:dict[str, list[list[bytes]]]) -> dict[str, list[list[str]]]:
+    for x in keybinds:
+        if len(keybinds[x][0]) > 0:
+            keybinds[x][0][0] = keybinds[x][0][0].decode(ENCODING)
+        elif len(keybinds[x]) > 1 and len(keybinds[x][1]) > 0:
+            keybinds[x][1][0] = keybinds[x][1][0].decode(ENCODING)
+    return keybinds
 
 
-def decode_keybinds(settings:dict):
-    for x in settings["keybinds"]:
-        if len(settings['keybinds'][x][0]) > 0:
-            settings['keybinds'][x][0][0] = bytes(settings['keybinds'][x][0][0], ENCODING)
-        elif len(settings['keybinds'][x]) > 1 and len(settings['keybinds'][x][1]) > 0:
-            settings['keybinds'][x][1][0] = bytes(settings['keybinds'][x][1][0], ENCODING)
-    return settings
+def decode_keybinds(keybinds:dict[str, list[list[str]]]) -> dict[str, list[list[bytes]]]:
+    for x in keybinds:
+        if len(keybinds[x][0]) > 0:
+            keybinds[x][0][0] = bytes(keybinds[x][0][0], ENCODING)
+        elif len(keybinds[x]) > 1 and len(keybinds[x][1]) > 0:
+            keybinds[x][1][0] = bytes(keybinds[x][1][0], ENCODING)
+    return keybinds
 
 
 def settings_manager(line_name:str, write_value=None) -> Any | None:
@@ -340,17 +352,18 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
     def_settings = {"auto_save": True, "logging": True, "keybinds": {"esc": [[b"\x1b"]], "up": [[], [b"H"]], "down": [[], [b"P"]], "left": [[], [b"K"]], "right": [[], [b"M"]], "enter": [[b"\r"]]}}
 
     def recreate_settings():
-        encode_save_s(encode_keybinds(def_settings), os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
+        new_settings = deepcopy(def_settings)
+        new_settings["keybinds"] = encode_keybinds(new_settings["keybinds"])
+        encode_save_s(new_settings, os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
         # log
         log_info("Recreated settings")
-        return def_settings
+        return new_settings
 
 
     try:
-        settings = decode_keybinds(decode_save_s(os.path.join(ROOT_FOLDER, "settings"), 0, SETTINGS_SEED))
+        settings = decode_save_s(os.path.join(ROOT_FOLDER, "settings"), 0, SETTINGS_SEED)
+        settings["keybinds"] = decode_keybinds(settings["keybinds"])
     except (ValueError, TypeError):
-        from data_manager import press_key
-        
         log_info("Decode error", "settings", Log_type.ERROR)
         press_key("The settings file is corrupted, and will now be recreated!")
         settings = recreate_settings()
@@ -376,12 +389,14 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
             if settings[line_name] != write_value:
                 log_info("Changed settings", f"{line_name}: {settings[line_name]} -> {write_value}")
                 settings[line_name] = write_value
-                encode_save_s(encode_keybinds(settings), os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
+                settings["keybinds"] = encode_keybinds(settings["keybinds"])
+                encode_save_s(settings, os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
         else:
             if line_name in settings_lines:
                 log_info("Recreating key in settings", line_name, Log_type.WARN)
                 settings[line_name] = def_settings[line_name]
-                encode_save_s(encode_keybinds(settings), os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
+                settings["keybinds"] = encode_keybinds(settings["keybinds"])
+                encode_save_s(settings, os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
             else:
                 raise KeyError(line_name)
 
@@ -396,7 +411,7 @@ def random_state_converter(random_state:np.random.RandomState | dict | tuple):
     else:
         if type(random_state) is tuple:
             state = random_state
-        else:
+        elif isinstance(random_state, np.random.RandomState):
             state = random_state.get_state()
         state_nums = []
         for num in state[1]:
@@ -447,7 +462,8 @@ def _package_response(bad_packages:list, py_good:bool):
     if len(bad_packages) == 0 and py_good:
         return True
     else:
-        if input("Do you want to continue?(Y/N): ").upper() == "Y":
+        ans = input("Do you want to continue?(Y/N): ")
+        if ans.upper() == "Y":
             log_info("Continuing anyways")
             return True
         else:

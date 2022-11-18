@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import datetime as dtime
+from typing import Any
 
 import utils as u
 import tools as ts
@@ -111,7 +112,7 @@ def create_save_data():
     return dm.Save_data(save_name, display_save_name, last_access, player, r.get_state())
 
 
-def correct_save_data(data:dict, save_version:int, extra_data:dict):
+def correct_save_data(data:dict[str, Any], save_version:float, extra_data:dict[str, Any]):
     """Modifys the save data, to make it up to date, with the newest save file data structure."""
     ts.log_info("Correcting save data")
     # 0.0 -> 1.0
@@ -136,7 +137,7 @@ def correct_save_data(data:dict, save_version:int, extra_data:dict):
     return data
 
 
-def load_save(save_name:str, keybind_mapping:list):
+def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list[bytes]]):
     """Loads a save file into a `Save_data` object."""
     full_save_name = os.path.join(SAVES_FOLDER_PATH, save_name)
     # get if save if a file
@@ -159,16 +160,16 @@ def load_save(save_name:str, keybind_mapping:list):
             ts.make_backup(save_name)
         data = correct_save_data(data, save_version, {"save_name": save_name})
     # display_name
-    display_name = data["display_name"]
+    display_name:str = data["display_name"]
     # last access
-    last_access = data["last_access"]
+    last_access:list[int] = data["last_access"]
     # player
-    player_data = data["player"]
+    player_data:dict[str, Any] = data["player"]
     player = es.Player(player_data["name"])
     player.hp = int(player_data["hp"])
     player.attack = int(player_data["attack"])
     player.defence = int(player_data["defence"])
-    player.speed = float(player_data["speed"])
+    player.speed = int(player_data["speed"])
     player.inventory.items = list(iy.inventory_converter(player_data["inventory"]))
     # log
     ts.log_info("Loaded save", f'save name: {save_name}, player name: "{player.name}", last saved: {u.make_date(last_access)} {u.make_time(last_access[3:])}')
@@ -199,7 +200,7 @@ def _process_save_display_data(data):
         return [data[0], data_processed]
     except (TypeError, IndexError):
         ts.log_info("Parse error", f"Save name: {data[0]}", Log_type.ERROR)
-        dm.press_key(f"\"{data[0]}\" could not be parsed!")
+        ts.press_key(f"\"{data[0]}\" could not be parsed!")
         return None
 
 def _get_save_folders() -> list[str]:
@@ -237,7 +238,7 @@ def get_saves_data():
     for data in datas:
         if data[1] == -1:
             ts.log_info("Decode error", f"Save name: {data[0]}", Log_type.ERROR)
-            dm.press_key(f"\"{data[0]}\" is corrupted!")
+            ts.press_key(f"\"{data[0]}\" is corrupted!")
         else:
             processed_data = _process_save_display_data(data)
             if processed_data is not None:

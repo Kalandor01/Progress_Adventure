@@ -36,7 +36,7 @@ if __name__ == "__main__":
                 ts.settings_manager("keybinds"))
             ts.change_logging(SETTINGS.logging)
             SETTINGS.save_keybind_mapping()
-            SAVE_DATA = dm.Save_data
+            SAVE_DATA:dm.Save_data = None
             GLOBALS = dm.Globals(False, False, False, False)
             
             col.init()
@@ -282,7 +282,7 @@ def game_loop():
         # ENDING
     GLOBALS.exiting = False
     GLOBALS.in_game_loop = False
-    dm.press_key("Exiting...Press keys!")
+    ts.press_key("Exiting...Press keys!")
     ts.log_info("Game loop ended")
 
     
@@ -334,10 +334,11 @@ def main_menu():
             ], " Keybinds", False, True).display(SETTINGS.keybind_mapping)
             # exit
             if ans == -1:
-                keybinds = ts.settings_manager("keybinds")
+                keybinds:dict[str, list[list[bytes]]] = ts.settings_manager("keybinds")
+                new_keybinds:dict[str, dm.Key] = {}
                 for x in keybinds:
-                    keybinds[x] = dm.Key(keybinds[x])
-                SETTINGS.keybinds = keybinds
+                    new_keybinds[x] = dm.Key(keybinds[x])
+                SETTINGS.keybinds = new_keybinds
                 break
             # done
             elif ans > 5:
@@ -413,12 +414,12 @@ def main_menu():
         # action
         # new save
         if status[0] == 1:
-            dm.press_key(f"\nCreating new save!\n")
+            ts.press_key(f"\nCreating new save!\n")
             new_save()
             files_data = sm.get_saves_data()
         # load
         elif status[0] == 0:
-            dm.press_key(f"\nLoading save: {status[1]}!")
+            ts.press_key(f"\nLoading save: {status[1]}!")
             load_save(status[1])
             files_data = sm.get_saves_data()
 

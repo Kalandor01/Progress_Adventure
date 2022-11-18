@@ -165,9 +165,9 @@ def load_backup_menu():
                 file_name = str(files_data[int(option)][0])
                 save_num = files_data[int(option)][2]
                 if recompile_save_file(file_name, file_name, BACKUPS_FOLDER_PATH, SAVES_FOLDER_PATH, OLD_BACKUP_EXT, SAVE_EXT, save_num):
-                    input("\n" + file_name + " loaded!")
+                    ts.press_key("\n" + file_name + " loaded!")
     else:
-        dm.press_key("No backups found!")
+        ts.press_key("No backups found!")
 
 
 

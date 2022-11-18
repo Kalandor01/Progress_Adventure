@@ -1,4 +1,5 @@
 import copy
+from typing import Any
 
 from utils import Double_Keys
 import tools as ts
@@ -108,13 +109,13 @@ class Settings:
 
     DOUBLE_KEYS = DOUBLE_KEYS
 
-    def __init__(self, auto_save:bool, logging:bool, keybinds:dict[list]):
+    def __init__(self, auto_save:bool, logging:bool, keybinds:dict[str, list[list[bytes]]]):
         self.auto_save = auto_save
         self.logging = logging
+        obj_kebinds = {}
         for key in keybinds:
-            keybinds[key] = Key(keybinds[key])
-        self.keybinds = dict[Key](keybinds)
-        self.keybind_mapping = []
+            obj_kebinds[key] = Key(keybinds[key])
+        self.keybinds = dict[str, Key](obj_kebinds)
         self.save_keybind_mapping()
     
     def change_others(self, auto_save=None, logging=None):
@@ -137,19 +138,19 @@ class Settings:
         "enter": copy.deepcopy(self.keybinds["enter"].value)}
     
     def save_keybind_mapping(self):
-        # [[keybinds["esc"], keybinds["up"], keybinds["down"], keybinds["left"], keybinds["right"], keybinds["enter"]], [b"\xe0", b"\x00"]]
-        # [[[[b"\x1b"]],     [[], [b"H"]],   [[], [b"P"]],     [[], [b"K"]],     [[], [b"M"]],      [[b"\r"]]],         [b"\xe0", b"\x00"]]
-        self.keybind_mapping:list[list[list[list[bytes]]|bytes]] = [[
+        # ([keybinds["esc"], keybinds["up"], keybinds["down"], keybinds["left"], keybinds["right"], keybinds["enter"]], [b"\xe0", b"\x00"])
+        # ([[[b"\x1b"]],     [[], [b"H"]],   [[], [b"P"]],     [[], [b"K"]],     [[], [b"M"]],      [[b"\r"]]],         [b"\xe0", b"\x00"])
+        self.keybind_mapping:tuple[list[list[list[bytes]]], list[bytes]] = ([
             self.keybinds["esc"].value,
             self.keybinds["up"].value,
             self.keybinds["down"].value,
             self.keybinds["left"].value,
             self.keybinds["right"].value,
-            self.keybinds["enter"].value], self.DOUBLE_KEYS]
+            self.keybinds["enter"].value], self.DOUBLE_KEYS)
         ts.settings_manager("keybinds", self.encode_keybinds())
 
 class Save_data:
-    def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player, seed:tuple, chunks:list[Chunk]=None):
+    def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player, seed:tuple[Any], chunks:list[Chunk]=None):
         self.save_name = str(save_name)
         self.display_save_name = str(display_save_name)
         self.last_access = list[int](last_access)
@@ -159,17 +160,6 @@ class Save_data:
         if chunks is not None:
             for chunk in chunks:
                 self.chunks.append(copy.deepcopy(chunk))
-
-
-def press_key(text=""):
-    """
-    Writes out text, and then stalls until the user presses any key.
-    """
-
-    print(text, end="", flush=True)
-    if getch() in DOUBLE_KEYS:
-        getch()
-    print()
 
 
 def is_key(key:Key) -> bool:

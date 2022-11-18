@@ -55,7 +55,7 @@ class Loot_controller:
         self.chance = float(chance)
         if type(item_num) is int:
             item_num = range(item_num, item_num)
-        self.item_num = item_num
+        self.item_num:range = item_num
         self.rolls = int(rolls)
 
 def loot_manager(drops:list[Loot_controller]=None):
