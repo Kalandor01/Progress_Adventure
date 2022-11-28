@@ -1,3 +1,4 @@
+import copy
 from enum import Enum, auto
 
 
@@ -56,6 +57,50 @@ class Item:
 
     def use(self):
         return False
+    
+
+class Container:
+    def __init__(self):
+        self.items:list[Item] = []
+    
+    
+    def find_item(self, name:Item_categories):
+        for item in self.items:
+            if item.name == name:
+                return x
+        return False
+        
+
+    def add(self, name:Item_categories, amount=1):
+        item_num = self.find_item(name)
+        if item_num != False:
+            self.items[item_num].amount += amount
+            return None
+        else:
+            self.items.append(Item(name, amount))
+    
+
+    def remove(self, name:Item_categories, amount=1):
+        for item in self.items:
+            if item.name == name:
+                if item.amount >= amount:
+                    item.amount -= amount
+                    return True
+                break
+        return False
+
+
+    def get_loot(self):
+        items = copy.deepcopy(self.items)
+        self.items.clear()
+        return items
+    
+
+    def __str__(self):
+        txt = f"{self.__class__.__name__}:"
+        for item in self.items:
+            txt += f"\n\t{item.d_name}{' x' + str(item.amount) if item.amount > 1 else ''}"
+        return txt
 
 
 class Inventory:
