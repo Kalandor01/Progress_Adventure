@@ -56,7 +56,7 @@ SAVE_FOLDER_NAME_CHUNKS = "chunks"
 SAVE_SEED = 87531
 SETTINGS_SEED = 1
 # other
-ERROR_HANDLING = True
+ERROR_HANDLING = False
 AUTO_SAVE_DELAY = 3
 FILE_ENCODING_VERSION = 2
 DOUBLE_KEYS = [b"\xe0", b"\x00"]
@@ -401,22 +401,26 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
                 raise KeyError(line_name)
 
 
-def random_state_converter(random_state:np.random.RandomState | dict | tuple):
+def random_state_to_json(random_state:np.random.RandomState|tuple):
     """
-    Can convert a numpy RandomState.getstate() into a json format and back.
+    Converts a numpy RandomState.getstate() into a json format.
     """
-    if type(random_state) is dict:
-        states = [int(num) for num in random_state["state"]]
-        return (str(random_state["type"]), np.array(states, dtype=np.uint32), int(random_state["pos"]), int(random_state["has_gauss"]), float(random_state["cached_gaussian"]))
-    else:
-        if type(random_state) is tuple:
-            state = random_state
-        elif isinstance(random_state, np.random.RandomState):
-            state = random_state.get_state()
-        state_nums = []
-        for num in state[1]:
-            state_nums.append(int(num))
-        return {"type": state[0], "state": state_nums, "pos": state[2], "has_gauss": state[3], "cached_gaussian": state[4]}
+    if type(random_state) is tuple:
+        state = random_state
+    elif isinstance(random_state, np.random.RandomState):
+        state = random_state.get_state()
+    state_nums = []
+    for num in state[1]:
+        state_nums.append(int(num))
+    return {"type": state[0], "state": state_nums, "pos": state[2], "has_gauss": state[3], "cached_gaussian": state[4]}
+    
+
+def json_to_random_state(random_state:dict):
+    """
+    Converts a json formated numpy RandomState.getstate() into a numpy RandomState.getstate().
+    """
+    states = [int(num) for num in random_state["state"]]
+    return (str(random_state["type"]), np.array(states, dtype=np.uint32), int(random_state["pos"]), int(random_state["has_gauss"]), float(random_state["cached_gaussian"]))
 
 
 def is_up_to_date(min_version:str, curr_version:str):

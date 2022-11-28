@@ -20,8 +20,7 @@ class Globals:
 
 class Key:
     def __init__(self, value:list[list[bytes]]):
-        self.value = value
-        self.set_name()
+        self.set_value(value)
     
     def set_name(self):
         if len(self.value[0]) > 0:
@@ -70,7 +69,7 @@ class Key:
                     self.name = "Ő"
                 case _:
                     self.name = self.value[0][0].decode(ENCODING)
-        elif len(self.value) > 1 and len(self.value[1]) > 0:
+        else:
             match self.value[1][0]:
                 case Double_Keys.ARROW_UP.value:
                     self.name = "up arrow"
@@ -94,12 +93,25 @@ class Key:
                     self.name = "delete"
                 case _:
                     self.name = self.value[1][0].decode(ENCODING)
+
+    def set_value(self, key_value:list[list[bytes]]):
+        try:
+            if len(key_value[0]) > 0:
+                key_value[0][0].decode(ENCODING)
+            elif len(self.value) > 1 and len(key_value) > 0:
+                key_value[1][0].decode(ENCODING)
+            else:
+                raise KeyError
+        except UnicodeDecodeError:
+            ts.log_info("Unknown key", "cannot decode key", ts.Log_type.ERROR)
+            raise
         else:
-            self.name = "key error"
+            self.value = key_value
+            self.set_name()
 
     def change(self, key_value:list[list[bytes]]):
-        self.value = key_value
-        self.set_name()
+        try: self.set_value(key_value)
+        except UnicodeDecodeError: pass
     
     def __str__(self):
         return f"{self.name}: {self.value}"

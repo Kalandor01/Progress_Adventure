@@ -52,7 +52,7 @@ def _convert_data_json(data:dm.Save_data):
     # player
     save_data_json["player"] = _convert_player_json(data.player)
     # randomstate
-    save_data_json["seed"] = ts.random_state_converter(r)
+    save_data_json["seed"] = ts.random_state_to_json(r)
     return save_data_json
 
 
@@ -177,7 +177,7 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     # PREPARING
     ts.log_info("Preparing game data")
     # load random state
-    r.set_state(ts.random_state_converter(data["seed"]))
+    r.set_state(ts.json_to_random_state(data["seed"]))
     # load to class
     return dm.Save_data(save_name, display_name, last_access, player, r.get_state())
 
