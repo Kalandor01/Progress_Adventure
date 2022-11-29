@@ -3,7 +3,7 @@ import inspect
 
 from tools import r
 
-from inventory import Inventory, Item_categories
+from inventory import Inventory, Item_category
 
 
 def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|range, fluc_small=2, fluc_big=3, c_rare=0.02, team=1, c_team_change=0.005, name:str=None):
@@ -50,7 +50,7 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
 
 
 class Loot_controller:
-    def __init__(self, item:Item_categories, chance=1.0, item_num:int|range=1, rolls=1):
+    def __init__(self, item:Item_category, chance=1.0, item_num:int|range=1, rolls=1):
         self.item = item
         self.chance = float(chance)
         if type(item_num) is int:
@@ -112,26 +112,26 @@ class Player(Entity):
 class Caveman(Entity):
     def __init__(self):
         super().__init__(entity_master(7, 7, 7, 7), loot_manager(
-            [Loot_controller(Item_categories.WEAPONS.value.WOODEN_CLUB, 0.3),
-            Loot_controller(Item_categories.MATERIALS.value.CLOTH, 0.15, range(0, 1), 3),
-            Loot_controller(Item_categories.MISC.value.COPPER_COIN, 0.35, range(0, 4), 3)]))
+            [Loot_controller(Item_category.WEAPONS.value.WOODEN_CLUB, 0.3),
+            Loot_controller(Item_category.MATERIALS.value.CLOTH, 0.15, range(0, 1), 3),
+            Loot_controller(Item_category.MISC.value.COPPER_COIN, 0.35, range(0, 4), 3)]))
 
 
 class Ghoul(Entity):
     def __init__(self):
         super().__init__(entity_master(11, 9, 9, 9), loot_manager(
-            [Loot_controller(Item_categories.WEAPONS.value.STONE_SWORD, 0.2),
-            Loot_controller(Item_categories.MISC.value.ROTTEN_FLESH, 0.55, range(0, 3)),
-            Loot_controller(Item_categories.MISC.value.COPPER_COIN, 0.40, range(0, 5), 4)]))
+            [Loot_controller(Item_category.WEAPONS.value.STONE_SWORD, 0.2),
+            Loot_controller(Item_category.MISC.value.ROTTEN_FLESH, 0.55, range(0, 3)),
+            Loot_controller(Item_category.MISC.value.COPPER_COIN, 0.40, range(0, 5), 4)]))
 
 
 class Troll(Entity):
     def __init__(self):
         super().__init__(entity_master(13, 11, 11, 5), loot_manager(
-            [Loot_controller(Item_categories.WEAPONS.value.CLUB_WITH_TEETH, 0.25),
-            Loot_controller(Item_categories.MATERIALS.value.CLOTH, 0.25, range(1, 3), 2),
-            Loot_controller(Item_categories.MATERIALS.value.TEETH, 0.35, range(1, 5), 2),
-            Loot_controller(Item_categories.MISC.value.SILVER_COIN, 0.30, range(1, 3), 3)]))
+            [Loot_controller(Item_category.WEAPONS.value.CLUB_WITH_TEETH, 0.25),
+            Loot_controller(Item_category.MATERIALS.value.CLOTH, 0.25, range(1, 3), 2),
+            Loot_controller(Item_category.MATERIALS.value.TEETH, 0.35, range(1, 5), 2),
+            Loot_controller(Item_category.MISC.value.SILVER_COIN, 0.30, range(1, 3), 3)]))
 
 
 class Test(Entity):

@@ -2,7 +2,11 @@ import copy
 from enum import Enum, auto
 
 
-class Weapon_items(Enum):
+class Item_category(Enum):
+    pass
+
+
+class Weapon_items(Item_category):
     WOODEN_SWORD = auto()
     STONE_SWORD = auto()
     STEEL_SWORD = auto()
@@ -11,14 +15,14 @@ class Weapon_items(Enum):
     WOODEN_CLUB = auto()
     CLUB_WITH_TEETH = auto()
 
-class Armour_items(Enum):
+class Armour_items(Item_category):
     WOODEN_SHIELD = auto()
     LEATHER_CAP = auto()
     LEATHER_TUNIC = auto()
     LEATHER_PANTS = auto()
     LEATHER_BOOTS = auto()
 
-class Material_items(Enum):
+class Material_items(Item_category):
     BOTTLE = auto()
     WOOL = auto()
     CLOTH = auto()
@@ -28,22 +32,16 @@ class Material_items(Enum):
     GOLD = auto()
     TEETH = auto()
 
-class Misc_items(Enum):
+class Misc_items(Item_category):
     HEALTH_POTION = auto()
     GOLD_COIN = auto()
     SILVER_COIN = auto()
     COPPER_COIN = auto()
     ROTTEN_FLESH = auto()
 
-class Item_categories(Enum):
-    WEAPONS = Weapon_items
-    ARMOUR = Armour_items
-    MATERIALS = Material_items
-    MISC = Misc_items
-
 
 class Item:
-    def __init__(self, name:Item_categories, amount=1):
+    def __init__(self, name:Item_category, amount=1):
         self.name = name
         self.amount = amount
         self.make_item()
@@ -64,14 +62,14 @@ class Container:
         self.items:list[Item] = []
     
     
-    def find_item(self, name:Item_categories):
+    def find_item(self, name:Item_category):
         for item in self.items:
             if item.name == name:
                 return x
         return False
         
 
-    def add(self, name:Item_categories, amount=1):
+    def add(self, name:Item_category, amount=1):
         item_num = self.find_item(name)
         if item_num != False:
             self.items[item_num].amount += amount
@@ -80,7 +78,7 @@ class Container:
             self.items.append(Item(name, amount))
     
 
-    def remove(self, name:Item_categories, amount=1):
+    def remove(self, name:Item_category, amount=1):
         for item in self.items:
             if item.name == name:
                 if item.amount >= amount:
@@ -108,7 +106,7 @@ class Inventory:
         self.items:list[Item] = []
     
 
-    def add(self, name:Item_categories, amount=1):
+    def add(self, name:Item_category, amount=1):
         for item in self.items:
             if item.name == name:
                 item.amount += amount
@@ -116,7 +114,7 @@ class Inventory:
         self.items.append(Item(name, amount))
     
 
-    def remove(self, name:Item_categories, amount=1):
+    def remove(self, name:Item_category, amount=1):
         for item in self.items:
             if item.name == name:
                 if item.amount >= amount:
@@ -131,7 +129,7 @@ class Inventory:
             self.add(item[0], item[1])
 
 
-    def use(self, name:Item_categories):
+    def use(self, name:Item_category):
         for x in range(len(self.items)):
             if self.items[x].name == name:
                 if self.items[x].use():
@@ -154,9 +152,10 @@ def item_finder(name:str) -> Enum|None:
     Returns `None` if it doesn't exist.
     """
 
-    for enum in Item_categories._value2member_map_:
+    for enum in Item_category._value2member_map_:
         try: return enum._member_map_[name]
         except KeyError: pass
+
 
 def inventory_converter(inventory:list):
     """
