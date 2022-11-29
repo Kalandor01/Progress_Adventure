@@ -59,9 +59,10 @@ SETTINGS_SEED = 1
 ERROR_HANDLING = False
 AUTO_SAVE_DELAY = 3
 FILE_ENCODING_VERSION = 2
+CHUNK_SIZE = 10
 DOUBLE_KEYS = [b"\xe0", b"\x00"]
 LOG_MS = False
-SAVE_VERSION = 1.3
+SAVE_VERSION = 1.4
 STANDARD_CURSOR_ICONS = sfm.Cursor_icon(selected_icon=">", selected_icon_right="",
                                         not_selected_icon=" ", not_selected_icon_right="")
 DELETE_CURSOR_ICONS = sfm.Cursor_icon(selected_icon=" X", selected_icon_right="",

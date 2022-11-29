@@ -8,7 +8,7 @@ import tools as ts
 import data_manager as dm
 import entities as es
 import inventory as iy
-import chunk_manager as ch
+import chunk_manager as cm
 
 from utils import Color, Style
 from tools import r, sfm
@@ -17,10 +17,11 @@ from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
 from tools import SAVE_VERSION
 from tools import SAVE_FILE_NAME_DATA
 from tools import SAVE_FOLDER_NAME_CHUNKS
+from tools import CHUNK_SIZE
 
 
-def _convert_display_json(data:dm.Save_data):
-    """Converts the display save data to json format."""
+def _save_display_json(data:dm.Save_data):
+    """Saves the display data to the save folder."""
     display_data = {}
     display_data["save_version"] = SAVE_VERSION
     display_data["display_name"] = data.display_save_name
@@ -31,15 +32,34 @@ def _convert_display_json(data:dm.Save_data):
     return display_data
 
 
-def _convert_player_json(player_data:es.Player):
-    """Converts the player save data to json format."""
-    player_json = {"name": player_data.name, "hp": player_data.hp, "attack": player_data.attack, "defence": player_data.defence, "speed": player_data.speed}
+def _save_player_json(player_data:es.Player):
+    """Saves the player data to the save folder."""
+    player_json = {
+                    "name": player_data.name,
+                    "hp": player_data.hp,
+                    "attack": player_data.attack,
+                    "defence": player_data.defence,
+                    "speed": player_data.speed,
+                    "x_pos": player_data.x_pos,
+                    "y_pos": player_data.y_pos
+                    }
     player_json["inventory"] = list(iy.inventory_converter(player_data.inventory.items))
     return player_json
 
 
-def _convert_data_json(data:dm.Save_data):
-    """Converts the micelanius save data to json format."""
+def _load_player_json(player_json:dict[str, Any]):
+    """Loads the player data from the save folder."""
+    player = es.Player(player_json["name"])
+    player.hp = int(player_json["hp"])
+    player.attack = int(player_json["attack"])
+    player.defence = int(player_json["defence"])
+    player.speed = int(player_json["speed"])
+    player.inventory.items = list(iy.inventory_converter(player_json["inventory"]))
+    return player
+
+
+def _save_data_json(data:dm.Save_data):
+    """Saves the miscellaneous data to the save folder."""
     save_data_json = {}
     # save_version
     save_data_json["save_version"] = SAVE_VERSION
@@ -50,23 +70,40 @@ def _convert_data_json(data:dm.Save_data):
     last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
     save_data_json["last_access"] = last_access
     # player
-    save_data_json["player"] = _convert_player_json(data.player)
+    save_data_json["player"] = _save_player_json(data.player)
     # randomstate
     save_data_json["seed"] = ts.random_state_to_json(r)
     return save_data_json
 
 
-def _convert_chunk_json(chunk:ch.Chunk, save_folder:str):
-    """Converts a chunk's data to json format."""
+def _save_chunk_json(chunk:cm.Chunk, save_folder:str):
+    """Saves a chunk's data to the save folder."""
     chunk_data = chunk.to_json()
     chunk_file_name = f"{chunk.base_x}_{chunk.base_y}"
     ts.encode_save_s(chunk_data, os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
 
 
-def _convert_chunks_json(chunks:list[ch.Chunk], save_folder:str):
-    """Converts the chunks save data to json format."""
+def _load_chunk_json(x:int, y:int, save_folder:str):
+    """Loads a chunk's data from the save folder."""
+    base_x = x // CHUNK_SIZE
+    base_y = y // CHUNK_SIZE
+    chunk_file_name = f"{base_x}_{base_y}"
+    chunk_data = ts.decode_save_s(os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
+    # CONVERT JSON TO CHUNK
+    chunk = cm.Chunk(base_x, base_y)
+    return None
+
+
+def _save_chunks_json(chunks:list[cm.Chunk], save_folder:str):
+    """Saves all chunks data to the save folder."""
     for chunk in chunks:
-        _convert_chunk_json(chunk, save_folder)
+        _save_chunk_json(chunk, save_folder)
+
+
+def _load_chunks_json(x:int, y:int, save_folder:str):
+    """Loads all chunks data from the save folder."""
+    _load_chunk_json(x, y, save_folder)
+    return None
 
 
 def make_save(data:dm.Save_data):
@@ -81,14 +118,14 @@ def make_save(data:dm.Save_data):
     save_folder = os.path.join(SAVES_FOLDER_PATH, data.save_name)
     # DATA FILE
     # display data
-    display_data = _convert_display_json(data)
-    save_data = _convert_data_json(data)
+    display_data = _save_display_json(data)
+    save_data = _save_data_json(data)
     # create new save
     ts.encode_save_s([display_data, save_data], os.path.join(save_folder, SAVE_FILE_NAME_DATA))
     # CHUNKS FOLDER
     ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder)
     ts.log_info("Saving chunks")
-    _convert_chunks_json(data.chunks, save_folder)
+    _save_chunks_json(data.chunks, save_folder)
     # remove backup
     if backup_status != False:
         os.remove(backup_status[0])
@@ -165,21 +202,18 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     last_access:list[int] = data["last_access"]
     # player
     player_data:dict[str, Any] = data["player"]
-    player = es.Player(player_data["name"])
-    player.hp = int(player_data["hp"])
-    player.attack = int(player_data["attack"])
-    player.defence = int(player_data["defence"])
-    player.speed = int(player_data["speed"])
-    player.inventory.items = list(iy.inventory_converter(player_data["inventory"]))
-    # log
+    player = _load_player_json(player_data)
+    # chunks
+    ts.log_info("Loading chunks")
+    chunks = _load_chunks_json(player.x_pos, player.y_pos, full_save_name)
     ts.log_info("Loaded save", f'save name: {save_name}, player name: "{player.name}", last saved: {u.make_date(last_access)} {u.make_time(last_access[3:])}')
-    
+
     # PREPARING
     ts.log_info("Preparing game data")
     # load random state
     r.set_state(ts.json_to_random_state(data["seed"]))
     # load to class
-    return dm.Save_data(save_name, display_name, last_access, player, r.get_state())
+    return dm.Save_data(save_name, display_name, last_access, player, r.get_state(), chunks)
 
 
 def _process_save_display_data(data):

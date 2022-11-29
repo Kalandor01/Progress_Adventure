@@ -99,14 +99,8 @@ class Player(Entity):
             name = "You"
         super().__init__(entity_master(range(14, 26), range(7, 13), range(7, 13), range(1, 20), 0, 0, 0, 0, 0, name))
         self.inventory = Inventory()
-        # self.name = "You"
-        # self.hp = r.randint(1, 7) + r.randint(1, 7) + 12
-        # self.attack = r.randint(1, 7) + 6
-        # self.defence = r.randint(1, 7) + 6
-        # self.speed = round(r.random() * 100 / 5, 1)
-        # self.rare = False
-        # self.team = 0
-        # self.switched = False
+        self.x_pos:int = 0
+        self.y_pos:int = 0
 
 
 class Caveman(Entity):
