@@ -98,7 +98,7 @@ class Key:
         try:
             if len(key_value[0]) > 0:
                 key_value[0][0].decode(ENCODING)
-            elif len(self.value) > 1 and len(key_value) > 0:
+            elif len(key_value) > 1 and len(key_value) > 0:
                 key_value[1][0].decode(ENCODING)
             else:
                 raise KeyError
@@ -162,7 +162,7 @@ class Settings:
         ts.settings_manager("keybinds", self.encode_keybinds())
 
 class Save_data:
-    def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player, seed:tuple[Any], chunks:list[Chunk]=None):
+    def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player, seed:tuple[Any]|dict[str, Any], chunks:list[Chunk]=None):
         self.save_name = str(save_name)
         self.display_save_name = str(display_save_name)
         self.last_access = list[int](last_access)

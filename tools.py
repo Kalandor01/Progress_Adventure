@@ -38,6 +38,7 @@ ROOT_FOLDER = os.getcwd()
     #saves folder
 SAVES_FOLDER = "saves"
 SAVES_FOLDER_PATH = os.path.join(ROOT_FOLDER, SAVES_FOLDER)
+OLD_SAVE_NAME = "save*"
 SAVE_EXT = "sav"
     #logs folder
 LOGGING = True
@@ -105,12 +106,24 @@ def encode_save_s(data:list[dict[str, Any]]|dict[str, Any], file_path:str, seed=
     sfm.encode_save(json_data, seed, file_path, extension, ENCODING, FILE_ENCODING_VERSION)
 
 
-def decode_save_s(file_path, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT) -> dict[str, Any]:
+def decode_save_s(file_path, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT, can_be_old=False) -> dict[str, Any]:
     """
     Shorthand for `sfm.decode_save` + convert from string to json.\n
     `line_num` is the line, that you want go get back (starting from 0).
     """
-    return json.loads(sfm.decode_save(seed, file_path, extension, ENCODING, line_num + 1)[line_num])
+    try:
+        decoded_lines = sfm.decode_save(seed, file_path, extension, ENCODING, line_num + 1)
+    except (ValueError, FileNotFoundError):
+        log_info("Decode error", f"file name: {os.path.join(SAVES_FOLDER, os.path.basename(file_path))}.{SAVE_EXT}", Log_type.ERROR)
+        if can_be_old:
+            log_info("Decode backup", "trying to decode file as a numbered save file")
+            save_name = str(os.path.basename(file_path))
+            old_save_removable = OLD_SAVE_NAME.replace("*", "")
+            file_number = int(save_name.replace(old_save_removable, ""))
+            decoded_lines = sfm.decode_save(file_number, file_path, extension, ENCODING, line_num + 1)
+        else:
+            raise
+    return json.loads(decoded_lines[line_num])
 
 
 def change_logging(value:bool):
@@ -207,6 +220,7 @@ def make_zip(save_name:str, save_name_path:str, full_zip_name:str):
                 arc_name = os.path.relpath(file_name, ar2).removeprefix(save_name + os.sep)
                 zf.write(file_name, arc_name)
 
+
 def make_backup(save_name:str, is_temporary=False):
     """
     Makes a backup of a save from the saves folder into the backups folder (as a zip file).\n
@@ -218,8 +232,9 @@ def make_backup(save_name:str, is_temporary=False):
     now = dtime.now()
 
     # make common variables
-    save_file = f'{os.path.join(SAVES_FOLDER_PATH, save_name)}.{SAVE_EXT}'
     save_folder = os.path.join(SAVES_FOLDER_PATH, save_name)
+    # FILE BACKUP ALWAYS FAILS!!!
+    save_file = f'{save_folder}.{SAVE_EXT}'
     if os.path.isdir(save_folder) or os.path.isfile(save_file):
         # make more variables
         backup_name_end = f'{u.make_date(now)};{u.make_time(now, "-", is_temporary, "-")};{save_name}.{OLD_BACKUP_EXT if os.path.isfile(save_file) else BACKUP_EXT}'
@@ -402,11 +417,11 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
                 raise KeyError(line_name)
 
 
-def random_state_to_json(random_state:np.random.RandomState|tuple):
+def random_state_to_json(random_state:np.random.RandomState|tuple|dict[str, Any]):
     """
     Converts a numpy RandomState.getstate() into a json format.
     """
-    if type(random_state) is tuple:
+    if type(random_state) is tuple or type(random_state) is dict:
         state = random_state
     elif isinstance(random_state, np.random.RandomState):
         state = random_state.get_state()

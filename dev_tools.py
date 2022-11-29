@@ -1,7 +1,7 @@
 import json
 import os
 import sys
-from typing import Callable
+from typing import Callable, Literal
 from zipfile import ZipFile
 
 from utils import Color
@@ -103,7 +103,7 @@ def get_saves_data():
     main.get_saves_data but for backups
     """
 
-    def process_file(data, old_files=False):
+    def _process_file(data:tuple[str, list[str] | Literal[-1]], old_files=False):
         if data[1] == -1:
             if not old_files:
                 errored_new.append(data)
@@ -138,9 +138,9 @@ def get_saves_data():
     # process file data
     datas_processed = []
     for file_data in datas:
-        process_file(file_data)
+        _process_file(file_data)
     for file_data in datas_old:
-        process_file(file_data, True)
+        _process_file(file_data, True)
     for wrong in errored_both:
         ts.press_key(f"\"{wrong[0]}\" is corrupted!")
     return datas_processed

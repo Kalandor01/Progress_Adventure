@@ -1,7 +1,7 @@
 import json
 import os
 from datetime import datetime as dtime
-from typing import Any
+from typing import Any, Literal
 
 import utils as u
 import tools as ts
@@ -13,7 +13,7 @@ import chunk_manager as cm
 from utils import Color, Style
 from tools import r, sfm
 from tools import Log_type
-from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
+from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT, OLD_SAVE_NAME
 from tools import SAVE_VERSION
 from tools import SAVE_FILE_NAME_DATA
 from tools import SAVE_FOLDER_NAME_CHUNKS
@@ -183,7 +183,7 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
         os.remove(f'{full_save_name}.{SAVE_EXT}')
         ts.log_info("Removed save file", "single save files have been deprecated", Log_type.WARN)
     else:
-        data = ts.decode_save_s(os.path.join(full_save_name, SAVE_FILE_NAME_DATA, ), 1)
+        data = ts.decode_save_s(os.path.join(full_save_name, SAVE_FILE_NAME_DATA, ), 1, can_be_old=True)
     # read data
     
     # save version
@@ -207,7 +207,7 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     ts.log_info("Loading chunks")
     chunks = _load_chunks_json(player.x_pos, player.y_pos, full_save_name)
     ts.log_info("Loaded save", f'save name: {save_name}, player name: "{player.name}", last saved: {u.make_date(last_access)} {u.make_time(last_access[3:])}')
-
+    
     # PREPARING
     ts.log_info("Preparing game data")
     # load random state
@@ -249,21 +249,46 @@ def _get_save_folders() -> list[str]:
 
 def _get_valid_folders(folders:list[str]):
     """Gets the display data from all readable save files in the save folder."""
-    datas = []
+    datas:list[tuple[str, dict[str, Any]]] = []
     for folder in folders:
         data = ts.decode_save_s(os.path.join(SAVES_FOLDER_PATH, folder, SAVE_FILE_NAME_DATA), 0)
-        datas.append([folder, data])
+        datas.append((folder, data))
     return datas
 
 def get_saves_data():
     """Gets all save files from the save folder, and proceses them for diplay."""
     ts.recreate_saves_folder()
     # read saves
-    datas = []
+    datas:list[tuple[str, dict[str, Any]|Literal[-1]]] = []
+    # read from numbered file (very old)!
+    datas_very_old = sfm.file_reader(-1, OLD_SAVE_NAME, SAVE_EXT, SAVES_FOLDER_PATH, True, 1)
+    for data in datas_very_old:
+        # fix data
+        fix_name = OLD_SAVE_NAME.replace("*", str(data[0]))
+        fix_data:dict[str, Any]|Literal[-1] = -1
+        if data[1] != -1:
+            fix_data:dict[str, Any]|Literal[-1] = json.loads(data[1][0])
+        datas.append((fix_name, fix_data))
     # read from file (old)
-    datas.extend(sfm.file_reader_blank(SAVE_SEED, SAVES_FOLDER_PATH, 1))
-    for data in datas:
-        data[1] = json.loads(data[1][0])
+    datas_old = sfm.file_reader_blank(SAVE_SEED, SAVES_FOLDER_PATH, 1)
+    for data in datas_old:
+        # fix data
+        fix_data:dict[str, Any]|Literal[-1] = -1
+        if data[1] != -1:
+            fix_data:dict[str, Any]|Literal[-1] = json.loads(data[1][0])
+        found = False
+        index = -1
+        for x in range(len(datas)):
+            if datas[x][0] == data[0]:
+                found = True
+                if datas[x][1] == -1:
+                    index = x
+                break
+        if not found:
+            datas.append((data[0], fix_data))
+        elif index != -1:
+            datas[index] = (data[0], fix_data)
+                
     # read from folder
     folders = _get_save_folders()
     datas.extend(_get_valid_folders(folders))
@@ -271,7 +296,7 @@ def get_saves_data():
     datas_processed = []
     for data in datas:
         if data[1] == -1:
-            ts.log_info("Decode error", f"Save name: {data[0]}", Log_type.ERROR)
+            ts.log_info("Decode error", f"save name: {data[0]}(.{SAVE_EXT})", Log_type.ERROR)
             ts.press_key(f"\"{data[0]}\" is corrupted!")
         else:
             processed_data = _process_save_display_data(data)
