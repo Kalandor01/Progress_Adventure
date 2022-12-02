@@ -22,6 +22,7 @@ from tools import STANDARD_CURSOR_ICONS, DELETE_CURSOR_ICONS, ERROR_HANDLING
 
 if __name__ == "__main__":
     try:
+        print("Loading...")
         ts.threading.current_thread().name = MAIN_THREAD_NAME
         ts.begin_log()
         if ts.check_package_versions():
