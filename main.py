@@ -5,6 +5,7 @@ import shutil
 import sys
 import threading as thr
 import time
+import tkinter as tk
 
 import dev_tools as dt
 import tools as ts
@@ -425,6 +426,26 @@ def main_menu():
             files_data = sm.get_saves_data()
 
 
+def gui_menu():
+    # label = tk.Label(
+    # text="Hello, Tkinter",
+    # fg="white",
+    # bg="black",
+    # width=10,
+    # height=10
+    # )
+    # button = tk.Button(
+    # text="Click me!",
+    # width=25,
+    # height=5,
+    # bg="blue",
+    # fg="yellow",
+    # )
+    
+    window = tk.Tk(className="Test window")
+    window.mainloop()
+
+
 def main():
     # dt.decode_save_file("settings", ROOT_FOLDER, SETTINGS_SEED)
     # dt.decode_save_file("new save")
@@ -432,7 +453,9 @@ def main():
     # dt.encode_save_file("file_test")
     
     # dt.load_backup_menu()
-    main_menu()
+    # main_menu()
+    
+    gui_menu()
 
 
 def main_error_handler():
