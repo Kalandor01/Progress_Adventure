@@ -15,9 +15,15 @@ data.sav
             - attack: int
             - defence: int
             - speed: int
-            - inventory:
-                - item
-                - item
+            - inventory: [
+                [
+                    - (type): str(Item_categories(Enum))
+                    - (amount): int
+                ]
+            ]
+            - x_pos: int
+            - y_pos: int
+            - rotation: str(Rotation(Enum))
         - seed:
             - type: str
             - state: [int * 624]
@@ -25,4 +31,9 @@ data.sav
             - has_gauss: int
             - cached_gaussian: float
 chunks
-    
+    {base_x}_{base_y}.sav
+        - tiles: [
+            - x: int
+            - y: int
+            - content: ???
+        ]

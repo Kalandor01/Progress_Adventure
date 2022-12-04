@@ -1,5 +1,5 @@
 from datetime import datetime as dtime
-from enum import Enum
+from enum import Enum, EnumType
 
 
 class Color(Enum):
@@ -97,3 +97,12 @@ def remove_bad_characters(save_name:str):
     for char in bad_chars:
         save_name = save_name.replace(char, "")
     return save_name
+
+
+def enum_item_finder(name:str, enum:EnumType) -> Enum|None:
+    """
+    Gives back the enum item, from the enum item name.\n
+    Returns `None` if it doesn't exist.
+    """
+    try: return enum._member_map_[name]
+    except KeyError: return None

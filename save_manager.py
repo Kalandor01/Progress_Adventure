@@ -21,7 +21,7 @@ from tools import CHUNK_SIZE
 
 
 def _save_display_json(data:dm.Save_data):
-    """Saves the display data to the save folder."""
+    """Converts the display data to json format."""
     display_data = {}
     display_data["save_version"] = SAVE_VERSION
     display_data["display_name"] = data.display_save_name
@@ -33,7 +33,7 @@ def _save_display_json(data:dm.Save_data):
 
 
 def _save_player_json(player_data:es.Player):
-    """Saves the player data to the save folder."""
+    """Converts the player data to json format."""
     player_json = {
                     "name": player_data.name,
                     "hp": player_data.hp,
@@ -41,25 +41,36 @@ def _save_player_json(player_data:es.Player):
                     "defence": player_data.defence,
                     "speed": player_data.speed,
                     "x_pos": player_data.x_pos,
-                    "y_pos": player_data.y_pos
+                    "y_pos": player_data.y_pos,
+                    "rotation": player_data.rotation.name
                     }
-    player_json["inventory"] = list(iy.inventory_converter(player_data.inventory.items))
+    player_json["inventory"] = player_data.inventory.to_json()
     return player_json
 
 
+def _load_inventory_json(inventory_json:list):
+    """Converts the inventory json to object format."""
+    items = []
+    for item in inventory_json:
+        item_type = iy.item_finder(item[0])
+        if item_type is not None:
+            items.append(iy.Item(item_type, item[1]))
+    return items
+
+
 def _load_player_json(player_json:dict[str, Any]):
-    """Loads the player data from the save folder."""
+    """Converts the player json to object format."""
     player = es.Player(player_json["name"])
     player.hp = int(player_json["hp"])
     player.attack = int(player_json["attack"])
     player.defence = int(player_json["defence"])
     player.speed = int(player_json["speed"])
-    player.inventory.items = list(iy.inventory_converter(player_json["inventory"]))
+    player.inventory.items = list(_load_inventory_json(player_json["inventory"]))
     return player
 
 
 def _save_data_json(data:dm.Save_data):
-    """Saves the miscellaneous data to the save folder."""
+    """Converts the miscellaneous data to json format."""
     save_data_json = {}
     # save_version
     save_data_json["save_version"] = SAVE_VERSION
@@ -79,31 +90,50 @@ def _save_data_json(data:dm.Save_data):
 def _save_chunk_json(chunk:cm.Chunk, save_folder:str):
     """Saves a chunk's data to the save folder."""
     chunk_data = chunk.to_json()
-    chunk_file_name = f"{chunk.base_x}_{chunk.base_y}"
+    chunk_file_name = f"chunk_{chunk.base_x}_{chunk.base_y}"
     ts.encode_save_s(chunk_data, os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
 
 
+def _load_tile_json(tile:dict):
+    """Converts the tile json to object format."""
+    x = int(tile["x"])
+    y = int(tile["y"])
+    content = tile["content"]
+    tile_obj = cm.Tile(x, y, content)
+    return tile_obj
+
+
 def _load_chunk_json(x:int, y:int, save_folder:str):
-    """Loads a chunk's data from the save folder."""
+    """Converts the chunk json to object format."""
     base_x = x // CHUNK_SIZE
     base_y = y // CHUNK_SIZE
-    chunk_file_name = f"{base_x}_{base_y}"
-    chunk_data = ts.decode_save_s(os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
-    # CONVERT JSON TO CHUNK
-    chunk = cm.Chunk(base_x, base_y)
-    return None
+    chunk_file_name = f"chunk_{base_x}_{base_y}"
+    try:
+        chunk_data = ts.decode_save_s(os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
+    except FileNotFoundError:
+        chunk_data = None
+    if chunk_data is not None:
+        tiles = []
+        for tile in chunk_data["tiles"]:
+            tiles.append(_load_tile_json(tile))
+        chunk = cm.Chunk(base_x, base_y, tiles)
+    else:
+        chunk = cm.Chunk(base_x, base_y, [])
+        chunk.gen_tile(x, y)
+    return chunk
 
 
-def _save_chunks_json(chunks:list[cm.Chunk], save_folder:str):
-    """Saves all chunks data to the save folder."""
-    for chunk in chunks:
+def _save_world_json(world:cm.World, save_folder:str):
+    """Converts the world's data to json format, and saves all chunks to the save file."""
+    for chunk in world.chunks:
         _save_chunk_json(chunk, save_folder)
 
 
-def _load_chunks_json(x:int, y:int, save_folder:str):
-    """Loads all chunks data from the save folder."""
-    _load_chunk_json(x, y, save_folder)
-    return None
+def _load_world_json(x:int, y:int, save_folder:str):
+    """Converts the world json to object format."""
+    world = cm.World()
+    world.chunks.append(_load_chunk_json(x, y, save_folder))
+    return world
 
 
 def make_save(data:dm.Save_data):
@@ -125,7 +155,7 @@ def make_save(data:dm.Save_data):
     # CHUNKS FOLDER
     ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder)
     ts.logger("Saving chunks")
-    _save_chunks_json(data.chunks, save_folder)
+    _save_world_json(data.world, save_folder)
     # remove backup
     if backup_status != False:
         os.remove(backup_status[0])
@@ -154,15 +184,18 @@ def correct_save_data(data:dict[str, Any], save_version:float, extra_data:dict[s
     ts.logger("Correcting save data")
     # 0.0 -> 1.0
     if save_version == 0.0:
+        # added save varsions
         save_version = 1.0
         ts.logger("Corrected save data", "0.0 -> 1.0")
     # 1.0 -> 1.1
     if save_version == 1.0:
+        # added player inventory
         data["player"]["inventory"] = []
         save_version = 1.1
         ts.logger("Corrected save data", "1.0 -> 1.1")
     # 1.1 -> 1.2
     if save_version == 1.1:
+        # added display save name
         data["display_name"] = extra_data["save_name"]
         save_version = 1.2
         ts.logger("Corrected save data", "1.1 -> 1.2")
@@ -171,6 +204,14 @@ def correct_save_data(data:dict[str, Any], save_version:float, extra_data:dict[s
         # switched from file to folder
         save_version = 1.3
         ts.logger("Corrected save data", "1.2 -> 1.3")
+    # 1.3 -> 1.4
+    if save_version == 1.3:
+        # added chunks + player position/rotation
+        data["player"]["x_pos"] = 0
+        data["player"]["y_pos"] = 0
+        data["player"]["rotation"] = es.Rotation.UP.name
+        save_version = 1.4
+        ts.logger("Corrected save data", "1.3 -> 1.4")
     return data
 
 
@@ -203,9 +244,9 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     # player
     player_data:dict[str, Any] = data["player"]
     player = _load_player_json(player_data)
-    # chunks
-    ts.logger("Loading chunks")
-    chunks = _load_chunks_json(player.x_pos, player.y_pos, full_save_name)
+    # world
+    ts.logger("Loading world")
+    world = _load_world_json(player.x_pos, player.y_pos, full_save_name)
     ts.logger("Loaded save", f'save name: {save_name}, player name: "{player.name}", last saved: {u.make_date(last_access)} {u.make_time(last_access[3:])}')
     
     # PREPARING
@@ -213,7 +254,7 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     # load random state
     r.set_state(ts.json_to_random_state(data["seed"]))
     # load to class
-    return dm.Save_data(save_name, display_name, last_access, player, r.get_state(), chunks)
+    return dm.Save_data(save_name, display_name, last_access, player, r.get_state(), world)
 
 
 def _process_save_display_data(data):

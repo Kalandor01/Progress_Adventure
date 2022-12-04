@@ -1,5 +1,7 @@
 from enum import Enum, auto
 
+import tools as ts
+
 
 class Weapon_items(Enum):
     WOODEN_SWORD = auto()
@@ -95,6 +97,15 @@ class Inventory:
                         self.items.pop(x)
                 break
     
+    
+    def to_json(self):
+        """Convert the items in the inventory into a list for a json format."""
+
+        items_json = []
+        for item in self.items:
+            items_json.append([item.name.name, item.amount])
+        return items_json
+    
 
     def __str__(self):
         txt = "Inventory:"
@@ -103,26 +114,13 @@ class Inventory:
         return txt
     
 
-def item_finder(name:str) -> Enum|None:
+def item_finder(name:str) -> Item_categories|None:
     """
-    Gives back the item enum, from the item name.\n
+    Gives back the item, from the item's enum name.\n
     Returns `None` if it doesn't exist.
     """
-
     for enum in Item_categories._value2member_map_:
         try: return enum._member_map_[name]
-        except KeyError: pass
-
-def inventory_converter(inventory:list):
-    """
-    Can convert between the json and object versions of the inventory items list.
-    """
-
-    items = []
-    for item in inventory:
-        if type(item) is list:
-            items.append(Item(item_finder(item[0]), item[1]))
-        else:
-            item:Item
-            items.append([item.name.name, item.amount])
-    return items
+        except KeyError:
+            ts.logger("Wrong item type", f"unknown item type: {name}", ts.Log_type.WARN)
+            return None

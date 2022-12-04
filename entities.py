@@ -1,9 +1,17 @@
 from __future__ import annotations
+from enum import Enum
 import inspect
 
 from tools import r
 
 from inventory import Inventory, Item_categories
+
+
+class Rotation(Enum):
+    UP = 0
+    DOWN = 1
+    LEFT = 2
+    RIGHT = 3
 
 
 def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|range, fluc_small=2, fluc_big=3, c_rare=0.02, team=1, c_team_change=0.005, name:str=None):
@@ -101,6 +109,7 @@ class Player(Entity):
         self.inventory = Inventory()
         self.x_pos:int = 0
         self.y_pos:int = 0
+        self.rotation:Rotation = Rotation.UP
 
 
 class Caveman(Entity):

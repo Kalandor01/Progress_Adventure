@@ -7,7 +7,7 @@ from tools import getch
 from tools import ENCODING, DOUBLE_KEYS
 
 from entities import Player
-from chunk_manager import Chunk
+from chunk_manager import Chunk, World
 
 
 class Globals:
@@ -162,16 +162,13 @@ class Settings:
         ts.settings_manager("keybinds", self.encode_keybinds())
 
 class Save_data:
-    def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player, seed:tuple[Any]|dict[str, Any], chunks:list[Chunk]=None):
+    def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player, seed:tuple[Any]|dict[str, Any], world:World=None):
         self.save_name = str(save_name)
         self.display_save_name = str(display_save_name)
         self.last_access = list[int](last_access)
         self.player = copy.deepcopy(player)
         self.seed = tuple(seed)
-        self.chunks:list[Chunk] = []
-        if chunks is not None:
-            for chunk in chunks:
-                self.chunks.append(copy.deepcopy(chunk))
+        self.world:World = World()
 
 
 def is_key(key:Key) -> bool:
