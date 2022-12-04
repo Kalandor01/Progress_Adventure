@@ -164,6 +164,7 @@ def make_save(data:dm.Save_data):
 
 def create_save_data():
     """Creates the data for a new save file."""
+    # ACTUALY CREATE THE FIRST CHUNK SOMEWHERE HERE!!!
     ts.logger("Preparing game data")
     # make save name
     display_save_name = input("Name your save: ")
