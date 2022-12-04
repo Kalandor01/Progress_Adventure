@@ -181,16 +181,16 @@ class Self_Checks:
     def begin_check(self, check_function:Callable, separate=True):
         check_name = check_function.__name__.capitalize().replace("_", " ")
         if separate:
-            ts.begin_log()
+            ts.log_separator()
         print(end=check_name + "...")
-        ts.log_info(check_name, "Running...")
+        ts.logger(check_name, "Running...")
         return check_name
 
 
     def _give_result(self, check_name:str, result_type=ts.Log_type.FAIL):
         print(result_type.name)
-        ts.log_info(check_name,
-            result_type.name + (": " + str(sys.exc_info()) if result_type==ts.Log_type.CRASH else ""),
+        ts.logger(check_name,
+            result_type.name + (": " + str(sys.exc_info()) if result_type==ts.Log_type.FATAL else ""),
             result_type)
         
     
@@ -201,11 +201,11 @@ class Self_Checks:
         try:
             check_function(check_name)
         except:
-            self._give_result(check_name, ts.Log_type.CRASH)
+            self._give_result(check_name, ts.Log_type.FATAL)
     
     
     def run_all_tests(self):
-        ts.begin_log()
+        ts.log_separator()
         self.check(self.initialization_check, False)
         self.check(self.settings_checks, False)
         # self.check(self.save_file_checks, False)

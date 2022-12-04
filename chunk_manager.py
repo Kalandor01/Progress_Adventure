@@ -1,4 +1,4 @@
-from tools import CHUNK_SIZE, log_info, Log_type
+from tools import CHUNK_SIZE, logger, Log_type
 
 class Tile:
     def __init__(self, x:int, y:int, content):
@@ -12,7 +12,7 @@ class Chunk:
     def __init__(self, base_x:int, base_y:int, tiles:list[Tile]=None):
         self.base_x = int(base_x) // CHUNK_SIZE
         self.base_y = int(base_y) // CHUNK_SIZE
-        log_info("Generating chunk", f"base_x: {self.base_x} , base_y: {self.base_y}")
+        logger("Generating chunk", f"base_x: {self.base_x} , base_y: {self.base_y}")
         self.tiles:list[Tile] = []
         for tile in tiles:
             self.tiles.append(tile)
@@ -37,7 +37,7 @@ class Chunk:
         y_con = y % CHUNK_SIZE
         new_tile = Tile(x_con, y_con, None)
         self.tiles.append(new_tile)
-        log_info("Generating tile", f"x: {x} , y: {y}")
+        logger("Generating tile", f"x: {x} , y: {y}")
         return new_tile
 
 

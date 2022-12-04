@@ -6,27 +6,31 @@ import sys
 import threading as thr
 import time
 
-import dev_tools as dt
-import tools as ts
-import data_manager as dm
-import entities as es
-import save_manager as sm
+try:
+    import dev_tools as dt
+    import tools as ts
+    import data_manager as dm
+    import entities as es
+    import save_manager as sm
 
-from tools import r, sfm, col, getch
-from tools import Log_type
-from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME
-from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
-from tools import AUTO_SAVE_DELAY, DOUBLE_KEYS
-from tools import STANDARD_CURSOR_ICONS, DELETE_CURSOR_ICONS, ERROR_HANDLING
+    from tools import r, sfm, col, getch
+    from tools import Log_type
+    from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME
+    from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
+    from tools import AUTO_SAVE_DELAY, DOUBLE_KEYS
+    from tools import STANDARD_CURSOR_ICONS, DELETE_CURSOR_ICONS, ERROR_HANDLING
+except ModuleNotFoundError:
+    input(f"ERROR: {sys.exc_info()[1]}")
+    sys.exit(1)
 
 
 if __name__ == "__main__":
     try:
         print("Loading...")
         ts.threading.current_thread().name = MAIN_THREAD_NAME
-        ts.begin_log()
+        ts.log_separator()
         if ts.check_package_versions():
-            ts.log_info("Preloading global variables")
+            ts.logger("Preloading global variables")
             # dt.decode_save_file(SETTINGS_SEED, "settings")
 
             # GLOBAL VARIABLES
@@ -44,7 +48,7 @@ if __name__ == "__main__":
         else:
             GOOD_PACKAGES = False
     except:
-        ts.log_info("Preloading crashed", sys.exc_info(), Log_type.CRASH)
+        ts.logger("Preloading crashed", sys.exc_info(), Log_type.FATAL)
         raise
 
 
@@ -207,17 +211,17 @@ def stats(won=0):
 
 def prepair_fight():
     GLOBALS.in_fight = True
-    ts.log_info("Fight started")
+    ts.logger("Fight started")
     fight_ran(3, 5)
     stats(1)
-    ts.log_info("Fight ended")
+    ts.logger("Fight ended")
     GLOBALS.in_fight = False
 
 
 def save_game():
     frozen_data = copy.deepcopy(SAVE_DATA)
     sm.make_save(frozen_data)
-    ts.log_info("Game saved", f'save name: {frozen_data.save_name}, player name: "{frozen_data.player.name}"')
+    ts.logger("Game saved", f'save name: {frozen_data.save_name}, player name: "{frozen_data.player.name}"')
 
 
 # Auto save thread
@@ -228,13 +232,13 @@ def auto_saver():
             if GLOBALS.in_game_loop:
                 if not GLOBALS.in_fight and not GLOBALS.saving:
                     GLOBALS.saving = True
-                    ts.log_info("Beginning auto save", f"save name: {SAVE_DATA.save_name}")
+                    ts.logger("Beginning auto save", f"save name: {SAVE_DATA.save_name}")
                     save_game()
                     GLOBALS.saving = False
             else:
                 break
     except:
-        ts.log_info("Thread crashed", sys.exc_info(), Log_type.CRASH)
+        ts.logger("Thread crashed", sys.exc_info(), Log_type.FATAL)
         raise
 
 
@@ -246,7 +250,7 @@ def quit_game():
                 if dm.is_key(SETTINGS.keybinds["esc"]):
                     if not GLOBALS.in_fight and not GLOBALS.saving:
                         GLOBALS.saving = True
-                        ts.log_info("Beginning manual save", f"save name: {SAVE_DATA.save_name}")
+                        ts.logger("Beginning manual save", f"save name: {SAVE_DATA.save_name}")
                         GLOBALS.exiting = True
                         save_game()
                         GLOBALS.saving = False
@@ -256,14 +260,14 @@ def quit_game():
             else:
                 break
     except:
-        ts.log_info("Thread crashed", sys.exc_info(), Log_type.CRASH)
+        ts.logger("Thread crashed", sys.exc_info(), Log_type.FATAL)
         raise
     
 
 def game_loop():
     GLOBALS.in_game_loop = True
     # GAME LOOP
-    ts.log_info("Game loop started")
+    ts.logger("Game loop started")
     # TRHEADS
     # manual quit
     thread_quit = thr.Thread(target=quit_game, name=MANUAL_SAVE_THREAD_NAME, daemon=True)
@@ -284,14 +288,14 @@ def game_loop():
     GLOBALS.exiting = False
     GLOBALS.in_game_loop = False
     ts.press_key("Exiting...Press keys!")
-    ts.log_info("Game loop ended")
+    ts.logger("Game loop ended")
 
     
 def new_save():
     global SAVE_DATA
     SAVE_DATA = sm.create_save_data()
     sm.make_save(SAVE_DATA)
-    ts.log_info("Created save", f'save_name: {SAVE_DATA.save_name}, player name: "{SAVE_DATA.player.name}"')
+    ts.logger("Created save", f'save_name: {SAVE_DATA.save_name}, player name: "{SAVE_DATA.player.name}"')
     game_loop()
 
 
@@ -392,7 +396,7 @@ def main_menu():
                     if option != -1 and option < (len(list_data) - 1) / 2:
                         if sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(SETTINGS.keybind_mapping):
                             # log
-                            ts.log_info("Deleted save", f'save name: {files_data[option][0]}')
+                            ts.logger("Deleted save", f'save name: {files_data[option][0]}')
                             # remove
                             if os.path.isfile(f'{os.path.join(SAVES_FOLDER_PATH, files_data[option][0])}.{SAVE_EXT}'):
                                 os.remove(f'{os.path.join(SAVES_FOLDER_PATH, files_data[option][0])}.{SAVE_EXT}')
@@ -443,22 +447,22 @@ def main_error_handler():
         exit_game = True
         try:
             if GOOD_PACKAGES:
-                ts.log_info("Beginning new instance")
+                ts.logger("Beginning new instance")
                 main()
         except:
-            ts.log_info("Instance crashed", sys.exc_info(), Log_type.CRASH)
+            ts.logger("Instance crashed", sys.exc_info(), Log_type.FATAL)
             if ERROR_HANDLING:
                 print(f"ERROR: {sys.exc_info()[1]}")
                 ans = input("Restart?(Y/N): ")
                 if ans.upper() == "Y":
-                    ts.log_info("Restarting instance")
+                    ts.logger("Restarting instance")
                     exit_game = False
             else:
                 raise
         else:
             col.deinit()
             # end log
-            ts.log_info("Instance ended succesfuly")
+            ts.logger("Instance ended succesfuly")
 
 
 if __name__ == "__main__":

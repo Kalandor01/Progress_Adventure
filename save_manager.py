@@ -124,17 +124,17 @@ def make_save(data:dm.Save_data):
     ts.encode_save_s([display_data, save_data], os.path.join(save_folder, SAVE_FILE_NAME_DATA))
     # CHUNKS FOLDER
     ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder)
-    ts.log_info("Saving chunks")
+    ts.logger("Saving chunks")
     _save_chunks_json(data.chunks, save_folder)
     # remove backup
     if backup_status != False:
         os.remove(backup_status[0])
-        ts.log_info("Removed temporary backup", backup_status[1])
+        ts.logger("Removed temporary backup", backup_status[1])
 
 
 def create_save_data():
     """Creates the data for a new save file."""
-    ts.log_info("Preparing game data")
+    ts.logger("Preparing game data")
     # make save name
     display_save_name = input("Name your save: ")
     if display_save_name == "":
@@ -151,26 +151,26 @@ def create_save_data():
 
 def correct_save_data(data:dict[str, Any], save_version:float, extra_data:dict[str, Any]):
     """Modifys the save data, to make it up to date, with the newest save file data structure."""
-    ts.log_info("Correcting save data")
+    ts.logger("Correcting save data")
     # 0.0 -> 1.0
     if save_version == 0.0:
         save_version = 1.0
-        ts.log_info("Corrected save data", "0.0 -> 1.0")
+        ts.logger("Corrected save data", "0.0 -> 1.0")
     # 1.0 -> 1.1
     if save_version == 1.0:
         data["player"]["inventory"] = []
         save_version = 1.1
-        ts.log_info("Corrected save data", "1.0 -> 1.1")
+        ts.logger("Corrected save data", "1.0 -> 1.1")
     # 1.1 -> 1.2
     if save_version == 1.1:
         data["display_name"] = extra_data["save_name"]
         save_version = 1.2
-        ts.log_info("Corrected save data", "1.1 -> 1.2")
+        ts.logger("Corrected save data", "1.1 -> 1.2")
     # 1.2 -> 1.3
     if save_version == 1.2:
         # switched from file to folder
         save_version = 1.3
-        ts.log_info("Corrected save data", "1.2 -> 1.3")
+        ts.logger("Corrected save data", "1.2 -> 1.3")
     return data
 
 
@@ -181,7 +181,7 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     if os.path.isfile(f'{full_save_name}.{SAVE_EXT}'):
         data = ts.decode_save_s(full_save_name, 1)
         os.remove(f'{full_save_name}.{SAVE_EXT}')
-        ts.log_info("Removed save file", "single save files have been deprecated", Log_type.WARN)
+        ts.logger("Removed save file", "single save files have been deprecated", Log_type.WARN)
     else:
         data = ts.decode_save_s(os.path.join(full_save_name, SAVE_FILE_NAME_DATA, ), 1, can_be_old=True)
     # read data
@@ -191,7 +191,7 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     except KeyError: save_version = 0.0
     if save_version != SAVE_VERSION:
         is_older = ts.is_up_to_date(str(save_version), str(SAVE_VERSION))
-        ts.log_info("Trying to load save with an incorrect version", f"{SAVE_VERSION} -> {save_version}", Log_type.WARN)
+        ts.logger("Trying to load save with an incorrect version", f"{SAVE_VERSION} -> {save_version}", Log_type.WARN)
         ans = sfm.UI_list(["Yes", "No"], f"\"{save_name}\" is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to back up the save file before loading it?").display(keybind_mapping)
         if ans == 0:
             ts.make_backup(save_name)
@@ -204,12 +204,12 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     player_data:dict[str, Any] = data["player"]
     player = _load_player_json(player_data)
     # chunks
-    ts.log_info("Loading chunks")
+    ts.logger("Loading chunks")
     chunks = _load_chunks_json(player.x_pos, player.y_pos, full_save_name)
-    ts.log_info("Loaded save", f'save name: {save_name}, player name: "{player.name}", last saved: {u.make_date(last_access)} {u.make_time(last_access[3:])}')
+    ts.logger("Loaded save", f'save name: {save_name}, player name: "{player.name}", last saved: {u.make_date(last_access)} {u.make_time(last_access[3:])}')
     
     # PREPARING
-    ts.log_info("Preparing game data")
+    ts.logger("Preparing game data")
     # load random state
     r.set_state(ts.json_to_random_state(data["seed"]))
     # load to class
@@ -233,7 +233,7 @@ def _process_save_display_data(data):
         data_processed += u.stylized_text(f" v.{save_version}", (Color.GREEN if save_version == SAVE_VERSION else Color.RED))
         return [data[0], data_processed]
     except (TypeError, IndexError):
-        ts.log_info("Parse error", f"Save name: {data[0]}", Log_type.ERROR)
+        ts.logger("Parse error", f"Save name: {data[0]}", Log_type.ERROR)
         ts.press_key(f"\"{data[0]}\" could not be parsed!")
         return None
 
@@ -296,7 +296,7 @@ def get_saves_data():
     datas_processed = []
     for data in datas:
         if data[1] == -1:
-            ts.log_info("Decode error", f"save name: {data[0]}(.{SAVE_EXT})", Log_type.ERROR)
+            ts.logger("Decode error", f"save name: {data[0]}(.{SAVE_EXT})", Log_type.ERROR)
             ts.press_key(f"\"{data[0]}\" is corrupted!")
         else:
             processed_data = _process_save_display_data(data)

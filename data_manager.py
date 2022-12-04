@@ -103,7 +103,7 @@ class Key:
             else:
                 raise KeyError
         except UnicodeDecodeError:
-            ts.log_info("Unknown key", "cannot decode key", ts.Log_type.ERROR)
+            ts.logger("Unknown key", "cannot decode key", ts.Log_type.ERROR)
             raise
         else:
             self.value = key_value

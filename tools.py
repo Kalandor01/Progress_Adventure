@@ -74,7 +74,7 @@ class Log_type(Enum):
     INFO    = 0
     WARN    = 1
     ERROR   = 2
-    CRASH   = 3
+    FATAL   = 3
     OTHER   = 4
     PASS    = 5
     FAIL    = 6
@@ -114,9 +114,9 @@ def decode_save_s(file_path, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT, can
     try:
         decoded_lines = sfm.decode_save(seed, file_path, extension, ENCODING, line_num + 1)
     except (ValueError, FileNotFoundError):
-        log_info("Decode error", f"file name: {os.path.join(SAVES_FOLDER, os.path.basename(file_path))}.{SAVE_EXT}", Log_type.ERROR)
+        logger("Decode error", f"file name: {os.path.join(SAVES_FOLDER, os.path.basename(file_path))}.{SAVE_EXT}", Log_type.ERROR)
         if can_be_old:
-            log_info("Decode backup", "trying to decode file as a numbered save file")
+            logger("Decode backup", "trying to decode file as a numbered save file")
             save_name = str(os.path.basename(file_path))
             old_save_removable = OLD_SAVE_NAME.replace("*", "")
             file_number = int(save_name.replace(old_save_removable, ""))
@@ -127,25 +127,35 @@ def decode_save_s(file_path, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT, can
 
 
 def change_logging(value:bool):
+    """
+    Sets if logging is enabled or not.
+    """
     global LOGGING
     if LOGGING != value:
         if value:
             LOGGING = value
-            log_info("Logging enabled")
+            logger("Logging enabled")
         else:
-            log_info("Logging disabled")
+            logger("Logging disabled")
             LOGGING = value
 
 
-def begin_log():
-    if LOGGING:
-        current_date = u.make_date(dtime.now())
-        recreate_logs_folder()
-        with open(os.path.join(LOGS_FOLDER_PATH, f"{current_date}.{LOG_EXT}"), "a") as f:
-            f.write("\n")
+def log_separator():
+    """
+    Puts a newline in the logs.
+    """
+    try:
+        if LOGGING:
+            recreate_logs_folder()
+            with open(os.path.join(LOGS_FOLDER_PATH, f"{u.make_date(dtime.now())}.{LOG_EXT}"), "a") as f:
+                f.write("\n")
+    except:
+        if LOGGING:
+            with open(os.path.join(ROOT_FOLDER, "CRASH.log"), "a") as f:
+                f.write(f"\n[{u.make_date(dtime.now())}_{u.make_time(dtime.now(), write_ms=True)}] [CRASH]\t: |Logging error|\n")
 
 
-def log_info(message:str, detail="", log_type=Log_type.INFO, write_out=False, new_line=False):
+def logger(message:str, detail="", log_type=Log_type.INFO, write_out=False, new_line=False):
     """
     Progress Adventure logger.
     """
@@ -179,7 +189,7 @@ def recreate_folder(folder_name:str, parent_folder_path:str=ROOT_FOLDER, display
         display_name = folder_name.lower()
     if not os.path.isdir(folder_path):
         os.mkdir(folder_path)
-        log_info(f"Recreating {display_name} folder")
+        logger(f"Recreating {display_name} folder")
         return True
     else:
         return False
@@ -246,11 +256,11 @@ def make_backup(save_name:str, is_temporary=False):
         # make zip
         else:
             make_zip(save_name, save_folder, backup_name)
-        log_info(f"Made {('temporary ' if is_temporary else '')}backup", display_backup_name)
+        logger(f"Made {('temporary ' if is_temporary else '')}backup", display_backup_name)
         return [backup_name, display_backup_name]
     else:
         display_save_path = os.path.join(SAVES_FOLDER, save_name)
-        log_info("Backup failed", f"save file/folder not found: {display_save_path}(.{SAVE_EXT})", Log_type.WARN)
+        logger("Backup failed", f"save file/folder not found: {display_save_path}(.{SAVE_EXT})", Log_type.WARN)
         return False
 
 
@@ -372,7 +382,7 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
         new_settings["keybinds"] = encode_keybinds(new_settings["keybinds"])
         encode_save_s(new_settings, os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
         # log
-        log_info("Recreated settings")
+        logger("Recreated settings")
         return new_settings
 
 
@@ -380,7 +390,7 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
         settings = decode_save_s(os.path.join(ROOT_FOLDER, "settings"), 0, SETTINGS_SEED)
         settings["keybinds"] = decode_keybinds(settings["keybinds"])
     except (ValueError, TypeError):
-        log_info("Decode error", "settings", Log_type.ERROR)
+        logger("Decode error", "settings", Log_type.ERROR)
         press_key("The settings file is corrupted, and will now be recreated!")
         settings = recreate_settings()
     except FileNotFoundError:
@@ -394,7 +404,7 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
                 return settings[line_name]
             except KeyError:
                 if line_name in settings_lines:
-                    log_info("Missing key in settings", line_name, Log_type.WARN)
+                    logger("Missing key in settings", line_name, Log_type.WARN)
                     settings_manager(line_name, def_settings[line_name])
                     return def_settings[line_name]
                 else:
@@ -403,13 +413,13 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
     else:
         if line_name in settings.keys():
             if settings[line_name] != write_value:
-                log_info("Changed settings", f"{line_name}: {settings[line_name]} -> {write_value}")
+                logger("Changed settings", f"{line_name}: {settings[line_name]} -> {write_value}")
                 settings[line_name] = write_value
                 settings["keybinds"] = encode_keybinds(settings["keybinds"])
                 encode_save_s(settings, os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
         else:
             if line_name in settings_lines:
-                log_info("Recreating key in settings", line_name, Log_type.WARN)
+                logger("Recreating key in settings", line_name, Log_type.WARN)
                 settings[line_name] = def_settings[line_name]
                 settings["keybinds"] = encode_keybinds(settings["keybinds"])
                 encode_save_s(settings, os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
@@ -464,19 +474,19 @@ def is_up_to_date(min_version:str, curr_version:str):
 def _package_response(bad_packages:list, py_good:bool):
     # python
     if py_good:
-        log_info("Python up to date")
+        logger("Python up to date")
     else:
         from platform import python_version
-        log_info("Python not up to date", f"{python_version()} -> {PYTHON_MIN_VERSION}", Log_type.WARN)
+        logger("Python not up to date", f"{python_version()} -> {PYTHON_MIN_VERSION}", Log_type.WARN)
         print(f"Python not up to date: {python_version()} -> {PYTHON_MIN_VERSION}")
     # packages
     if len(bad_packages) == 0:
-        log_info("All packages up to date")
+        logger("All packages up to date")
     else:
         bad_packages_str = []
         for package in bad_packages:
             bad_packages_str.append(f"{package[2]}({package[1]}) -> {package[0]}")
-        log_info("Some packages are not up to date", ", ".join([p for p in bad_packages_str]), Log_type.WARN)
+        logger("Some packages are not up to date", ", ".join([p for p in bad_packages_str]), Log_type.WARN)
         print(f"{'Some packages are' if len(bad_packages) > 1 else 'A package is'} not up to date:\n\t" + "\n\t".join([p for p in bad_packages_str]))
     # return
     if len(bad_packages) == 0 and py_good:
@@ -484,7 +494,7 @@ def _package_response(bad_packages:list, py_good:bool):
     else:
         ans = input("Do you want to continue?(Y/N): ")
         if ans.upper() == "Y":
-            log_info("Continuing anyways")
+            logger("Continuing anyways")
             return True
         else:
             return False
@@ -502,11 +512,11 @@ def check_package_versions():
     from platform import python_version
     import random_sentance as rs
 
-    log_info("Checking python version")
+    logger("Checking python version")
     py_good = True
     if not is_up_to_date(PYTHON_MIN_VERSION, python_version()):
         py_good = False
-    log_info("Checking package versions")
+    logger("Checking package versions")
     packages = [[PIP_NP_MIN_VERSION, np.__version__, "numpy"],
                 [PIP_COL_MIN_VERSION, col.__version__, "colorama"],
                 [PIP_SFM_MIN_VERSION, sfm.__version__, "Save File Manager"],
