@@ -87,19 +87,6 @@ def _save_data_json(data:dm.Save_data):
     return save_data_json
 
 
-def _save_chunk_json(chunk:cm.Chunk, save_folder:str):
-    """Saves a chunk's data to the save folder."""
-    chunk_data = chunk.to_json()
-    chunk_file_name = f"chunk_{chunk.base_x}_{chunk.base_y}"
-    ts.encode_save_s(chunk_data, os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
-
-
-def _save_world_json(world:cm.World, save_folder:str):
-    """Converts the world's data to json format, and saves all chunks to the save file."""
-    for chunk in world.chunks:
-        _save_chunk_json(chunk, save_folder)
-
-
 def _load_world_json(x:int, y:int, save_folder:str):
     """Converts the world json to object format."""
     world = cm.World()
@@ -126,7 +113,7 @@ def make_save(data:dm.Save_data):
     # CHUNKS/WORLD
     ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder)
     ts.logger("Saving chunks")
-    _save_world_json(data.world, save_folder)
+    data.world.save_all_chunks_to_files(save_folder)
     # remove backup
     if backup_status != False:
         os.remove(backup_status[0])

@@ -1,6 +1,6 @@
 import os
 
-from tools import CHUNK_SIZE, SAVE_FOLDER_NAME_CHUNKS, logger, decode_save_s, Log_type
+from tools import CHUNK_SIZE, SAVE_FOLDER_NAME_CHUNKS, SAVE_EXT, logger, decode_save_s, encode_save_s, Log_type
 
 
 class Tile:
@@ -70,6 +70,14 @@ class Chunk:
             return self.gen_tile(x, y)
         else:
             return tile
+
+    
+    def save_to_file(self, save_folder:str):
+        """Saves the chunk's data a file in the save folder."""
+        chunk_data = self.to_json()
+        chunk_file_name = f"chunk_{self.base_x}_{self.base_y}"
+        encode_save_s(chunk_data, os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
+        logger("Saved chunk", f"chunk_{self.base_x}_{self.base_y}.{SAVE_EXT}")
         
 
 class World:
@@ -100,7 +108,6 @@ class World:
         y_con = y // CHUNK_SIZE
         new_chunk = Chunk(x_con, y_con)
         self.chunks.append(new_chunk)
-        logger("Generating chunk", f"x: {x_con} , y: {y_con}")
         return new_chunk
     
     
@@ -122,6 +129,17 @@ class World:
         content = tile["content"]
         tile_obj = Tile(x, y, content)
         return tile_obj
+
+
+    def save_all_chunks_to_files(self, save_folder:str, remove_chunks=False):
+        """
+        Saves all chunks to the save file.\n
+        If `remove_chunks` is True, it also removes the chunks from the chunks list.
+        """
+        for chunk in self.chunks:
+            chunk.save_to_file(save_folder)
+        if remove_chunks:
+            self.chunks.clear()
 
 
     def get_chunk_in_folder(self, x:int, y:int, save_folder:str):
