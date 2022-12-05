@@ -119,9 +119,8 @@ def item_finder(name:str) -> Item_categories|None:
     Gives back the item, from the item's enum name.\n
     Returns `None` if it doesn't exist.
     """
-    # THIS FAILS SOMETIMES!!!
     for enum in Item_categories._value2member_map_:
         try: return enum._member_map_[name]
-        except KeyError:
-            ts.logger("Wrong item type", f"unknown item type: {name}", ts.Log_type.WARN)
-            return None
+        except KeyError: pass
+    ts.logger("Unknown item type", f"item type: {name}", ts.Log_type.WARN)
+    return None

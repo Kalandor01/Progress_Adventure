@@ -94,35 +94,6 @@ def _save_chunk_json(chunk:cm.Chunk, save_folder:str):
     ts.encode_save_s(chunk_data, os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
 
 
-def _load_tile_json(tile:dict):
-    """Converts the tile json to object format."""
-    x = int(tile["x"])
-    y = int(tile["y"])
-    content = tile["content"]
-    tile_obj = cm.Tile(x, y, content)
-    return tile_obj
-
-
-def _load_chunk_json(x:int, y:int, save_folder:str):
-    """Converts the chunk json to object format."""
-    base_x = x // CHUNK_SIZE
-    base_y = y // CHUNK_SIZE
-    chunk_file_name = f"chunk_{base_x}_{base_y}"
-    try:
-        chunk_data = ts.decode_save_s(os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
-    except FileNotFoundError:
-        chunk_data = None
-    if chunk_data is not None:
-        tiles = []
-        for tile in chunk_data["tiles"]:
-            tiles.append(_load_tile_json(tile))
-        chunk = cm.Chunk(base_x, base_y, tiles)
-    else:
-        chunk = cm.Chunk(base_x, base_y, [])
-        chunk.gen_tile(x, y)
-    return chunk
-
-
 def _save_world_json(world:cm.World, save_folder:str):
     """Converts the world's data to json format, and saves all chunks to the save file."""
     for chunk in world.chunks:
@@ -132,7 +103,7 @@ def _save_world_json(world:cm.World, save_folder:str):
 def _load_world_json(x:int, y:int, save_folder:str):
     """Converts the world json to object format."""
     world = cm.World()
-    world.chunks.append(_load_chunk_json(x, y, save_folder))
+    world.get_chunk_in_folder(x, y, save_folder)
     return world
 
 
@@ -152,7 +123,7 @@ def make_save(data:dm.Save_data):
     save_data = _save_data_json(data)
     # create new save
     ts.encode_save_s([display_data, save_data], os.path.join(save_folder, SAVE_FILE_NAME_DATA))
-    # CHUNKS FOLDER
+    # CHUNKS/WORLD
     ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder)
     ts.logger("Saving chunks")
     _save_world_json(data.world, save_folder)
@@ -164,7 +135,6 @@ def make_save(data:dm.Save_data):
 
 def create_save_data():
     """Creates the data for a new save file."""
-    # ACTUALY CREATE THE FIRST CHUNK SOMEWHERE HERE!!!
     ts.logger("Preparing game data")
     # make save name
     display_save_name = input("Name your save: ")
@@ -177,7 +147,9 @@ def create_save_data():
     now = dtime.now()
     last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
     # load to class
-    return dm.Save_data(save_name, display_save_name, last_access, player, r.get_state())
+    save_data = dm.Save_data(save_name, display_save_name, last_access, player, r.get_state())
+    save_data.world.gen_tile(save_data.player.x_pos, save_data.player.y_pos)
+    return save_data
 
 
 def correct_save_data(data:dict[str, Any], save_version:float, extra_data:dict[str, Any]):
@@ -255,7 +227,9 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     # load random state
     r.set_state(ts.json_to_random_state(data["seed"]))
     # load to class
-    return dm.Save_data(save_name, display_name, last_access, player, r.get_state(), world)
+    save_data = dm.Save_data(save_name, display_name, last_access, player, r.get_state(), world)
+    # LOAD CHUNK AT PLAYER POS!!!
+    return save_data
 
 
 def _process_save_display_data(data):

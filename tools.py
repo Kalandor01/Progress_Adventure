@@ -106,7 +106,7 @@ def encode_save_s(data:list[dict[str, Any]]|dict[str, Any], file_path:str, seed=
     sfm.encode_save(json_data, seed, file_path, extension, ENCODING, FILE_ENCODING_VERSION)
 
 
-def decode_save_s(file_path, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT, can_be_old=False) -> dict[str, Any]:
+def decode_save_s(file_path:str, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT, can_be_old=False) -> dict[str, Any]:
     """
     Shorthand for `sfm.decode_save` + convert from string to json.\n
     `line_num` is the line, that you want go get back (starting from 0).
@@ -114,7 +114,8 @@ def decode_save_s(file_path, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT, can
     try:
         decoded_lines = sfm.decode_save(seed, file_path, extension, ENCODING, line_num + 1)
     except (ValueError, FileNotFoundError):
-        logger("Decode error", f"file name: {os.path.join(SAVES_FOLDER, os.path.basename(file_path))}.{SAVE_EXT}", Log_type.ERROR)
+        safe_file_path = file_path.removeprefix(ROOT_FOLDER)
+        logger("Decode error", f"file name: {safe_file_path}.{SAVE_EXT}", Log_type.ERROR)
         if can_be_old:
             logger("Decode backup", "trying to decode file as a numbered save file")
             save_name = str(os.path.basename(file_path))

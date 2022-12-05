@@ -1,4 +1,7 @@
-from tools import CHUNK_SIZE, logger, Log_type
+import os
+
+from tools import CHUNK_SIZE, SAVE_FOLDER_NAME_CHUNKS, logger, decode_save_s, Log_type
+
 
 class Tile:
     def __init__(self, x:int, y:int, content):
@@ -109,6 +112,37 @@ class World:
         chunk = self.find_chunk(x, y)
         if chunk is None:
             chunk = self.gen_chunk(x, y)
+        return chunk
+
+
+    def _load_tile_json(self, tile:dict):
+        """Converts the tile json to object format."""
+        x = int(tile["x"])
+        y = int(tile["y"])
+        content = tile["content"]
+        tile_obj = Tile(x, y, content)
+        return tile_obj
+
+
+    def get_chunk_in_folder(self, x:int, y:int, save_folder:str):
+        """
+        Returns the `Chunk` if it exists in the chunks folder.\n
+        Otherwise it generates a new `Chunk` object.
+        """
+        base_x = x // CHUNK_SIZE
+        base_y = y // CHUNK_SIZE
+        chunk_file_name = f"chunk_{base_x}_{base_y}"
+        try:
+            chunk_data = decode_save_s(os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
+        except FileNotFoundError:
+            chunk = self.gen_chunk(x, y)
+        else:
+            tiles = []
+            for tile in chunk_data["tiles"]:
+                tiles.append(self._load_tile_json(tile))
+            chunk = Chunk(base_x, base_y, tiles)
+        if self.find_chunk(x, y) is not None:
+            self.chunks.append(chunk)
         return chunk
 
 
