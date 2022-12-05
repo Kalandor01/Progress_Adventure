@@ -113,7 +113,7 @@ def decode_save_s(file_path:str, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT,
     """
     try:
         decoded_lines = sfm.decode_save(seed, file_path, extension, ENCODING, line_num + 1)
-    except (ValueError, FileNotFoundError):
+    except ValueError:
         safe_file_path = file_path.removeprefix(ROOT_FOLDER)
         logger("Decode error", f"file name: {safe_file_path}.{SAVE_EXT}", Log_type.ERROR)
         if can_be_old:
@@ -124,6 +124,10 @@ def decode_save_s(file_path:str, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT,
             decoded_lines = sfm.decode_save(file_number, file_path, extension, ENCODING, line_num + 1)
         else:
             raise
+    except FileNotFoundError:
+        safe_file_path = file_path.removeprefix(ROOT_FOLDER)
+        logger("File not found", f"file name: {safe_file_path}.{SAVE_EXT}", Log_type.ERROR)
+        raise
     return json.loads(decoded_lines[line_num])
 
 
