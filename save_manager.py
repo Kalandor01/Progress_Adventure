@@ -179,6 +179,7 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     """Loads a save file into a `Save_data` object."""
     full_save_name = os.path.join(SAVES_FOLDER_PATH, save_name)
     # get if save if a file
+    # DOESN'T WORK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if os.path.isfile(f'{full_save_name}.{SAVE_EXT}'):
         data = ts.decode_save_s(full_save_name, 1)
         os.remove(f'{full_save_name}.{SAVE_EXT}')
