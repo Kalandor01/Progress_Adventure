@@ -69,7 +69,7 @@ def unzipp(zip_from_path:str, zip_to_path:str):
 
 
 
-def old_file_reader(save_name:str="save*", save_ext:str=OLD_BACKUP_EXT, dir_name:str=BACKUPS_FOLDER_PATH, decode_until:int=1):
+def _old_file_reader(save_name:str="save*", save_ext:str=OLD_BACKUP_EXT, dir_name:str=BACKUPS_FOLDER_PATH, decode_until:int=1):
     """
     sfm.file_reader but for backups
     """
@@ -98,7 +98,7 @@ def old_file_reader(save_name:str="save*", save_ext:str=OLD_BACKUP_EXT, dir_name
             file_data.append([files[0].replace("." + OLD_BACKUP_EXT, ""), data])
     return file_data
 
-def get_saves_data():
+def _get_saves_data():
     """
     main.get_saves_data but for backups
     """
@@ -132,7 +132,7 @@ def get_saves_data():
     ts.recreate_saves_folder()
     # read saves
     datas = sfm.file_reader(-1, None, OLD_BACKUP_EXT, BACKUPS_FOLDER_PATH, save_num=SAVE_SEED)
-    datas_old = old_file_reader()
+    datas_old = _old_file_reader()
     errored_new = []
     errored_both = []
     # process file data
@@ -149,7 +149,7 @@ def load_backup_menu():
     """
     W.I.P. Backup loading menu.
     """
-    files_data = get_saves_data()
+    files_data = _get_saves_data()
     if len(files_data) > 0:
         while True:
             # get data from file_data

@@ -178,14 +178,14 @@ def correct_save_data(data:dict[str, Any], save_version:float, extra_data:dict[s
 def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list[bytes]]):
     """Loads a save file into a `Save_data` object."""
     full_save_name = os.path.join(SAVES_FOLDER_PATH, save_name)
-    # get if save if a file
-    # DOESN'T WORK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # get if save is a file
     if os.path.isfile(f'{full_save_name}.{SAVE_EXT}'):
-        data = ts.decode_save_s(full_save_name, 1)
+        data = ts.decode_save_s(full_save_name, 1, can_be_old=True)
+        # BACKUP BEFORE THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         os.remove(f'{full_save_name}.{SAVE_EXT}')
         ts.logger("Removed save file", "single save files have been deprecated", Log_type.WARN)
     else:
-        data = ts.decode_save_s(os.path.join(full_save_name, SAVE_FILE_NAME_DATA, ), 1, can_be_old=True)
+        data = ts.decode_save_s(os.path.join(full_save_name, SAVE_FILE_NAME_DATA, ), 1)
     # read data
     
     # save version
