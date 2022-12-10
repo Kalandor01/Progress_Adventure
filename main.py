@@ -5,6 +5,7 @@ import shutil
 import sys
 import threading as thr
 import time
+from typing import Literal
 
 try:
     import dev_tools as dt
@@ -50,7 +51,6 @@ if __name__ == "__main__":
     except:
         ts.logger("Preloading crashed", sys.exc_info(), Log_type.FATAL)
         raise
-
 
 
 # Monster cheat sheet: name, life, attack, deff, speed, rare, team, switched
@@ -355,7 +355,7 @@ def main_menu():
     files_data = sm.get_saves_data()
     in_main_menu = True
     while True:
-        status = [-1, -1]
+        status:tuple[int, str|Literal[-1]] = (-1, -1)
         if in_main_menu:
             in_main_menu = False
             if len(files_data):
@@ -370,7 +370,7 @@ def main_menu():
             in_main_menu = True
         # new file
         if option == 0:
-            status = [1, ""]
+            status = (1, "")
         elif option == -1:
             break
         # load/delete
@@ -386,7 +386,7 @@ def main_menu():
             option = sfm.UI_list_s(list_data, " Level select", True, True, exclude_nones=True).display(SETTINGS.keybind_mapping)
             # load
             if option != -1 and option < len(files_data):
-                status = [0, files_data[int(option)][0]]
+                status = (0, files_data[int(option)][0])
             # delete
             elif option == len(files_data):
                 # remove "delete file"

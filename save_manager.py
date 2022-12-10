@@ -220,22 +220,25 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     return save_data
 
 
-def _process_save_display_data(data):
-    """Turns the json display data from a file into more uniform data."""
+def _process_save_display_data(data:tuple[str, dict[str, Any] | Literal[-1]]):
+    """Turns the json display data from a json into more uniform data."""
     try:
-        data_processed = ""
-        try:
-            dispaly_name = data[1]['display_name']
-        except KeyError:
-            dispaly_name = data[0]
-        data_processed += f"{dispaly_name}: {data[1]['player_name']}\n"
-        last_access = data[1]["last_access"]
-        data_processed += f"Last opened: {u.make_date(last_access, '.')} {u.make_time(last_access[3:])}"
-        # check version
-        try: save_version = data[1]["save_version"]
-        except KeyError: save_version = 0.0
-        data_processed += u.stylized_text(f" v.{save_version}", (Color.GREEN if save_version == SAVE_VERSION else Color.RED))
-        return [data[0], data_processed]
+        if data[1] != -1:
+            data_processed = ""
+            try:
+                dispaly_name = data[1]['display_name']
+            except KeyError:
+                dispaly_name = data[0]
+            data_processed += f"{dispaly_name}: {data[1]['player_name']}\n"
+            last_access = data[1]["last_access"]
+            data_processed += f"Last opened: {u.make_date(last_access, '.')} {u.make_time(last_access[3:])}"
+            # check version
+            try: save_version = data[1]["save_version"]
+            except KeyError: save_version = 0.0
+            data_processed += u.stylized_text(f" v.{save_version}", (Color.GREEN if save_version == SAVE_VERSION else Color.RED))
+            return (data[0], data_processed)
+        else:
+            raise IndexError
     except (TypeError, IndexError):
         ts.logger("Parse error", f"Save name: {data[0]}", Log_type.ERROR)
         ts.press_key(f"\"{data[0]}\" could not be parsed!")
@@ -297,7 +300,7 @@ def get_saves_data():
     folders = _get_save_folders()
     datas.extend(_get_valid_folders(folders))
     # process file data
-    datas_processed = []
+    datas_processed:list[tuple[str, str]] = []
     for data in datas:
         if data[1] == -1:
             ts.logger("Decode error", f"save name: {data[0]}(.{SAVE_EXT})", Log_type.ERROR)

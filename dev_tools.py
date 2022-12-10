@@ -68,7 +68,6 @@ def unzipp(zip_from_path:str, zip_to_path:str):
         print(f"unzip: FILE {zip_to_path}.{BACKUP_EXT} NOT FOUND")
 
 
-
 def _old_file_reader(save_name:str="save*", save_ext:str=OLD_BACKUP_EXT, dir_name:str=BACKUPS_FOLDER_PATH, decode_until:int=1):
     """
     sfm.file_reader but for backups
@@ -168,7 +167,6 @@ def load_backup_menu():
                     ts.press_key("\n" + file_name + " loaded!")
     else:
         ts.press_key("No backups found!")
-
 
 
 # thread_1 = threading.Thread(target="function", name="Thread name", args=["argument list"])

@@ -1,4 +1,5 @@
 import os
+from typing import Any
 
 from tools import CHUNK_SIZE, SAVE_FOLDER_NAME_CHUNKS, SAVE_EXT, logger, decode_save_s, encode_save_s, Log_type
 
@@ -14,27 +15,25 @@ class Tile:
         """Returns a json representation of the `Tile`."""
         tile_json = {"x": self.x, "y": self.y, "content": self.content}
         return tile_json
-        
 
 
 class Chunk:
-    def __init__(self, base_x:int, base_y:int, tiles:list[Tile]=None):
+    def __init__(self, base_x:int, base_y:int, tiles:dict[str, Tile]=None):
         self.base_x = int(base_x) // CHUNK_SIZE
         self.base_y = int(base_y) // CHUNK_SIZE
-        logger("Generating chunk", f"base_x: {self.base_x} , base_y: {self.base_y}")
-        self.tiles:list[Tile] = []
+        logger("Creating chunk", f"base_x: {self.base_x} , base_y: {self.base_y}")
+        self.tiles:dict[str, Tile] = {}
         if tiles is not None:
-            for tile in tiles:
-                self.tiles.append(tile)
-    
+            self.tiles = tiles
+
 
     def to_json(self):
         """Returns a json representation of the `Chunk`."""
         chunk_json = {"tiles": []}
         for tile in self.tiles:
-            chunk_json["tiles"].append(tile.to_json())
+            chunk_json["tiles"].append(self.tiles[tile].to_json())
         return chunk_json
-    
+
 
     def find_tile(self, x:int, y:int):
         """
@@ -43,21 +42,22 @@ class Chunk:
         """
         x_con = x % CHUNK_SIZE
         y_con = y % CHUNK_SIZE
-        for tile in self.tiles:
-            if tile.x == x_con and tile.y == y_con:
-                return tile
-        return None
+        tile_name = f"{x_con}_{y_con}"
+        if tile_name in self.tiles.keys():
+            return self.tiles[tile_name]
+        else:
+            return None
 
-    
+
     def gen_tile(self, x:int, y:int):
-        """Generates a new `Tile` in the specified location."""
+        """Generates a `Tile` in the specified location."""
         x_con = x % CHUNK_SIZE
         y_con = y % CHUNK_SIZE
+        new_tile_name = f"{x_con}_{y_con}"
         new_tile = Tile(x_con, y_con, None)
-        self.tiles.append(new_tile)
-        logger("Generating tile", f"x: {x} , y: {y}")
+        self.tiles[new_tile_name] = new_tile
+        logger("Creating tile", f"x: {x} , y: {y}")
         return new_tile
-
 
 
     def get_tile(self, x:int, y:int):
@@ -71,22 +71,21 @@ class Chunk:
         else:
             return tile
 
-    
+
     def save_to_file(self, save_folder:str):
         """Saves the chunk's data a file in the save folder."""
         chunk_data = self.to_json()
         chunk_file_name = f"chunk_{self.base_x}_{self.base_y}"
         encode_save_s(chunk_data, os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
-        logger("Saved chunk", f"chunk_{self.base_x}_{self.base_y}.{SAVE_EXT}")
+        logger("Saved chunk", f"{chunk_file_name}.{SAVE_EXT}")
         
 
 class World:
-    def __init__(self, chunks:list[Chunk]=None):
+    def __init__(self, chunks:dict[str, Chunk]=None):
         logger("Generating World")
-        self.chunks:list[Chunk] = []
+        self.chunks:dict[str, Chunk] = {}
         if chunks is not None:
-            for chunk in chunks:
-                self.chunks.append(chunk)
+            self.chunks = chunks
     
 
     def find_chunk(self, x:int, y:int):
@@ -96,18 +95,20 @@ class World:
         """
         x_con = x // CHUNK_SIZE
         y_con = y // CHUNK_SIZE
-        for chunk in self.chunks:
-            if chunk.base_x == x_con and chunk.base_y == y_con:
-                return chunk
-        return None
+        chunk_name = f"{x_con}_{y_con}"
+        if chunk_name in self.chunks.keys():
+            return self.chunks[chunk_name]
+        else:
+            return None
     
     
     def gen_chunk(self, x:int, y:int):
         """Generates a new `Chunk` in the specified location."""
         x_con = x // CHUNK_SIZE
         y_con = y // CHUNK_SIZE
+        new_chunk_name = f"{x_con}_{y_con}"
         new_chunk = Chunk(x_con, y_con)
-        self.chunks.append(new_chunk)
+        self.chunks[new_chunk_name] = new_chunk
         return new_chunk
     
     
@@ -122,13 +123,14 @@ class World:
         return chunk
 
 
-    def _load_tile_json(self, tile:dict):
-        """Converts the tile json to object format."""
+    def _load_tile_json(self, tile:dict[str, Any]):
+        """Converts the tile json to dict format."""
         x = int(tile["x"])
         y = int(tile["y"])
         content = tile["content"]
+        tile_name = f"{x}_{y}"
         tile_obj = Tile(x, y, content)
-        return tile_obj
+        return {tile_name: tile_obj}
 
 
     def save_all_chunks_to_files(self, save_folder:str, remove_chunks=False):
@@ -137,15 +139,15 @@ class World:
         If `remove_chunks` is True, it also removes the chunks from the chunks list.
         """
         for chunk in self.chunks:
-            chunk.save_to_file(save_folder)
+            self.chunks[chunk].save_to_file(save_folder)
         if remove_chunks:
             self.chunks.clear()
 
 
-    def get_chunk_in_folder(self, x:int, y:int, save_folder:str):
+    def find_chunk_in_folder(self, x:int, y:int, save_folder:str):
         """
         Returns the `Chunk` if it exists in the chunks folder.\n
-        Otherwise it generates a new `Chunk` object.
+        Otherwise it returns `None`.
         """
         base_x = x // CHUNK_SIZE
         base_y = y // CHUNK_SIZE
@@ -153,14 +155,28 @@ class World:
         try:
             chunk_data = decode_save_s(os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
         except FileNotFoundError:
-            chunk = self.gen_chunk(x, y)
+            return None
         else:
-            tiles = []
+            tiles = {}
             for tile in chunk_data["tiles"]:
-                tiles.append(self._load_tile_json(tile))
+                tiles.update(self._load_tile_json(tile))
             chunk = Chunk(base_x, base_y, tiles)
-        if self.find_chunk(x, y) is not None:
-            self.chunks.append(chunk)
+            return chunk
+
+
+    def get_chunk_in_folder(self, x:int, y:int, save_folder:str):
+        """
+        Returns the `Chunk` if it exists in the chunks folder, and adds it to the `chunks` dict.\n
+        Otherwise it generates a new `Chunk` object.
+        """
+        chunk = self.find_chunk_in_folder(x, y, save_folder)
+        if chunk is not None:
+            base_x = x // CHUNK_SIZE
+            base_y = y // CHUNK_SIZE
+            new_chunk_name = f"{base_x}_{base_y}"
+            self.chunks[new_chunk_name] = chunk
+        else:
+            chunk = self.gen_chunk(x, y)
         return chunk
 
 

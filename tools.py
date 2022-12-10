@@ -364,12 +364,12 @@ def decode_keybinds(keybinds:dict[str, list[list[str]]]) -> dict[str, list[list[
     return keybinds
 
 
-def settings_manager(line_name:str, write_value=None) -> Any | None:
+def settings_manager(line_name:str, write_value:Any=None):
     """
     STRUCTURE:\n
-    - auto_save
-    - logging
-    - keybinds
+    - auto_save: bool
+    - logging: bool
+    - keybinds: dict[str, list[list[bytes]]]
     \t- esc
     \t- up
     \t- down
@@ -380,7 +380,7 @@ def settings_manager(line_name:str, write_value=None) -> Any | None:
 
     # default values
     settings_lines = ["auto_save", "logging", "keybinds"]
-    def_settings = {"auto_save": True, "logging": True, "keybinds": {"esc": [[b"\x1b"]], "up": [[], [b"H"]], "down": [[], [b"P"]], "left": [[], [b"K"]], "right": [[], [b"M"]], "enter": [[b"\r"]]}}
+    def_settings:dict[str, Any] = {"auto_save": True, "logging": True, "keybinds": {"esc": [[b"\x1b"]], "up": [[], [b"H"]], "down": [[], [b"P"]], "left": [[], [b"K"]], "right": [[], [b"M"]], "enter": [[b"\r"]]}}
 
     def recreate_settings():
         new_settings = deepcopy(def_settings)
