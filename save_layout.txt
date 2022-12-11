@@ -23,7 +23,7 @@ data.sav
             ]
             - x_pos: int
             - y_pos: int
-            - rotation: str(Rotation(Enum))
+            - rotation: int(Rotation(Enum).value)
         - seed:
             - type: str
             - state: [int * 624]

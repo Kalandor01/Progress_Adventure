@@ -21,7 +21,9 @@ class Globals:
 class Key:
     def __init__(self, value:list[list[bytes]]):
         self.set_value(value)
-    
+        self.conflict = False
+
+
     def set_name(self):
         if len(self.value[0]) > 0:
             match self.value[0][0]:
@@ -94,6 +96,7 @@ class Key:
                 case _:
                     self.name = self.value[1][0].decode(ENCODING)
 
+
     def set_value(self, key_value:list[list[bytes]]):
         try:
             if len(key_value[0]) > 0:
@@ -109,17 +112,19 @@ class Key:
             self.value = key_value
             self.set_name()
 
+
     def change(self, key_value:list[list[bytes]]):
         try: self.set_value(key_value)
         except UnicodeDecodeError: pass
-    
+
+
     def __str__(self):
         return f"{self.name}: {self.value}"
 
 
 class Settings:
-
     DOUBLE_KEYS = DOUBLE_KEYS
+
 
     def __init__(self, auto_save:bool, logging:bool, keybinds:dict[str, list[list[bytes]]]):
         self.auto_save = auto_save
@@ -129,7 +134,8 @@ class Settings:
             obj_kebinds[key] = Key(keybinds[key])
         self.keybinds = dict[str, Key](obj_kebinds)
         self.save_keybind_mapping()
-    
+
+
     def change_others(self, auto_save=None, logging=None):
         # auto save
         if auto_save is not None:
@@ -140,7 +146,8 @@ class Settings:
             self.logging = bool(logging)
             ts.settings_manager("logging", self.logging)
             ts.change_logging(self.logging)
-    
+
+
     def encode_keybinds(self):
         return {"esc": copy.deepcopy(self.keybinds["esc"].value),
         "up": copy.deepcopy(self.keybinds["up"].value),
@@ -148,7 +155,8 @@ class Settings:
         "left": copy.deepcopy(self.keybinds["left"].value),
         "right": copy.deepcopy(self.keybinds["right"].value),
         "enter": copy.deepcopy(self.keybinds["enter"].value)}
-    
+
+
     def save_keybind_mapping(self):
         # ([keybinds["esc"], keybinds["up"], keybinds["down"], keybinds["left"], keybinds["right"], keybinds["enter"]], [b"\xe0", b"\x00"])
         # ([[[b"\x1b"]],     [[], [b"H"]],   [[], [b"P"]],     [[], [b"K"]],     [[], [b"M"]],      [[b"\r"]]],         [b"\xe0", b"\x00"])
@@ -160,6 +168,17 @@ class Settings:
             self.keybinds["right"].value,
             self.keybinds["enter"].value], self.DOUBLE_KEYS)
         ts.settings_manager("keybinds", self.encode_keybinds())
+
+
+    def check_keybind_conflicts(self):
+        for key in self.keybinds:
+            self.keybinds[key].conflict = False
+        for key1 in self.keybinds:
+            for key2 in self.keybinds:
+                if key1 != key2:
+                    if self.keybinds[key1].value == self.keybinds[key2].value:
+                        self.keybinds[key1].conflict = True
+                        self.keybinds[key2].conflict = True
 
 class Save_data:
     def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player, seed:tuple[Any]|dict[str, Any], world:World=None):

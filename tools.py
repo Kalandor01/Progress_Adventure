@@ -26,13 +26,16 @@ PIP_COL_MIN_VERSION = "0.4.6"
 
 PIP_SFM_MIN_VERSION = "1.13.3"
 PIP_RS_MIN_VERSION = "1.5.1"
+
 # language
 ENCODING = "windows-1250"
+
 # thread names
 MAIN_THREAD_NAME = "Main"
 AUTO_SAVE_THREAD_NAME = "Auto saver"
 MANUAL_SAVE_THREAD_NAME = "Quit manager"
 TEST_THREAD_NAME = "Test"
+
 # paths/folders/file names
 ROOT_FOLDER = os.getcwd()
     #saves folder
@@ -53,17 +56,19 @@ BACKUP_EXT = "zip"
     # save folder structure
 SAVE_FILE_NAME_DATA = "data"
 SAVE_FOLDER_NAME_CHUNKS = "chunks"
+
 # seeds
 SAVE_SEED = 87531
 SETTINGS_SEED = 1
+
 # other
 ERROR_HANDLING = False
-AUTO_SAVE_DELAY = 3
+AUTO_SAVE_DELAY = 10
 FILE_ENCODING_VERSION = 2
 CHUNK_SIZE = 10
 DOUBLE_KEYS = [b"\xe0", b"\x00"]
 LOG_MS = False
-SAVE_VERSION = 1.4
+SAVE_VERSION = "1.4.1"
 STANDARD_CURSOR_ICONS = sfm.Cursor_icon(selected_icon=">", selected_icon_right="",
                                         not_selected_icon=" ", not_selected_icon_right="")
 DELETE_CURSOR_ICONS = sfm.Cursor_icon(selected_icon=" X", selected_icon_right="",
@@ -458,8 +463,8 @@ def is_up_to_date(min_version:str, curr_version:str):
     """
     Returns if the current version string is equal or higher than the minimum version.
     """
-    version = curr_version.split(".")
-    min_v = min_version.split(".")
+    version = str(curr_version).split(".")
+    min_v = str(min_version).split(".")
 
     for x in range(len(version)):
         # min v. shorter

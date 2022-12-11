@@ -1,5 +1,6 @@
 import os
 from typing import Any
+from copy import deepcopy
 
 from tools import CHUNK_SIZE, SAVE_FOLDER_NAME_CHUNKS, SAVE_EXT, logger, decode_save_s, encode_save_s, Log_type
 
@@ -19,8 +20,8 @@ class Tile:
 
 class Chunk:
     def __init__(self, base_x:int, base_y:int, tiles:dict[str, Tile]=None):
-        self.base_x = int(base_x) // CHUNK_SIZE
-        self.base_y = int(base_y) // CHUNK_SIZE
+        self.base_x = int(base_x) // CHUNK_SIZE * CHUNK_SIZE
+        self.base_y = int(base_y) // CHUNK_SIZE * CHUNK_SIZE
         logger("Creating chunk", f"base_x: {self.base_x} , base_y: {self.base_y}")
         self.tiles:dict[str, Tile] = {}
         if tiles is not None:
@@ -93,8 +94,8 @@ class World:
         Returns the `Chunk` if it exists.\n
         Otherwise it returns `None`.
         """
-        x_con = x // CHUNK_SIZE
-        y_con = y // CHUNK_SIZE
+        x_con = x // CHUNK_SIZE * CHUNK_SIZE
+        y_con = y // CHUNK_SIZE * CHUNK_SIZE
         chunk_name = f"{x_con}_{y_con}"
         if chunk_name in self.chunks.keys():
             return self.chunks[chunk_name]
@@ -104,8 +105,8 @@ class World:
     
     def gen_chunk(self, x:int, y:int):
         """Generates a new `Chunk` in the specified location."""
-        x_con = x // CHUNK_SIZE
-        y_con = y // CHUNK_SIZE
+        x_con = x // CHUNK_SIZE * CHUNK_SIZE
+        y_con = y // CHUNK_SIZE * CHUNK_SIZE
         new_chunk_name = f"{x_con}_{y_con}"
         new_chunk = Chunk(x_con, y_con)
         self.chunks[new_chunk_name] = new_chunk
@@ -138,10 +139,13 @@ class World:
         Saves all chunks to the save file.\n
         If `remove_chunks` is True, it also removes the chunks from the chunks list.
         """
-        for chunk in self.chunks:
-            self.chunks[chunk].save_to_file(save_folder)
         if remove_chunks:
+            chunk_data = deepcopy(self.chunks)
             self.chunks.clear()
+        else:
+            chunk_data = self.chunks
+        for chunk in chunk_data:
+            chunk_data[chunk].save_to_file(save_folder)
 
 
     def find_chunk_in_folder(self, x:int, y:int, save_folder:str):
@@ -149,8 +153,8 @@ class World:
         Returns the `Chunk` if it exists in the chunks folder.\n
         Otherwise it returns `None`.
         """
-        base_x = x // CHUNK_SIZE
-        base_y = y // CHUNK_SIZE
+        base_x = x // CHUNK_SIZE * CHUNK_SIZE
+        base_y = y // CHUNK_SIZE * CHUNK_SIZE
         chunk_file_name = f"chunk_{base_x}_{base_y}"
         try:
             chunk_data = decode_save_s(os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
@@ -171,8 +175,8 @@ class World:
         """
         chunk = self.find_chunk_in_folder(x, y, save_folder)
         if chunk is not None:
-            base_x = x // CHUNK_SIZE
-            base_y = y // CHUNK_SIZE
+            base_x = x // CHUNK_SIZE * CHUNK_SIZE
+            base_y = y // CHUNK_SIZE * CHUNK_SIZE
             new_chunk_name = f"{base_x}_{base_y}"
             self.chunks[new_chunk_name] = chunk
         else:

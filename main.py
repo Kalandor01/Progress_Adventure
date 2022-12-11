@@ -8,6 +8,7 @@ import time
 from typing import Literal
 
 try:
+    import utils as u
     import dev_tools as dt
     import tools as ts
     import data_manager as dm
@@ -51,6 +52,8 @@ if __name__ == "__main__":
     except:
         ts.logger("Preloading crashed", sys.exc_info(), Log_type.FATAL)
         raise
+
+
 
 
 # Monster cheat sheet: name, life, attack, deff, speed, rare, team, switched
@@ -209,6 +212,8 @@ def stats(won=0):
         print()
 
 
+
+
 def prepair_fight():
     GLOBALS.in_fight = True
     ts.logger("Fight started")
@@ -220,7 +225,7 @@ def prepair_fight():
 
 def save_game():
     frozen_data = copy.deepcopy(SAVE_DATA)
-    sm.make_save(frozen_data)
+    sm.make_save(frozen_data, SAVE_DATA)
     ts.logger("Game saved", f'save name: {frozen_data.save_name}, player name: "{frozen_data.player.name}"')
 
 
@@ -279,6 +284,11 @@ def game_loop():
     # GAME
     stats(-1)
     print("Wandering...")
+    for _ in range(500):
+        time.sleep(0.1)
+        SAVE_DATA.player.weighted_turn()
+        SAVE_DATA.player.move()
+        SAVE_DATA.world.get_tile(SAVE_DATA.player.pos[0], SAVE_DATA.player.pos[1])
     time.sleep(5)
     if not GLOBALS.exiting:
         prepair_fight()
@@ -325,16 +335,20 @@ def main_menu():
         else:
             key = [[key], []]
         SETTINGS.keybinds[name].change(key)
+        SETTINGS.check_keybind_conflicts()
+
+    def get_keybind_name(key_name:str):
+        return u.stylized_text(SETTINGS.keybinds[key_name].name, (u.Color.RED if SETTINGS.keybinds[key_name].conflict else u.Color.RESET))
 
     def keybind_setting():
         while True:
             ans = sfm.UI_list_s([
-            f"Escape: {SETTINGS.keybinds['esc'].name}",
-            f"Up: {SETTINGS.keybinds['up'].name}",
-            f"Down: {SETTINGS.keybinds['down'].name}",
-            f"Left: {SETTINGS.keybinds['left'].name}",
-            f"Right: {SETTINGS.keybinds['right'].name}",
-            f"Enter: {SETTINGS.keybinds['enter'].name}",
+            f"Escape: {get_keybind_name('esc')}",
+            f"Up: {get_keybind_name('up')}",
+            f"Down: {get_keybind_name('down')}",
+            f"Left: {get_keybind_name('left')}",
+            f"Right: {get_keybind_name('right')}",
+            f"Enter: {get_keybind_name('enter')}",
             None, "Done"
             ], " Keybinds", False, True).display(SETTINGS.keybind_mapping)
             # exit

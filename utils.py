@@ -106,3 +106,31 @@ def enum_item_finder(name:str, enum:EnumType) -> Enum|None:
     """
     try: return enum._member_map_[name]
     except KeyError: return None
+
+
+def vector_add(vector1:tuple[float, float], vector2:tuple[float, float], round=False):
+    """
+    Adds together the the two vectors.\n
+    If `round` is True, it rounds the resoulting values in the vector.
+    """
+    x = vector1[0] + vector2[0]
+    if round:
+        x = int(x)
+    y = vector1[1] + vector2[1]
+    if round:
+        y = int(y)
+    return (x, y)
+
+
+def vector_multiply(vector:tuple[float, float], multiplier:tuple[float, float], round=False):
+    """
+    Multiplies the first vector's parts with the numbers in the second "vector".\n
+    If `round` is True, it rounds the resoulting values in the vector.
+    """
+    x = vector[0] * multiplier[0]
+    if round:
+        x = int(x)
+    y = vector[1] * multiplier[1]
+    if round:
+        y = int(y)
+    return (x, y)

@@ -116,8 +116,8 @@ def _get_saves_data():
                 last_access = data[1]["last_access"]
                 data_processed += f"Last opened: {u.make_date(last_access, '.')} {u.make_time(last_access[3:])}"
                 # check version
-                try: save_version = data[1]["save_version"]
-                except KeyError: save_version = 0.0
+                try: save_version:str = data[1]["save_version"]
+                except KeyError: save_version = "0.0"
                 data_processed += u.stylized_text(f" v.{save_version}", (Color.GREEN if save_version == SAVE_VERSION else Color.RED))
                 if old_files:
                     file_number = int(data[0].replace(f".{OLD_BACKUP_EXT}", "").split("save")[1])

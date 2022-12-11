@@ -22,7 +22,7 @@ from tools import CHUNK_SIZE
 
 def _save_display_json(data:dm.Save_data):
     """Converts the display data to json format."""
-    display_data = {}
+    display_data:dict[str, Any] = {}
     display_data["save_version"] = SAVE_VERSION
     display_data["display_name"] = data.display_save_name
     now = dtime.now()
@@ -40,9 +40,9 @@ def _save_player_json(player_data:es.Player):
                     "attack": player_data.attack,
                     "defence": player_data.defence,
                     "speed": player_data.speed,
-                    "x_pos": player_data.x_pos,
-                    "y_pos": player_data.y_pos,
-                    "rotation": player_data.rotation.name
+                    "x_pos": player_data.pos[0],
+                    "y_pos": player_data.pos[1],
+                    "rotation": player_data.rotation.value
                     }
     player_json["inventory"] = player_data.inventory.to_json()
     return player_json
@@ -66,12 +66,14 @@ def _load_player_json(player_json:dict[str, Any]):
     player.defence = int(player_json["defence"])
     player.speed = int(player_json["speed"])
     player.inventory.items = list(_load_inventory_json(player_json["inventory"]))
+    player.pos = (int(player_json["x_pos"]), int(player_json["y_pos"]))
+    player.rotation = es.Rotation(es.Rotation._value2member_map_[int(player_json["rotation"])])
     return player
 
 
 def _save_data_json(data:dm.Save_data):
     """Converts the miscellaneous data to json format."""
-    save_data_json = {}
+    save_data_json:dict[str, Any] = {}
     # save_version
     save_data_json["save_version"] = SAVE_VERSION
     # display_name
@@ -94,7 +96,7 @@ def _load_world_json(x:int, y:int, save_folder:str):
     return world
 
 
-def make_save(data:dm.Save_data):
+def make_save(data:dm.Save_data, actual_data:dm.Save_data=None):
     """
     Creates a save file from the save data.\n
     Makes a temporary backup.
@@ -112,8 +114,11 @@ def make_save(data:dm.Save_data):
     ts.encode_save_s([display_data, save_data], os.path.join(save_folder, SAVE_FILE_NAME_DATA))
     # CHUNKS/WORLD
     ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder)
+    # WORKING WITH ACTUAL DATA
+    if actual_data is None:
+        actual_data = data
     ts.logger("Saving chunks")
-    data.world.save_all_chunks_to_files(save_folder)
+    actual_data.world.save_all_chunks_to_files(save_folder, True)
     # remove backup
     if backup_status != False:
         os.remove(backup_status[0])
@@ -135,43 +140,57 @@ def create_save_data():
     last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
     # load to class
     save_data = dm.Save_data(save_name, display_save_name, last_access, player, r.get_state())
-    save_data.world.gen_tile(save_data.player.x_pos, save_data.player.y_pos)
+    save_data.world.gen_tile(save_data.player.pos[0], save_data.player.pos[1])
     return save_data
 
 
-def correct_save_data(data:dict[str, Any], save_version:float, extra_data:dict[str, Any]):
+def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str, Any]):
     """Modifys the save data, to make it up to date, with the newest save file data structure."""
     ts.logger("Correcting save data")
     # 0.0 -> 1.0
-    if save_version == 0.0:
+    if save_version == "0.0":
         # added save varsions
-        save_version = 1.0
+        save_version = "1.0"
         ts.logger("Corrected save data", "0.0 -> 1.0")
     # 1.0 -> 1.1
-    if save_version == 1.0:
+    if save_version == "1.0":
         # added player inventory
         data["player"]["inventory"] = []
-        save_version = 1.1
+        save_version = "1.1"
         ts.logger("Corrected save data", "1.0 -> 1.1")
     # 1.1 -> 1.2
-    if save_version == 1.1:
+    if save_version == "1.1":
         # added display save name
         data["display_name"] = extra_data["save_name"]
-        save_version = 1.2
+        save_version = "1.2"
         ts.logger("Corrected save data", "1.1 -> 1.2")
     # 1.2 -> 1.3
-    if save_version == 1.2:
+    if save_version == "1.2":
         # switched from file to folder
-        save_version = 1.3
+        save_version = "1.3"
         ts.logger("Corrected save data", "1.2 -> 1.3")
     # 1.3 -> 1.4
-    if save_version == 1.3:
+    if save_version == "1.3":
         # added chunks + player position/rotation
         data["player"]["x_pos"] = 0
         data["player"]["y_pos"] = 0
-        data["player"]["rotation"] = es.Rotation.UP.name
-        save_version = 1.4
+        data["player"]["rotation"] = "UP"
+        save_version = "1.4"
         ts.logger("Corrected save data", "1.3 -> 1.4")
+    # 1.4 -> 1.4.1
+    if save_version == "1.4":
+        # renamed facings up, down... to 0, 1..
+        p_rot:str = data["player"]["rotation"]
+        if p_rot == "DOWN":
+            data["player"]["rotation"] = 1
+        elif p_rot == "LEFT":
+            data["player"]["rotation"] = 2
+        elif p_rot == "RIGHT":
+            data["player"]["rotation"] = 3
+        else:
+            data["player"]["rotation"] = 0
+        save_version = "1.4.1"
+        ts.logger("Corrected save data", "1.4 -> 1.4.1")
     return data
 
 
@@ -189,17 +208,17 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     # read data
     
     # save version
-    try: save_version = data["save_version"]
-    except KeyError: save_version = 0.0
+    try: save_version = str(data["save_version"])
+    except KeyError: save_version = "0.0"
     if save_version != SAVE_VERSION:
-        is_older = ts.is_up_to_date(str(save_version), str(SAVE_VERSION))
-        ts.logger("Trying to load save with an incorrect version", f"{SAVE_VERSION} -> {save_version}", Log_type.WARN)
+        is_older = ts.is_up_to_date(save_version, SAVE_VERSION)
+        ts.logger("Trying to load save with an incorrect version", f"{save_version} -> {SAVE_VERSION}", Log_type.WARN)
         ans = sfm.UI_list(["Yes", "No"], f"\"{save_name}\" is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to back up the save file before loading it?").display(keybind_mapping)
         if ans == 0:
             ts.make_backup(save_name)
         data = correct_save_data(data, save_version, {"save_name": save_name})
     # display_name
-    display_name:str = data["display_name"]
+    display_name = str(data["display_name"])
     # last access
     last_access:list[int] = data["last_access"]
     # player
@@ -207,7 +226,7 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     player = _load_player_json(player_data)
     # world
     ts.logger("Loading world")
-    world = _load_world_json(player.x_pos, player.y_pos, full_save_name)
+    world = _load_world_json(player.pos[0], player.pos[1], full_save_name)
     ts.logger("Loaded save", f'save name: {save_name}, player name: "{player.name}", last saved: {u.make_date(last_access)} {u.make_time(last_access[3:])}')
     
     # PREPARING
