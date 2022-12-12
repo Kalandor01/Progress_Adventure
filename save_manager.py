@@ -122,7 +122,7 @@ def make_save(data:dm.Save_data, actual_data:dm.Save_data=None):
     # remove backup
     if backup_status != False:
         os.remove(backup_status[0])
-        ts.logger("Removed temporary backup", backup_status[1])
+        ts.logger("Removed temporary backup", backup_status[1], Log_type.DEBUG)
 
 
 def create_save_data():
@@ -151,24 +151,24 @@ def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str
     if save_version == "0.0":
         # added save varsions
         save_version = "1.0"
-        ts.logger("Corrected save data", "0.0 -> 1.0")
+        ts.logger("Corrected save data", "0.0 -> 1.0", Log_type.DEBUG)
     # 1.0 -> 1.1
     if save_version == "1.0":
         # added player inventory
         data["player"]["inventory"] = []
         save_version = "1.1"
-        ts.logger("Corrected save data", "1.0 -> 1.1")
+        ts.logger("Corrected save data", "1.0 -> 1.1", Log_type.DEBUG)
     # 1.1 -> 1.2
     if save_version == "1.1":
         # added display save name
         data["display_name"] = extra_data["save_name"]
         save_version = "1.2"
-        ts.logger("Corrected save data", "1.1 -> 1.2")
+        ts.logger("Corrected save data", "1.1 -> 1.2", Log_type.DEBUG)
     # 1.2 -> 1.3
     if save_version == "1.2":
         # switched from file to folder
         save_version = "1.3"
-        ts.logger("Corrected save data", "1.2 -> 1.3")
+        ts.logger("Corrected save data", "1.2 -> 1.3", Log_type.DEBUG)
     # 1.3 -> 1.4
     if save_version == "1.3":
         # added chunks + player position/rotation
@@ -176,7 +176,7 @@ def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str
         data["player"]["y_pos"] = 0
         data["player"]["rotation"] = "UP"
         save_version = "1.4"
-        ts.logger("Corrected save data", "1.3 -> 1.4")
+        ts.logger("Corrected save data", "1.3 -> 1.4", Log_type.DEBUG)
     # 1.4 -> 1.4.1
     if save_version == "1.4":
         # renamed facings up, down... to 0, 1..
@@ -190,7 +190,7 @@ def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str
         else:
             data["player"]["rotation"] = 0
         save_version = "1.4.1"
-        ts.logger("Corrected save data", "1.4 -> 1.4.1")
+        ts.logger("Corrected save data", "1.4 -> 1.4.1", Log_type.DEBUG)
     return data
 
 

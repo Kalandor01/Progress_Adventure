@@ -3,7 +3,7 @@ from enum import Enum
 import inspect
 
 import utils as u
-from tools import r, logger
+from tools import r, logger, Log_type
 
 from inventory import Inventory, Item_categories
 
@@ -156,7 +156,7 @@ class Player(Entity):
             
             if new_dir is not None:
                 self.rotation = new_dir
-                logger("Player turned", f"{old_rot} -> {self.rotation}")
+                logger("Player turned", f"{old_rot} -> {self.rotation}", Log_type.DEBUG)
 
 
     def move(self, amount:tuple[int, int]=None, direction:Rotation=None):
@@ -173,7 +173,7 @@ class Player(Entity):
         move_raw = _facing_to_movement_vector(direction)
         move = u.vector_multiply(move_raw, amount)
         self.pos = u.vector_add(self.pos, move, True)
-        logger("Player moved", f"{old_pos} -> {self.pos}")
+        logger("Player moved", f"{old_pos} -> {self.pos}", Log_type.DEBUG)
 
 
 class Caveman(Entity):

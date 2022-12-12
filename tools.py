@@ -45,6 +45,7 @@ OLD_SAVE_NAME = "save*"
 SAVE_EXT = "sav"
     #logs folder
 LOGGING = True
+LOGGING_LEVEL = 0
 LOGS_FOLDER = "logs"
 LOGS_FOLDER_PATH = os.path.join(ROOT_FOLDER, LOGS_FOLDER)
 LOG_EXT = "log"
@@ -76,13 +77,14 @@ DELETE_CURSOR_ICONS = sfm.Cursor_icon(selected_icon=" X", selected_icon_right=""
 
 
 class Log_type(Enum):
-    INFO    = 0
-    WARN    = 1
-    ERROR   = 2
-    FATAL   = 3
-    OTHER   = 4
+    DEBUG   = 0
+    INFO    = 1
+    WARN    = 2
+    ERROR   = 3
+    FATAL   = 4
     PASS    = 5
     FAIL    = 6
+    OTHER   = 7
 
 
 def press_key(text=""):
@@ -136,18 +138,22 @@ def decode_save_s(file_path:str, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT,
     return json.loads(decoded_lines[line_num])
 
 
-def change_logging(value:bool):
+def change_logging_level(value:int):
     """
-    Sets if logging is enabled or not.
+    Sets the `LOGGING_LEVEL`, and if logging is enabled or not.
     """
-    global LOGGING
-    if LOGGING != value:
-        if value:
-            LOGGING = value
-            logger("Logging enabled")
-        else:
-            logger("Logging disabled")
-            LOGGING = value
+    global LOGGING_LEVEL
+    if LOGGING_LEVEL != value:
+        # logging level
+        old_logging_level = LOGGING_LEVEL
+        LOGGING_LEVEL = value
+        logger("Logging level changed", f"{old_logging_level} -> {LOGGING_LEVEL}")
+        # logging
+        global LOGGING
+        old_logging = LOGGING
+        LOGGING = (value != -1)
+        if LOGGING != old_logging:
+            logger(f"Logging {'enabled' if LOGGING else 'disabled'}")
 
 
 def log_separator():
@@ -170,7 +176,7 @@ def logger(message:str, detail="", log_type=Log_type.INFO, write_out=False, new_
     Progress Adventure logger.
     """
     try:
-        if LOGGING:
+        if LOGGING and LOGGING_LEVEL <= log_type.value:
             l_type = log_type.name
             current_date = u.make_date(dtime.now())
             current_time = u.make_time(dtime.now(), write_ms=LOG_MS)
@@ -266,7 +272,7 @@ def make_backup(save_name:str, is_temporary=False):
         # make zip
         else:
             make_zip(save_name, save_folder, backup_name)
-        logger(f"Made {('temporary ' if is_temporary else '')}backup", display_backup_name)
+        logger(f"Made {('temporary ' if is_temporary else '')}backup", display_backup_name, (Log_type.DEBUG if is_temporary else Log_type.INFO))
         return [backup_name, display_backup_name]
     else:
         display_save_path = os.path.join(SAVES_FOLDER, save_name)
@@ -373,7 +379,7 @@ def settings_manager(line_name:str, write_value:Any=None):
     """
     STRUCTURE:\n
     - auto_save: bool
-    - logging: bool
+    - logging_level: int
     - keybinds: dict[str, list[list[bytes]]]
     \t- esc
     \t- up
@@ -384,8 +390,8 @@ def settings_manager(line_name:str, write_value:Any=None):
     """
 
     # default values
-    settings_lines = ["auto_save", "logging", "keybinds"]
-    def_settings:dict[str, Any] = {"auto_save": True, "logging": True, "keybinds": {"esc": [[b"\x1b"]], "up": [[], [b"H"]], "down": [[], [b"P"]], "left": [[], [b"K"]], "right": [[], [b"M"]], "enter": [[b"\r"]]}}
+    settings_lines = ["auto_save", "logging_level", "keybinds"]
+    def_settings:dict[str, Any] = {"auto_save": True, "logging_level": 100, "keybinds": {"esc": [[b"\x1b"]], "up": [[], [b"H"]], "down": [[], [b"P"]], "left": [[], [b"K"]], "right": [[], [b"M"]], "enter": [[b"\r"]]}}
 
     def recreate_settings():
         new_settings = deepcopy(def_settings)
@@ -423,7 +429,7 @@ def settings_manager(line_name:str, write_value:Any=None):
     else:
         if line_name in settings.keys():
             if settings[line_name] != write_value:
-                logger("Changed settings", f"{line_name}: {settings[line_name]} -> {write_value}")
+                logger("Changed settings", f"{line_name}: {settings[line_name]} -> {write_value}", Log_type.DEBUG)
                 settings[line_name] = write_value
                 settings["keybinds"] = encode_keybinds(settings["keybinds"])
                 encode_save_s(settings, os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)

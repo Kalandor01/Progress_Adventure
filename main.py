@@ -39,9 +39,9 @@ if __name__ == "__main__":
             GOOD_PACKAGES = True
             SETTINGS = dm.Settings(
                 ts.settings_manager("auto_save"),
-                ts.settings_manager("logging"),
+                ts.settings_manager("logging_level"),
                 ts.settings_manager("keybinds"))
-            ts.change_logging(SETTINGS.logging)
+            ts.change_logging_level(SETTINGS.logging_level)
             SETTINGS.save_keybind_mapping()
             SAVE_DATA:dm.Save_data = None
             GLOBALS = dm.Globals(False, False, False, False)
@@ -320,11 +320,18 @@ def main_menu():
     # action functions
     def other_options():
         auto_save = sfm.Toggle(SETTINGS.auto_save, "Auto save: ")
-        logging = sfm.Toggle(SETTINGS.logging, "Logging: ", "on", "minimal")
+        logging_values = [-1, 4, 3, 2, 1, 0]
+        logging_value = len(logging_values)
+        for x in range(len(logging_values)):
+            if logging_values[x] == SETTINGS.logging_level:
+                logging_value = x
+                break
+        logging_level_names = ["MINIMAL", Log_type.FATAL.name, Log_type.ERROR.name, Log_type.WARN.name, Log_type.INFO.name, "ALL"]
+        logging = sfm.Choice(logging_level_names, logging_value, "Logging: ")
         other_settings = [auto_save, logging, None, sfm.UI_list(["Done"])]
         response = sfm.options_ui(other_settings, " Other options", key_mapping=SETTINGS.keybind_mapping)
         if response is not None:
-            SETTINGS.change_others(auto_save.value, logging.value)
+            SETTINGS.change_others(bool(auto_save.value), logging_values[logging.value])
 
     def set_keybind(name:str):
         print("\n\nPress any key\n\n", end="")

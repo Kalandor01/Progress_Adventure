@@ -126,9 +126,10 @@ class Settings:
     DOUBLE_KEYS = DOUBLE_KEYS
 
 
-    def __init__(self, auto_save:bool, logging:bool, keybinds:dict[str, list[list[bytes]]]):
-        self.auto_save = auto_save
-        self.logging = logging
+    def __init__(self, auto_save:bool, logging_level:int, keybinds:dict[str, list[list[bytes]]]):
+        self.auto_save = bool(auto_save)
+        self.logging = (int(logging_level) != -1)
+        self.logging_level = int(logging_level)
         obj_kebinds = {}
         for key in keybinds:
             obj_kebinds[key] = Key(keybinds[key])
@@ -136,16 +137,17 @@ class Settings:
         self.save_keybind_mapping()
 
 
-    def change_others(self, auto_save=None, logging=None):
+    def change_others(self, auto_save:bool=None, logging_level:int=None):
         # auto save
         if auto_save is not None:
             self.auto_save = bool(auto_save)
             ts.settings_manager("auto_save", self.auto_save)
         # logging
-        if auto_save is not None:
-            self.logging = bool(logging)
-            ts.settings_manager("logging", self.logging)
-            ts.change_logging(self.logging)
+        if logging_level is not None:
+            self.logging = (int(logging_level) != -1)
+            self.logging_level = int(logging_level)
+            ts.settings_manager("logging_level", self.logging_level)
+            ts.change_logging_level(self.logging_level)
 
 
     def encode_keybinds(self):

@@ -57,7 +57,7 @@ class Chunk:
         new_tile_name = f"{x_con}_{y_con}"
         new_tile = Tile(x_con, y_con, None)
         self.tiles[new_tile_name] = new_tile
-        logger("Creating tile", f"x: {x} , y: {y}")
+        logger("Creating tile", f"x: {x} , y: {y}", Log_type.DEBUG)
         return new_tile
 
 
@@ -179,6 +179,7 @@ class World:
             base_y = y // CHUNK_SIZE * CHUNK_SIZE
             new_chunk_name = f"{base_x}_{base_y}"
             self.chunks[new_chunk_name] = chunk
+            logger("Loaded chunk from file", f"{new_chunk_name}.{SAVE_EXT}", Log_type.DEBUG)
         else:
             chunk = self.gen_chunk(x, y)
         return chunk
@@ -206,12 +207,14 @@ class World:
         return new_tile
 
 
-    def get_tile(self, x:int, y:int):
+    def get_tile(self, x:int, y:int, save_folder:str=None):
         """
-        Returns the `Tile` if it exists.\n
+        Returns the `Tile` if it exists in the `chunks` list or in the chunks folder.\n
         Otherwise it generates a new `Tile` and a new `Chunk`, if that also doesn't exist.
         """
         tile = self.find_tile(x, y)
         if tile is None:
-            tile = self.gen_tile(x, y)
+            if save_folder is not None:
+                chunk = self.get_chunk_in_folder(x, y, save_folder)
+                tile = chunk.get_tile(x, y)
         return tile

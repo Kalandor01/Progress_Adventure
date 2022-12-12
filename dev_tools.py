@@ -216,7 +216,7 @@ class Self_Checks:
         GOOD_PACKAGES = True
         SETTINGS = dm.Settings(
             ts.settings_manager("auto_save"),
-            ts.settings_manager("logging"),
+            ts.settings_manager("logging_level"),
             ts.settings_manager("keybinds"))
         SETTINGS.save_keybind_mapping()
         SAVE_DATA = dm.Save_data
@@ -229,7 +229,7 @@ class Self_Checks:
         good = False
         settings = dm.Settings(
                 ts.settings_manager("auto_save"),
-                ts.settings_manager("logging"),
+                ts.settings_manager("logging_level"),
                 ts.settings_manager("keybinds"))
         settings.save_keybind_mapping()
         
