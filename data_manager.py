@@ -1,13 +1,12 @@
-import copy
+from copy import deepcopy
 from typing import Any
 
 from utils import Double_Keys
-import tools as ts
-from tools import getch
-from tools import ENCODING, DOUBLE_KEYS
+from constants import ENCODING, DOUBLE_KEYS
+from tools import Log_type, getch, logger, settings_manager, change_logging_level
 
 from entities import Player
-from chunk_manager import Chunk, World
+from chunk_manager import World
 
 
 class Globals:
@@ -106,7 +105,7 @@ class Key:
             else:
                 raise KeyError
         except UnicodeDecodeError:
-            ts.logger("Unknown key", "cannot decode key", ts.Log_type.ERROR)
+            logger("Unknown key", "cannot decode key", Log_type.ERROR)
             raise
         else:
             self.value = key_value
@@ -141,22 +140,22 @@ class Settings:
         # auto save
         if auto_save is not None:
             self.auto_save = bool(auto_save)
-            ts.settings_manager("auto_save", self.auto_save)
+            settings_manager("auto_save", self.auto_save)
         # logging
         if logging_level is not None:
             self.logging = (int(logging_level) != -1)
             self.logging_level = int(logging_level)
-            ts.settings_manager("logging_level", self.logging_level)
-            ts.change_logging_level(self.logging_level)
+            settings_manager("logging_level", self.logging_level)
+            change_logging_level(self.logging_level)
 
 
     def encode_keybinds(self):
-        return {"esc": copy.deepcopy(self.keybinds["esc"].value),
-        "up": copy.deepcopy(self.keybinds["up"].value),
-        "down": copy.deepcopy(self.keybinds["down"].value),
-        "left": copy.deepcopy(self.keybinds["left"].value),
-        "right": copy.deepcopy(self.keybinds["right"].value),
-        "enter": copy.deepcopy(self.keybinds["enter"].value)}
+        return {"esc": deepcopy(self.keybinds["esc"].value),
+        "up": deepcopy(self.keybinds["up"].value),
+        "down": deepcopy(self.keybinds["down"].value),
+        "left": deepcopy(self.keybinds["left"].value),
+        "right": deepcopy(self.keybinds["right"].value),
+        "enter": deepcopy(self.keybinds["enter"].value)}
 
 
     def save_keybind_mapping(self):
@@ -169,7 +168,7 @@ class Settings:
             self.keybinds["left"].value,
             self.keybinds["right"].value,
             self.keybinds["enter"].value], self.DOUBLE_KEYS)
-        ts.settings_manager("keybinds", self.encode_keybinds())
+        settings_manager("keybinds", self.encode_keybinds())
 
 
     def check_keybind_conflicts(self):
@@ -187,9 +186,11 @@ class Save_data:
         self.save_name = str(save_name)
         self.display_save_name = str(display_save_name)
         self.last_access = list[int](last_access)
-        self.player = copy.deepcopy(player)
+        self.player = deepcopy(player)
         self.seed = tuple(seed)
-        self.world:World = World()
+        if world is None:
+            world = World()
+        self.world = world
 
 
 def is_key(key:Key) -> bool:

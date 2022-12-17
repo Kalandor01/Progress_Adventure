@@ -1,7 +1,7 @@
 from enum import Enum
 import json
 import os
-import shutil
+from shutil import copyfile
 import threading
 from datetime import datetime as dtime
 from msvcrt import getch
@@ -12,68 +12,24 @@ from zipfile import ZipFile
 from copy import deepcopy
 
 import save_file_manager as sfm
-
 import utils as u
+from constants import                                                   \
+    PYTHON_MIN_VERSION,                                                 \
+    PIP_NP_MIN_VERSION, PIP_COL_MIN_VERSION,                            \
+    PIP_SFM_MIN_VERSION, PIP_RS_MIN_VERSION,                            \
+    ENCODING,                                                           \
+    ROOT_FOLDER,                                                        \
+    SAVES_FOLDER, SAVES_FOLDER_PATH, OLD_SAVE_NAME, SAVE_EXT,           \
+    LOGGING, LOGGING_LEVEL, LOGS_FOLDER, LOGS_FOLDER_PATH, LOG_EXT,     \
+    BACKUPS_FOLDER, BACKUPS_FOLDER_PATH, OLD_BACKUP_EXT, BACKUP_EXT,    \
+    SAVE_SEED, SETTINGS_SEED,                                           \
+    LOG_MS,                                                             \
+    FILE_ENCODING_VERSION,                                              \
+    DOUBLE_KEYS
 
 
 # random
 r = np.random.RandomState()
-
-# package versions
-PYTHON_MIN_VERSION = "3.11.0"
-PIP_NP_MIN_VERSION = "1.23.4"
-PIP_COL_MIN_VERSION = "0.4.6"
-
-PIP_SFM_MIN_VERSION = "1.13.3"
-PIP_RS_MIN_VERSION = "1.5.1"
-
-# language
-ENCODING = "windows-1250"
-
-# thread names
-MAIN_THREAD_NAME = "Main"
-AUTO_SAVE_THREAD_NAME = "Auto saver"
-MANUAL_SAVE_THREAD_NAME = "Quit manager"
-TEST_THREAD_NAME = "Test"
-
-# paths/folders/file names
-ROOT_FOLDER = os.getcwd()
-    #saves folder
-SAVES_FOLDER = "saves"
-SAVES_FOLDER_PATH = os.path.join(ROOT_FOLDER, SAVES_FOLDER)
-OLD_SAVE_NAME = "save*"
-SAVE_EXT = "sav"
-    #logs folder
-LOGGING = True
-LOGGING_LEVEL = 0
-LOGS_FOLDER = "logs"
-LOGS_FOLDER_PATH = os.path.join(ROOT_FOLDER, LOGS_FOLDER)
-LOG_EXT = "log"
-    #backups folder
-BACKUPS_FOLDER = "backups"
-BACKUPS_FOLDER_PATH = os.path.join(ROOT_FOLDER, BACKUPS_FOLDER)
-OLD_BACKUP_EXT = SAVE_EXT + ".bak"
-BACKUP_EXT = "zip"
-    # save folder structure
-SAVE_FILE_NAME_DATA = "data"
-SAVE_FOLDER_NAME_CHUNKS = "chunks"
-
-# seeds
-SAVE_SEED = 87531
-SETTINGS_SEED = 1
-
-# other
-ERROR_HANDLING = False
-AUTO_SAVE_DELAY = 10
-FILE_ENCODING_VERSION = 2
-CHUNK_SIZE = 10
-DOUBLE_KEYS = [b"\xe0", b"\x00"]
-LOG_MS = False
-SAVE_VERSION = "1.4.1"
-STANDARD_CURSOR_ICONS = sfm.Cursor_icon(selected_icon=">", selected_icon_right="",
-                                        not_selected_icon=" ", not_selected_icon_right="")
-DELETE_CURSOR_ICONS = sfm.Cursor_icon(selected_icon=" X", selected_icon_right="",
-                                        not_selected_icon="  ", not_selected_icon_right="")
 
 
 class Log_type(Enum):
@@ -268,7 +224,7 @@ def make_backup(save_name:str, is_temporary=False):
         display_backup_name = os.path.join(BACKUPS_FOLDER, backup_name_end)
         # file copy
         if os.path.isfile(save_file):
-            shutil.copyfile(save_file, backup_name)
+            copyfile(save_file, backup_name)
         # make zip
         else:
             make_zip(save_name, save_folder, backup_name)
@@ -278,83 +234,6 @@ def make_backup(save_name:str, is_temporary=False):
         display_save_path = os.path.join(SAVES_FOLDER, save_name)
         logger("Backup failed", f"save file/folder not found: {display_save_path}(.{SAVE_EXT})", Log_type.WARN)
         return False
-
-
-# FILE_DATA_MERGER ABANDONED!!!
-    """
-    # -1: add only if there is nothing in the list? (NO!)
-    # 1: don't remove if there is extra stuff in list (success!?)
-
-    # ULTIMATE MIND DESTRUCTION!!!
-    def file_data_merger_special(def_data:list|dict, file_data:list|dict, index:int|str, list_type:type):
-        code = def_data["file_merger_code"]
-        value = def_data["file_merger_value"]
-        print("good:", def_data, file_data)
-        if code == -1:
-            if len(file_data) == 0:
-                merged_data = value
-            else:
-                if len(file_data) < index:
-                    merged_data = file_data[index]
-                else:
-                    merged_data = {"file_merger_nothing_to_add": None}
-        elif code == 1:
-            merged_data = file_data[index]
-        print("merged:", merged_data)
-        return merged_data
-
-    def is_good(data:list|dict, write=False):
-        good = (type(data) is dict and "file_merger_code" in data.keys() and "file_merger_value" in data.keys() and data["file_merger_code"] != 0)
-        if write:
-            print(f"{data}:", good)
-        return good
-
-    def file_data_merger(def_data:list|dict, file_data:list|dict):
-        def_data_c = copy.deepcopy(def_data)
-        if type(def_data_c) is list:
-            merged_data = []
-            for x in range(len(def_data_c)):
-                print("\nlist", type(def_data_c[x]))
-                good = is_good(def_data_c[x], True)
-                try:
-                    if type(def_data_c[x]) is list or type(def_data_c[x]) is dict:
-                        if good:
-                            sp_merge = file_data_merger_special(def_data_c[x], file_data, x, list)
-                            if sp_merge != {"file_merger_nothing_to_add": None}:
-                                merged_data.append()
-                        else:
-                            merged_data.append(file_data_merger(def_data_c[x], file_data[x]))
-                    else:
-                        merged_data.append(file_data[x])
-                except IndexError:
-                    print("error")
-                    merged_data.append(def_data_c[x])
-        else:
-            merged_data = {}
-            for key in def_data_c:
-                print("\ndict", type(def_data_c[key]))
-                good = is_good(def_data_c[key], True)
-                try:
-                    if type(def_data_c[key]) is list or type(def_data_c[key]) is dict:
-                        if good:
-                            merged_data[key] = file_data_merger_special(def_data_c[key], file_data, key, dict)
-                        else:
-                            merged_data[key] = file_data_merger(def_data_c[key], file_data[key])
-                    else:
-                        merged_data[key] = file_data[key]
-                except KeyError:
-                    print("error")
-                    merged_data[key] = def_data_c[key]
-        return merged_data
-
-    def_d = {"auto_save": {"file_merger_code": 1, "file_merger_value": [52]}, "keybinds": {"esc": [b"\x1b"], "up": [b"H", {"file_merger_code": -1, "file_merger_value": 1}], "down": [b"P", 1], "left": [b"K", 1], "right": [b"M", 1], "enter": [b"\r"]}}
-    file_d = {"auto_save": [1, 2, 3, 4, 5], "lol": "trash", "keybinds": {"esc": [b"\x1b", 1, 2, 3], "up": [b"H", 1], "right": [b"M", 1], "enter": [b"\r"]}}
-
-    merged_d = file_data_merger(def_d, file_d)
-    print("\n" + str(def_d))
-    print("\n" + str(file_d))
-    print("\n" + str(merged_d))
-    """
 
 
 def encode_keybinds(keybinds:dict[str, list[list[bytes]]]) -> dict[str, list[list[str]]]:
@@ -391,7 +270,7 @@ def settings_manager(line_name:str, write_value:Any=None):
 
     # default values
     settings_lines = ["auto_save", "logging_level", "keybinds"]
-    def_settings:dict[str, Any] = {"auto_save": True, "logging_level": 100, "keybinds": {"esc": [[b"\x1b"]], "up": [[], [b"H"]], "down": [[], [b"P"]], "left": [[], [b"K"]], "right": [[], [b"M"]], "enter": [[b"\r"]]}}
+    def_settings:dict[str, Any] = {"auto_save": True, "logging_level": 0, "keybinds": {"esc": [[b"\x1b"]], "up": [[], [b"H"]], "down": [[], [b"P"]], "left": [[], [b"K"]], "right": [[], [b"M"]], "enter": [[b"\r"]]}}
 
     def recreate_settings():
         new_settings = deepcopy(def_settings)

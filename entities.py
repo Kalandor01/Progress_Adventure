@@ -1,8 +1,8 @@
 from __future__ import annotations
 from enum import Enum
-import inspect
+from inspect import stack
 
-import utils as u
+from utils import vector_add, vector_multiply
 from tools import r, logger, Log_type
 
 from inventory import Inventory, Item_categories
@@ -31,8 +31,8 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
         return int(stat_value)
     
     if name is None:
-        stack = inspect.stack()
-        name = stack[1][0].f_locals["self"].__class__.__name__
+        frame_stack = stack()
+        name = frame_stack[1][0].f_locals["self"].__class__.__name__
     name = name.replace("_", " ")
     life = configure_stat(life)
     attack = configure_stat(attack)
@@ -149,7 +149,7 @@ class Player(Entity):
             move_vec = _facing_to_movement_vector(self.rotation)
             # back
             if r.rand() > 0.75:
-                new_dir = _movement_vector_to_facing(u.vector_multiply(move_vec, (-1, -1), True))
+                new_dir = _movement_vector_to_facing(vector_multiply(move_vec, (-1, -1), True))
             else:
                 new_dir = _movement_vector_to_facing((move_vec[1], move_vec[0]))
                 new_dir = _movement_vector_to_facing((move_vec[1], move_vec[0]))
@@ -171,8 +171,8 @@ class Player(Entity):
         if amount is None:
             amount = (1, 1)
         move_raw = _facing_to_movement_vector(direction)
-        move = u.vector_multiply(move_raw, amount)
-        self.pos = u.vector_add(self.pos, move, True)
+        move = vector_multiply(move_raw, amount)
+        self.pos = vector_add(self.pos, move, True)
         logger("Player moved", f"{old_pos} -> {self.pos}", Log_type.DEBUG)
 
 

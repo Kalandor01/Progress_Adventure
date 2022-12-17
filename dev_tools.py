@@ -1,17 +1,21 @@
 import json
-import os
-import sys
+from os.path import join, isdir
+from sys import exc_info
 from typing import Callable, Literal
 from zipfile import ZipFile
 
-from utils import Color
-import utils as u
+from utils import Color, make_date, make_time, stylized_text
+from constants import                                   \
+    ENCODING,                                           \
+    TEST_THREAD_NAME,                                   \
+    SAVES_FOLDER_PATH, SAVE_EXT,                        \
+    BACKUPS_FOLDER_PATH, OLD_BACKUP_EXT, BACKUP_EXT,    \
+    SAVE_SEED,                                          \
+    FILE_ENCODING_VERSION,                              \
+    SAVE_VERSION
 import tools as ts
-from tools import OLD_BACKUP_EXT, BACKUPS_FOLDER_PATH, sfm
-from tools import TEST_THREAD_NAME
-from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT, BACKUP_EXT
-from tools import ENCODING, FILE_ENCODING_VERSION
-from tools import SAVE_VERSION
+from tools import sfm
+
 import data_manager as dm
 
 def decode_save_file(save_name:str, save_name_pre=SAVES_FOLDER_PATH, save_num=SAVE_SEED, save_ext=SAVE_EXT):
@@ -19,7 +23,7 @@ def decode_save_file(save_name:str, save_name_pre=SAVES_FOLDER_PATH, save_num=SA
     Decodes a save file into a normal json.
     """
     try:
-        save_data = sfm.decode_save(save_num, os.path.join(save_name_pre, save_name), save_ext, ENCODING)
+        save_data = sfm.decode_save(save_num, join(save_name_pre, save_name), save_ext, ENCODING)
     except FileNotFoundError:
         print(f"decode_save_file: FILE {save_name} NOT FOUND!")
     else:
@@ -41,7 +45,7 @@ def encode_save_file(save_name:str, pre_save_name=SAVES_FOLDER_PATH, save_num=SA
     except FileNotFoundError:
         print(f"encode_save_file: FILE {save_name} NOT FOUND!")
     else:
-        sfm.encode_save(save_data_new, save_num, os.path.join(pre_save_name, save_name), save_ext, ENCODING, FILE_ENCODING_VERSION)
+        sfm.encode_save(save_data_new, save_num, join(pre_save_name, save_name), save_ext, ENCODING, FILE_ENCODING_VERSION)
 
 
 def recompile_save_file(save_name:str, new_save_name:str, pre_save_name=SAVES_FOLDER_PATH, new_pre_save_name=SAVES_FOLDER_PATH, save_ext=SAVE_EXT, new_save_ext=SAVE_EXT, save_num=SAVE_SEED, new_save_num=SAVE_SEED):
@@ -51,17 +55,17 @@ def recompile_save_file(save_name:str, new_save_name:str, pre_save_name=SAVES_FO
     if new_save_name is None:
         new_save_name = save_name
     try:
-        save_data = sfm.decode_save(save_num, os.path.join(pre_save_name, save_name), save_ext, ENCODING)
+        save_data = sfm.decode_save(save_num, join(pre_save_name, save_name), save_ext, ENCODING)
     except FileNotFoundError:
         print(f"recompile_save_file: FILE {save_name} NOT FOUND!")
         return False
     else:
-        sfm.encode_save(save_data, new_save_num, os.path.join(new_pre_save_name, new_save_name), new_save_ext, ENCODING, FILE_ENCODING_VERSION)
+        sfm.encode_save(save_data, new_save_num, join(new_pre_save_name, new_save_name), new_save_ext, ENCODING, FILE_ENCODING_VERSION)
         return True
 
 
 def unzipp(zip_from_path:str, zip_to_path:str):
-    if os.path.isdir(f"{zip_to_path}.{BACKUP_EXT}"):
+    if isdir(f"{zip_to_path}.{BACKUP_EXT}"):
         with ZipFile(f"{zip_to_path}.{BACKUP_EXT}", 'r') as zip_ref:
             zip_ref.extractall(zip_from_path)
     else:
@@ -114,11 +118,11 @@ def _get_saves_data():
                 data_processed = ""
                 data_processed += f"\"{data[0]}\"{'(old)' if old_files else ''}: {data[1]['player_name']}\n"
                 last_access = data[1]["last_access"]
-                data_processed += f"Last opened: {u.make_date(last_access, '.')} {u.make_time(last_access[3:])}"
+                data_processed += f"Last opened: {make_date(last_access, '.')} {make_time(last_access[3:])}"
                 # check version
                 try: save_version:str = data[1]["save_version"]
                 except KeyError: save_version = "0.0"
-                data_processed += u.stylized_text(f" v.{save_version}", (Color.GREEN if save_version == SAVE_VERSION else Color.RED))
+                data_processed += stylized_text(f" v.{save_version}", (Color.GREEN if save_version == SAVE_VERSION else Color.RED))
                 if old_files:
                     file_number = int(data[0].replace(f".{OLD_BACKUP_EXT}", "").split("save")[1])
                 else:
@@ -188,7 +192,7 @@ class Self_Checks:
     def _give_result(self, check_name:str, result_type=ts.Log_type.FAIL):
         print(result_type.name)
         ts.logger(check_name,
-            result_type.name + (": " + str(sys.exc_info()) if result_type==ts.Log_type.FATAL else ""),
+            result_type.name + (": " + str(exc_info()) if result_type==ts.Log_type.FATAL else ""),
             result_type)
         
     

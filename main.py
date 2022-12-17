@@ -1,28 +1,30 @@
-﻿import copy
+﻿from copy import deepcopy
 import math
 import os
 import shutil
-import sys
-import threading as thr
-import time
+from sys import exc_info
+from threading import Thread
+from time import sleep
 from typing import Literal
 
 try:
-    import utils as u
-    import dev_tools as dt
+    from utils import Color, stylized_text
     import tools as ts
     import data_manager as dm
     import entities as es
     import save_manager as sm
 
-    from tools import r, sfm, col, getch
-    from tools import Log_type
-    from tools import MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME
-    from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT
-    from tools import AUTO_SAVE_DELAY, DOUBLE_KEYS
-    from tools import STANDARD_CURSOR_ICONS, DELETE_CURSOR_ICONS, ERROR_HANDLING
+    from tools import r, Log_type, sfm, col, getch
+    from constants import                                                   \
+        MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME,   \
+        SAVES_FOLDER_PATH, SAVE_EXT,                                        \
+        DELETE_CURSOR_ICONS,                                                \
+        ERROR_HANDLING,                                                     \
+        AUTO_SAVE_DELAY,                                                    \
+        DOUBLE_KEYS
 except ModuleNotFoundError:
-    input(f"ERROR: {sys.exc_info()[1]}")
+    input(f"ERROR: {exc_info()[1]}")
+    import sys
     sys.exit(1)
 
 
@@ -33,6 +35,7 @@ if __name__ == "__main__":
         ts.log_separator()
         if ts.check_package_versions():
             ts.logger("Preloading global variables")
+            # import dev_tools as dt
             # dt.decode_save_file(SETTINGS_SEED, "settings")
 
             # GLOBAL VARIABLES
@@ -50,7 +53,7 @@ if __name__ == "__main__":
         else:
             GOOD_PACKAGES = False
     except:
-        ts.logger("Preloading crashed", sys.exc_info(), Log_type.FATAL)
+        ts.logger("Preloading crashed", str(exc_info()), Log_type.FATAL)
         raise
 
 
@@ -169,7 +172,7 @@ def fight(monster_l:list[es.Entity]=None):
                         print(f"CRITICAL HIT: -4 HP({m.hp})")
                     if m.hp <= 0:
                         print(f"{player.name} defeated {m.name}")
-                time.sleep(0.5)
+                sleep(0.5)
         # sum life
         szum = 0
         for m in monster_l:
@@ -224,7 +227,7 @@ def prepair_fight():
 
 
 def save_game():
-    frozen_data = copy.deepcopy(SAVE_DATA)
+    frozen_data = deepcopy(SAVE_DATA)
     sm.make_save(frozen_data, SAVE_DATA)
     ts.logger("Game saved", f'save name: {frozen_data.save_name}, player name: "{frozen_data.player.name}"')
 
@@ -233,7 +236,7 @@ def save_game():
 def auto_saver():
     try:
         while True:
-            time.sleep(AUTO_SAVE_DELAY)
+            sleep(AUTO_SAVE_DELAY)
             if GLOBALS.in_game_loop:
                 if not GLOBALS.in_fight and not GLOBALS.saving:
                     GLOBALS.saving = True
@@ -243,7 +246,7 @@ def auto_saver():
             else:
                 break
     except:
-        ts.logger("Thread crashed", sys.exc_info(), Log_type.FATAL)
+        ts.logger("Thread crashed", str(exc_info()), Log_type.FATAL)
         raise
 
 
@@ -265,7 +268,7 @@ def quit_game():
             else:
                 break
     except:
-        ts.logger("Thread crashed", sys.exc_info(), Log_type.FATAL)
+        ts.logger("Thread crashed", str(exc_info()), Log_type.FATAL)
         raise
     
 
@@ -275,21 +278,21 @@ def game_loop():
     ts.logger("Game loop started")
     # TRHEADS
     # manual quit
-    thread_quit = thr.Thread(target=quit_game, name=MANUAL_SAVE_THREAD_NAME, daemon=True)
+    thread_quit = Thread(target=quit_game, name=MANUAL_SAVE_THREAD_NAME, daemon=True)
     thread_quit.start()
     # auto saver
     if SETTINGS.auto_save:
-        thread_save = thr.Thread(target=auto_saver, name=AUTO_SAVE_THREAD_NAME, daemon=True)
+        thread_save = Thread(target=auto_saver, name=AUTO_SAVE_THREAD_NAME, daemon=True)
         thread_save.start()
     # GAME
     stats(-1)
     print("Wandering...")
     for _ in range(500):
-        time.sleep(0.1)
+        sleep(0.1)
         SAVE_DATA.player.weighted_turn()
         SAVE_DATA.player.move()
-        SAVE_DATA.world.get_tile(SAVE_DATA.player.pos[0], SAVE_DATA.player.pos[1])
-    time.sleep(5)
+        SAVE_DATA.world.get_tile(SAVE_DATA.player.pos[0], SAVE_DATA.player.pos[1], SAVE_DATA.save_name)
+    sleep(5)
     if not GLOBALS.exiting:
         prepair_fight()
         save_game()
@@ -345,7 +348,7 @@ def main_menu():
         SETTINGS.check_keybind_conflicts()
 
     def get_keybind_name(key_name:str):
-        return u.stylized_text(SETTINGS.keybinds[key_name].name, (u.Color.RED if SETTINGS.keybinds[key_name].conflict else u.Color.RESET))
+        return stylized_text(SETTINGS.keybinds[key_name].name, (Color.RED if SETTINGS.keybinds[key_name].conflict else Color.RESET))
 
     def keybind_setting():
         while True:
@@ -471,9 +474,9 @@ def main_error_handler():
                 ts.logger("Beginning new instance")
                 main()
         except:
-            ts.logger("Instance crashed", sys.exc_info(), Log_type.FATAL)
+            ts.logger("Instance crashed", str(exc_info()), Log_type.FATAL)
             if ERROR_HANDLING:
-                print(f"ERROR: {sys.exc_info()[1]}")
+                print(f"ERROR: {exc_info()[1]}")
                 ans = input("Restart?(Y/N): ")
                 if ans.upper() == "Y":
                     ts.logger("Restarting instance")

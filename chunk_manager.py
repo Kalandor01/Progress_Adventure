@@ -1,8 +1,9 @@
-import os
+from os.path import join
 from typing import Any
 from copy import deepcopy
 
-from tools import CHUNK_SIZE, SAVE_FOLDER_NAME_CHUNKS, SAVE_EXT, logger, decode_save_s, encode_save_s, Log_type
+from constants import CHUNK_SIZE, SAVE_FOLDER_NAME_CHUNKS, SAVE_EXT
+from tools import logger, decode_save_s, encode_save_s, Log_type
 
 
 class Tile:
@@ -77,7 +78,7 @@ class Chunk:
         """Saves the chunk's data a file in the save folder."""
         chunk_data = self.to_json()
         chunk_file_name = f"chunk_{self.base_x}_{self.base_y}"
-        encode_save_s(chunk_data, os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
+        encode_save_s(chunk_data, join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
         logger("Saved chunk", f"{chunk_file_name}.{SAVE_EXT}")
         
 
@@ -157,7 +158,7 @@ class World:
         base_y = y // CHUNK_SIZE * CHUNK_SIZE
         chunk_file_name = f"chunk_{base_x}_{base_y}"
         try:
-            chunk_data = decode_save_s(os.path.join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
+            chunk_data = decode_save_s(join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
         except FileNotFoundError:
             return None
         else:
@@ -217,4 +218,6 @@ class World:
             if save_folder is not None:
                 chunk = self.get_chunk_in_folder(x, y, save_folder)
                 tile = chunk.get_tile(x, y)
+            else:
+                self.gen_tile(x, y)
         return tile

@@ -66,8 +66,10 @@ def make_date(date_lis:list|dtime, sep="-"):
     """
     if type(date_lis) is dtime:
         return f"{pad_zero(date_lis.year)}{sep}{pad_zero(date_lis.month)}{sep}{pad_zero(date_lis.day)}"
-    else:
+    elif type(date_lis) is list:
         return f"{pad_zero(date_lis[0])}{sep}{pad_zero(date_lis[1])}{sep}{pad_zero(date_lis[2])}"
+    else:
+        return "date"
 
 
 def make_time(time_lis:list|dtime, sep=":", write_ms=False, ms_sep:str="."):
@@ -76,8 +78,10 @@ def make_time(time_lis:list|dtime, sep=":", write_ms=False, ms_sep:str="."):
     """
     if type(time_lis) is dtime:
         return f"{pad_zero(time_lis.hour)}{sep}{pad_zero(time_lis.minute)}{sep}{pad_zero(time_lis.second)}{f'{ms_sep}{time_lis.microsecond}' if write_ms else ''}"
-    else:
+    elif type(time_lis) is list:
         return f"{pad_zero(time_lis[0])}{sep}{pad_zero(time_lis[1])}{sep}{pad_zero(time_lis[2])}{f'{ms_sep}{time_lis[3]}' if write_ms else ''}"
+    else:
+        return "time"
 
 
 def stylized_text(text:str, fore_color:Color, back_color=Color.RESET, style=Style.NORMAL):
@@ -91,7 +95,7 @@ def stylized_text(text:str, fore_color:Color, back_color=Color.RESET, style=Styl
 def remove_bad_characters(save_name:str):
     """
     Removes all characters that can't be in file/folder names.\n
-    (\/:*"?:<>|)
+    (\\\\/:*"?:<>|)
     """
     bad_chars = ["\\", "/", ":", "*", "\"", "?", ":", "<", ">", "|"]
     for char in bad_chars:

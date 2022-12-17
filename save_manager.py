@@ -5,22 +5,21 @@ from typing import Any, Literal
 
 import utils as u
 import tools as ts
-import data_manager as dm
+from data_manager import Save_data
 import entities as es
 import inventory as iy
-import chunk_manager as cm
+from chunk_manager import World
 
-from utils import Color, Style
-from tools import r, sfm
-from tools import Log_type
-from tools import SAVES_FOLDER_PATH, SAVE_SEED, SAVE_EXT, OLD_SAVE_NAME
-from tools import SAVE_VERSION
-from tools import SAVE_FILE_NAME_DATA
-from tools import SAVE_FOLDER_NAME_CHUNKS
-from tools import CHUNK_SIZE
+from utils import Color
+from tools import r, sfm, Log_type
+from constants import                               \
+    SAVES_FOLDER_PATH, OLD_SAVE_NAME, SAVE_EXT,     \
+    SAVE_FILE_NAME_DATA, SAVE_FOLDER_NAME_CHUNKS,   \
+    SAVE_SEED,                                      \
+    SAVE_VERSION
 
 
-def _save_display_json(data:dm.Save_data):
+def _save_display_json(data:Save_data):
     """Converts the display data to json format."""
     display_data:dict[str, Any] = {}
     display_data["save_version"] = SAVE_VERSION
@@ -71,7 +70,7 @@ def _load_player_json(player_json:dict[str, Any]):
     return player
 
 
-def _save_data_json(data:dm.Save_data):
+def _save_data_json(data:Save_data):
     """Converts the miscellaneous data to json format."""
     save_data_json:dict[str, Any] = {}
     # save_version
@@ -91,12 +90,12 @@ def _save_data_json(data:dm.Save_data):
 
 def _load_world_json(x:int, y:int, save_folder:str):
     """Converts the world json to object format."""
-    world = cm.World()
+    world = World()
     world.get_chunk_in_folder(x, y, save_folder)
     return world
 
 
-def make_save(data:dm.Save_data, actual_data:dm.Save_data=None):
+def make_save(data:Save_data, actual_data:Save_data=None):
     """
     Creates a save file from the save data.\n
     Makes a temporary backup.
@@ -139,7 +138,7 @@ def create_save_data():
     now = dtime.now()
     last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
     # load to class
-    save_data = dm.Save_data(save_name, display_save_name, last_access, player, r.get_state())
+    save_data = Save_data(save_name, display_save_name, last_access, player, r.get_state())
     save_data.world.gen_tile(save_data.player.pos[0], save_data.player.pos[1])
     return save_data
 
@@ -234,7 +233,7 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     # load random state
     r.set_state(ts.json_to_random_state(data["seed"]))
     # load to class
-    save_data = dm.Save_data(save_name, display_name, last_access, player, r.get_state(), world)
+    save_data = Save_data(save_name, display_name, last_access, player, r.get_state(), world)
     # LOAD CHUNK AT PLAYER POS!!!
     return save_data
 
