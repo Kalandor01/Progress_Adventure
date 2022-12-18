@@ -15,7 +15,7 @@ class Rotation(Enum):
     EAST = 3
 
 
-def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|range, fluc_small=2, fluc_big=3, c_rare=0.02, team=1, c_team_change=0.005, name:str=None):
+def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|range, fluc_small=2, fluc_big=3, c_rare=0.02, team=1, c_team_change=0.005, name:str|None=None):
     
     def configure_stat(stat_value:int|range):
         # int or range
@@ -32,7 +32,7 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
     
     if name is None:
         frame_stack = stack()
-        name = frame_stack[1][0].f_locals["self"].__class__.__name__
+        name = str(frame_stack[1][0].f_locals["self"].__class__.__name__)
     name = name.replace("_", " ")
     life = configure_stat(life)
     attack = configure_stat(attack)
@@ -95,20 +95,22 @@ class Loot_controller:
         self.item_num:range = item_num
         self.rolls = int(rolls)
 
-def loot_manager(drops:list[Loot_controller]=None):
+
+def loot_manager(drops:list[Loot_controller]|None=None):
     """Converts a list of `Loot_manager`s into a list of `Item`s amounts."""
     loot = []
-    for drop in drops:
-        num = 0
-        for _ in range(drop.rolls):
-            num += (1 if r.random() <= drop.chance else 0) * r.randint(drop.item_num.start, drop.item_num.stop + 1)
-        if num > 0:
-            loot.append([drop.item, num])
+    if drops is not None:
+        for drop in drops:
+            num = 0
+            for _ in range(drop.rolls):
+                num += (1 if r.random() <= drop.chance else 0) * r.randint(drop.item_num.start, drop.item_num.stop + 1)
+            if num > 0:
+                loot.append([drop.item, num])
     return loot
 
 
 class Entity:
-    def __init__(self, traits:list=None, drops:list=None):
+    def __init__(self, traits:list|None=None, drops:list|None=None):
         if traits is None:
             traits = entity_master(1, 1, 1, 1, name="test")
         if drops is None:
@@ -159,7 +161,7 @@ class Player(Entity):
                 logger("Player turned", f"{old_rot} -> {self.rotation}", Log_type.DEBUG)
 
 
-    def move(self, amount:tuple[int, int]=None, direction:Rotation=None):
+    def move(self, amount:tuple[int, int]|None=None, direction:Rotation|None=None):
         """
         Moves the player in the direction it's facing.\n
         If `direction` is specified, it will move in that direction instead.\n

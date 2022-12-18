@@ -136,7 +136,7 @@ class Settings:
         self.save_keybind_mapping()
 
 
-    def change_others(self, auto_save:bool=None, logging_level:int=None):
+    def change_others(self, auto_save:bool|None=None, logging_level:int|None=None):
         # auto save
         if auto_save is not None:
             self.auto_save = bool(auto_save)
@@ -182,7 +182,7 @@ class Settings:
                         self.keybinds[key2].conflict = True
 
 class Save_data:
-    def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player, seed:tuple[Any]|dict[str, Any], world:World=None):
+    def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player, seed:tuple[Any]|dict[str, Any], world:World|None=None):
         self.save_name = str(save_name)
         self.display_save_name = str(display_save_name)
         self.last_access = list[int](last_access)

@@ -55,7 +55,8 @@ DELETE_CURSOR_ICONS = Cursor_icon(selected_icon=" X", selected_icon_right="",
 # other
 ERROR_HANDLING = False
 LOG_MS = False
-AUTO_SAVE_DELAY = 10
+AUTO_SAVE_INTERVAL = 20
+AUTO_SAVE_DELAY = 5
 FILE_ENCODING_VERSION = 2
 CHUNK_SIZE = 10
 SAVE_VERSION = "1.4.1"
@@ -77,5 +78,5 @@ DOUBLE_KEYS = [b"\xe0", b"\x00"]
 #     SAVE_SEED, SETTINGS_SEED,                                                           \
 #     STANDARD_CURSOR_ICONS, DELETE_CURSOR_ICONS,                                         \
 #     ERROR_HANDLING, LOG_MS,                                                             \
-#     AUTO_SAVE_DELAY, FILE_ENCODING_VERSION, CHUNK_SIZE,                                 \
+#     AUTO_SAVE_INTERVAL, AUTO_SAVE_DELAY, FILE_ENCODING_VERSION, CHUNK_SIZE,             \
 #     SAVE_VERSION, DOUBLE_KEYS

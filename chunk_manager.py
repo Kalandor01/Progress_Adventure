@@ -7,20 +7,23 @@ from tools import logger, decode_save_s, encode_save_s, Log_type
 
 
 class Tile:
-    def __init__(self, x:int, y:int, content):
+    def __init__(self, x:int, y:int, visited:int|None=None, content=None):
         self.x = int(x) % CHUNK_SIZE
         self.y = int(y) % CHUNK_SIZE
+        if visited is None:
+            visited = 0
+        self.visited = visited
         self.content = content
         
         
     def to_json(self):
         """Returns a json representation of the `Tile`."""
-        tile_json = {"x": self.x, "y": self.y, "content": self.content}
+        tile_json = {"x": self.x, "y": self.y, "visited": self.visited, "content": self.content}
         return tile_json
 
 
 class Chunk:
-    def __init__(self, base_x:int, base_y:int, tiles:dict[str, Tile]=None):
+    def __init__(self, base_x:int, base_y:int, tiles:dict[str, Tile]|None=None):
         self.base_x = int(base_x) // CHUNK_SIZE * CHUNK_SIZE
         self.base_y = int(base_y) // CHUNK_SIZE * CHUNK_SIZE
         logger("Creating chunk", f"base_x: {self.base_x} , base_y: {self.base_y}")
@@ -56,7 +59,7 @@ class Chunk:
         x_con = x % CHUNK_SIZE
         y_con = y % CHUNK_SIZE
         new_tile_name = f"{x_con}_{y_con}"
-        new_tile = Tile(x_con, y_con, None)
+        new_tile = Tile(x_con, y_con)
         self.tiles[new_tile_name] = new_tile
         logger("Creating tile", f"x: {x} , y: {y}", Log_type.DEBUG)
         return new_tile
@@ -83,7 +86,7 @@ class Chunk:
         
 
 class World:
-    def __init__(self, chunks:dict[str, Chunk]=None):
+    def __init__(self, chunks:dict[str, Chunk]|None=None):
         logger("Generating World")
         self.chunks:dict[str, Chunk] = {}
         if chunks is not None:
@@ -129,9 +132,11 @@ class World:
         """Converts the tile json to dict format."""
         x = int(tile["x"])
         y = int(tile["y"])
+        try: visited = int(tile["visited"])
+        except KeyError: visited = None
         content = tile["content"]
         tile_name = f"{x}_{y}"
-        tile_obj = Tile(x, y, content)
+        tile_obj = Tile(x, y, visited, content)
         return {tile_name: tile_obj}
 
 
@@ -218,7 +223,7 @@ class World:
         return new_tile
 
 
-    def get_tile(self, x:int, y:int, save_folder:str=None):
+    def get_tile(self, x:int, y:int, save_folder:str|None=None):
         """
         Returns the `Tile` if it exists in the `chunks` list or in the chunks folder.\n
         Otherwise it generates a new `Tile` and a new `Chunk`, if that also doesn't exist.
@@ -232,4 +237,5 @@ class World:
                 tile = self.gen_tile(x, y)
         else:
             tile = chunk.get_tile(x, y)
+        tile.visited += 1
         return tile

@@ -95,7 +95,7 @@ def _load_world_json(x:int, y:int, save_folder:str):
     return world
 
 
-def make_save(data:Save_data, actual_data:Save_data=None):
+def make_save(data:Save_data, actual_data:Save_data|None=None, clear_chunks=True):
     """
     Creates a save file from the save data.\n
     Makes a temporary backup.
@@ -117,7 +117,7 @@ def make_save(data:Save_data, actual_data:Save_data=None):
     if actual_data is None:
         actual_data = data
     ts.logger("Saving chunks")
-    actual_data.world.save_all_chunks_to_files(save_folder, True)
+    actual_data.world.save_all_chunks_to_files(save_folder, clear_chunks)
     # remove backup
     if backup_status != False:
         os.remove(backup_status[0])
@@ -193,17 +193,19 @@ def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str
     return data
 
 
-def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list[bytes]]):
+def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list[bytes]], is_file=False):
     """Loads a save file into a `Save_data` object."""
     full_save_name = os.path.join(SAVES_FOLDER_PATH, save_name)
     # get if save is a file
-    if os.path.isfile(f'{full_save_name}.{SAVE_EXT}'):
+    if is_file and os.path.isfile(f'{full_save_name}.{SAVE_EXT}'):
         data = ts.decode_save_s(full_save_name, 1, can_be_old=True)
-        # BACKUP BEFORE THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        os.remove(f'{full_save_name}.{SAVE_EXT}')
-        ts.logger("Removed save file", "single save files have been deprecated", Log_type.WARN)
+        save_name = ts.correct_save_name(save_name)
+        old_full_save_name = full_save_name
+        full_save_name = os.path.join(SAVES_FOLDER_PATH, save_name)
+        os.rename(f"{old_full_save_name}.{SAVE_EXT}", f"{full_save_name}.{SAVE_EXT}")
     else:
         data = ts.decode_save_s(os.path.join(full_save_name, SAVE_FILE_NAME_DATA, ), 1)
+        is_file = False
     # read data
     
     # save version
@@ -215,6 +217,11 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
         ans = sfm.UI_list(["Yes", "No"], f"\"{save_name}\" is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to back up the save file before loading it?").display(keybind_mapping)
         if ans == 0:
             ts.make_backup(save_name)
+        # delete save file
+        if is_file:
+            os.remove(f'{full_save_name}.{SAVE_EXT}')
+            ts.logger("Removed save file", "single save files have been deprecated", Log_type.WARN)
+        # correct
         data = correct_save_data(data, save_version, {"save_name": save_name})
     # display_name
     display_name = str(data["display_name"])
@@ -234,7 +241,8 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     r.set_state(ts.json_to_random_state(data["seed"]))
     # load to class
     save_data = Save_data(save_name, display_name, last_access, player, r.get_state(), world)
-    # LOAD CHUNK AT PLAYER POS!!!
+    if is_file:
+        make_save(save_data, clear_chunks=False)
     return save_data
 
 
@@ -251,10 +259,10 @@ def _process_save_display_data(data:tuple[str, dict[str, Any] | Literal[-1]]):
             last_access = data[1]["last_access"]
             data_processed += f"Last opened: {u.make_date(last_access, '.')} {u.make_time(last_access[3:])}"
             # check version
-            try: save_version = data[1]["save_version"]
-            except KeyError: save_version = 0.0
+            try: save_version = str(data[1]["save_version"])
+            except KeyError: save_version = "0.0"
             data_processed += u.stylized_text(f" v.{save_version}", (Color.GREEN if save_version == SAVE_VERSION else Color.RED))
-            return (data[0], data_processed)
+            return (data[0], data_processed, not ts.is_up_to_date("1.3", save_version))
         else:
             raise IndexError
     except (TypeError, IndexError):
@@ -318,7 +326,7 @@ def get_saves_data():
     folders = _get_save_folders()
     datas.extend(_get_valid_folders(folders))
     # process file data
-    datas_processed:list[tuple[str, str]] = []
+    datas_processed:list[tuple[str, str, bool]] = []
     for data in datas:
         if data[1] == -1:
             ts.logger("Decode error", f"save name: {data[0]}(.{SAVE_EXT})", Log_type.ERROR)

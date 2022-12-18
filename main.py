@@ -1,7 +1,5 @@
 ﻿from copy import deepcopy
 import math
-import os
-import shutil
 from sys import exc_info
 from threading import Thread
 from time import sleep
@@ -17,10 +15,9 @@ try:
     from tools import r, Log_type, sfm, col, getch
     from constants import                                                   \
         MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME,   \
-        SAVES_FOLDER_PATH, SAVE_EXT,                                        \
         DELETE_CURSOR_ICONS,                                                \
         ERROR_HANDLING,                                                     \
-        AUTO_SAVE_DELAY,                                                    \
+        AUTO_SAVE_INTERVAL, AUTO_SAVE_DELAY,                                \
         DOUBLE_KEYS
 except ModuleNotFoundError:
     input(f"ERROR: {exc_info()[1]}")
@@ -107,7 +104,7 @@ def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=False):
 
 
 # attacking with oop functions
-def fight(monster_l:list[es.Entity]=None):
+def fight(monster_l:list[es.Entity]|None=None):
     player = SAVE_DATA.player
     if monster_l is None:
         monster_l = [es.Test()]
@@ -227,23 +224,30 @@ def prepair_fight():
 
 
 def save_game():
+    GLOBALS.saving = True
     frozen_data = deepcopy(SAVE_DATA)
     sm.make_save(frozen_data, SAVE_DATA)
     ts.logger("Game saved", f'save name: {frozen_data.save_name}, player name: "{frozen_data.player.name}"')
+    GLOBALS.saving = False
 
 
 # Auto save thread
 def auto_saver():
     try:
         while True:
-            sleep(AUTO_SAVE_DELAY)
+            sleep(AUTO_SAVE_INTERVAL)
             if GLOBALS.in_game_loop:
-                if not GLOBALS.in_fight and not GLOBALS.saving:
-                    GLOBALS.saving = True
-                    ts.logger("Beginning auto save", f"save name: {SAVE_DATA.save_name}")
-                    save_game()
-                    GLOBALS.saving = False
-            else:
+                saved = False
+                while not saved:
+                    if GLOBALS.in_game_loop and not GLOBALS.saving and not GLOBALS.in_fight:
+                        ts.logger("Beginning auto save", f"save name: {SAVE_DATA.save_name}")
+                        save_game()
+                        saved = True
+                    elif GLOBALS.in_game_loop:
+                        sleep(AUTO_SAVE_DELAY)
+                    else:
+                        break
+            if not GLOBALS.in_game_loop:
                 break
     except:
         ts.logger("Thread crashed", str(exc_info()), Log_type.FATAL)
@@ -257,11 +261,9 @@ def quit_game():
             if GLOBALS.in_game_loop:
                 if dm.is_key(SETTINGS.keybinds["esc"]):
                     if not GLOBALS.in_fight and not GLOBALS.saving:
-                        GLOBALS.saving = True
                         ts.logger("Beginning manual save", f"save name: {SAVE_DATA.save_name}")
                         GLOBALS.exiting = True
                         save_game()
-                        GLOBALS.saving = False
                         break
                     else:
                         print("You can't exit now!")
@@ -312,9 +314,9 @@ def new_save():
     game_loop()
 
 
-def load_save(save_name:str):
+def load_save(save_name:str, is_file=False):
     global SAVE_DATA
-    SAVE_DATA = sm.load_save(save_name, SETTINGS.keybind_mapping)
+    SAVE_DATA = sm.load_save(save_name, SETTINGS.keybind_mapping, is_file)
     game_loop()
 
 
@@ -379,7 +381,7 @@ def main_menu():
     files_data = sm.get_saves_data()
     in_main_menu = True
     while True:
-        status:tuple[int, str|Literal[-1]] = (-1, -1)
+        status:tuple[int, str|Literal[-1], bool] = (-1, -1, False)
         if in_main_menu:
             in_main_menu = False
             if len(files_data):
@@ -394,7 +396,7 @@ def main_menu():
             in_main_menu = True
         # new file
         if option == 0:
-            status = (1, "")
+            status = (1, "", False)
         elif option == -1:
             break
         # load/delete
@@ -410,7 +412,7 @@ def main_menu():
             option = sfm.UI_list_s(list_data, " Level select", True, True, exclude_nones=True).display(SETTINGS.keybind_mapping)
             # load
             if option != -1 and option < len(files_data):
-                status = (0, files_data[int(option)][0])
+                status = (0, files_data[int(option)][0], files_data[int(option)][2])
             # delete
             elif option == len(files_data):
                 # remove "delete file"
@@ -419,13 +421,7 @@ def main_menu():
                     option = sfm.UI_list(list_data, " Delete mode!", DELETE_CURSOR_ICONS, True, True, exclude_nones=True).display(SETTINGS.keybind_mapping)
                     if option != -1 and option < (len(list_data) - 1) / 2:
                         if sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(SETTINGS.keybind_mapping):
-                            # log
-                            ts.logger("Deleted save", f'save name: {files_data[option][0]}')
-                            # remove
-                            if os.path.isfile(f'{os.path.join(SAVES_FOLDER_PATH, files_data[option][0])}.{SAVE_EXT}'):
-                                os.remove(f'{os.path.join(SAVES_FOLDER_PATH, files_data[option][0])}.{SAVE_EXT}')
-                            else:
-                                shutil.rmtree(os.path.join(SAVES_FOLDER_PATH, files_data[option][0]))
+                            ts.remove_save(files_data[option][0])
                             list_data.pop(option * 2)
                             list_data.pop(option * 2)
                             files_data.pop(option)
@@ -449,7 +445,7 @@ def main_menu():
         # load
         elif status[0] == 0:
             ts.press_key(f"\nLoading save: {status[1]}!")
-            load_save(status[1])
+            load_save(status[1], status[2])
             files_data = sm.get_saves_data()
 
 

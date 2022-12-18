@@ -1,7 +1,7 @@
 from enum import Enum
 import json
 import os
-from shutil import copyfile
+from shutil import copyfile, rmtree
 import threading
 from datetime import datetime as dtime
 from msvcrt import getch
@@ -151,7 +151,7 @@ def logger(message:str, detail="", log_type=Log_type.INFO, write_out=False, new_
                 f.write(f"\n[{u.make_date(dtime.now())}_{u.make_time(dtime.now(), write_ms=True)}] [CRASH]\t: |Logging error|\n")
 
 
-def recreate_folder(folder_name:str, parent_folder_path:str=ROOT_FOLDER, display_name:str=None):
+def recreate_folder(folder_name:str, parent_folder_path:str=ROOT_FOLDER, display_name:str|None=None):
     """
     Recreates the folder, if it doesn't exist.\n
     Returns if the folder needed to be recreated.
@@ -215,7 +215,6 @@ def make_backup(save_name:str, is_temporary=False):
 
     # make common variables
     save_folder = os.path.join(SAVES_FOLDER_PATH, save_name)
-    # FILE BACKUP ALWAYS FAILS!!!
     save_file = f'{save_folder}.{SAVE_EXT}'
     if os.path.isdir(save_folder) or os.path.isfile(save_file):
         # make more variables
@@ -429,7 +428,9 @@ def _check_save_name(save_name:str):
     Checks if the file name exists in the saves directory.
     """
     if not recreate_saves_folder():
-        return os.path.isdir(os.path.join(SAVES_FOLDER_PATH, save_name))
+        is_folder = os.path.isdir(os.path.join(SAVES_FOLDER_PATH, save_name))
+        is_file = os.path.isfile(os.path.join(SAVES_FOLDER_PATH, f"{save_name}.{SAVE_EXT}"))
+        return is_folder or is_file
     else:
         return False
 
@@ -443,3 +444,11 @@ def correct_save_name(raw_save_name:str):
             extra_num += 1
         save_name += "_" + str(extra_num)
     return save_name
+
+
+def remove_save(save_name:str):
+    if os.path.isfile(f'{os.path.join(SAVES_FOLDER_PATH, save_name)}.{SAVE_EXT}'):
+        os.remove(f'{os.path.join(SAVES_FOLDER_PATH, save_name)}.{SAVE_EXT}')
+    else:
+        rmtree(os.path.join(SAVES_FOLDER_PATH, save_name))
+    logger("Deleted save", f'save name: {save_name}')

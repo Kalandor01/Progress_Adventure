@@ -35,5 +35,6 @@ chunks
         - tiles: [
             - x: int
             - y: int
+            - visited: int
             - content: ???
         ]

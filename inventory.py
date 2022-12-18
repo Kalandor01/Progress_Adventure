@@ -1,6 +1,6 @@
 from enum import Enum, auto
 
-from tools import logger
+from tools import logger, Log_type
 
 
 class Weapon_items(Enum):
@@ -122,5 +122,5 @@ def item_finder(name:str) -> Item_categories|None:
     for enum in Item_categories._value2member_map_:
         try: return enum._member_map_[name]
         except KeyError: pass
-    logger("Unknown item type", f"item type: {name}", ts.Log_type.WARN)
+    logger("Unknown item type", f"item type: {name}", Log_type.WARN)
     return None
