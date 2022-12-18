@@ -167,20 +167,30 @@ class World:
                 tiles.update(self._load_tile_json(tile))
             chunk = Chunk(base_x, base_y, tiles)
             return chunk
+    
 
-
-    def get_chunk_in_folder(self, x:int, y:int, save_folder:str):
+    def load_chunk_from_folder(self, x:int, y:int, save_folder:str, append_mode=True):
         """
         Returns the `Chunk` if it exists in the chunks folder, and adds it to the `chunks` dict.\n
-        Otherwise it generates a new `Chunk` object.
+        Otherwise it generates a new `Chunk` object.\n
+        If `append_mode` is True and the chunk already exists in the `chunks` dict, it appends the tiles from the loaded chunk to the one it the dict.
         """
         chunk = self.find_chunk_in_folder(x, y, save_folder)
         if chunk is not None:
             base_x = x // CHUNK_SIZE * CHUNK_SIZE
             base_y = y // CHUNK_SIZE * CHUNK_SIZE
-            new_chunk_name = f"{base_x}_{base_y}"
-            self.chunks[new_chunk_name] = chunk
-            logger("Loaded chunk from file", f"{new_chunk_name}.{SAVE_EXT}", Log_type.DEBUG)
+            chunk_name = f"{base_x}_{base_y}"
+            # append mode
+            appended = False
+            existing_chunk = self.find_chunk(x, y)
+            if append_mode and existing_chunk is not None:
+                appended = True
+                chunk.tiles.update(existing_chunk.tiles)
+                existing_chunk.tiles = chunk.tiles
+                chunk = existing_chunk
+            else:
+                self.chunks[chunk_name] = chunk
+            logger(f"{'Appended' if appended else 'Loaded'} chunk from file", f"{chunk_name}.{SAVE_EXT}", Log_type.DEBUG)
         else:
             chunk = self.gen_chunk(x, y)
         return chunk
@@ -213,11 +223,13 @@ class World:
         Returns the `Tile` if it exists in the `chunks` list or in the chunks folder.\n
         Otherwise it generates a new `Tile` and a new `Chunk`, if that also doesn't exist.
         """
-        tile = self.find_tile(x, y)
-        if tile is None:
+        chunk = self.find_chunk(x, y)
+        if chunk is None:
             if save_folder is not None:
-                chunk = self.get_chunk_in_folder(x, y, save_folder)
+                chunk = self.load_chunk_from_folder(x, y, save_folder)
                 tile = chunk.get_tile(x, y)
             else:
-                self.gen_tile(x, y)
+                tile = self.gen_tile(x, y)
+        else:
+            tile = chunk.get_tile(x, y)
         return tile

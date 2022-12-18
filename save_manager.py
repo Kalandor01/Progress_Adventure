@@ -91,7 +91,7 @@ def _save_data_json(data:Save_data):
 def _load_world_json(x:int, y:int, save_folder:str):
     """Converts the world json to object format."""
     world = World()
-    world.get_chunk_in_folder(x, y, save_folder)
+    world.load_chunk_from_folder(x, y, save_folder)
     return world
 
 

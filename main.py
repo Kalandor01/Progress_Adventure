@@ -287,7 +287,7 @@ def game_loop():
     # GAME
     stats(-1)
     print("Wandering...")
-    for _ in range(500):
+    for _ in range(200):
         sleep(0.1)
         SAVE_DATA.player.weighted_turn()
         SAVE_DATA.player.move()
