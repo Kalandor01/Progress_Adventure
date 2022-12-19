@@ -214,24 +214,24 @@ def make_backup(save_name:str, is_temporary=False):
     now = dtime.now()
 
     # make common variables
-    save_folder = os.path.join(SAVES_FOLDER_PATH, save_name)
-    save_file = f'{save_folder}.{SAVE_EXT}'
-    if os.path.isdir(save_folder) or os.path.isfile(save_file):
+    save_folder_path = os.path.join(SAVES_FOLDER_PATH, save_name)
+    save_file_path = f'{save_folder_path}.{SAVE_EXT}'
+    if os.path.isdir(save_folder_path) or os.path.isfile(save_file_path):
         # make more variables
-        backup_name_end = f'{u.make_date(now)};{u.make_time(now, "-", is_temporary, "-")};{save_name}.{OLD_BACKUP_EXT if os.path.isfile(save_file) else BACKUP_EXT}'
+        backup_name_end = f'{u.make_date(now)};{u.make_time(now, "-", is_temporary, "-")};{save_name}.{OLD_BACKUP_EXT if os.path.isfile(save_file_path) else BACKUP_EXT}'
         backup_name = os.path.join(BACKUPS_FOLDER_PATH, backup_name_end)
         display_backup_name = os.path.join(BACKUPS_FOLDER, backup_name_end)
         # file copy
-        if os.path.isfile(save_file):
-            copyfile(save_file, backup_name)
+        if os.path.isfile(save_file_path):
+            copyfile(save_file_path, backup_name)
         # make zip
         else:
-            make_zip(save_name, save_folder, backup_name)
+            make_zip(save_name, save_folder_path, backup_name)
         logger(f"Made {('temporary ' if is_temporary else '')}backup", display_backup_name, (Log_type.DEBUG if is_temporary else Log_type.INFO))
         return [backup_name, display_backup_name]
     else:
         display_save_path = os.path.join(SAVES_FOLDER, save_name)
-        logger("Backup failed", f"save file/folder not found: {display_save_path}(.{SAVE_EXT})", Log_type.WARN)
+        logger(f"{'Temporary b' if is_temporary else 'B'}ackup failed", f"save file/folder not found: {display_save_path}(.{SAVE_EXT})", Log_type.WARN)
         return False
 
 
@@ -446,8 +446,8 @@ def correct_save_name(raw_save_name:str):
     return save_name
 
 
-def remove_save(save_name:str):
-    if os.path.isfile(f'{os.path.join(SAVES_FOLDER_PATH, save_name)}.{SAVE_EXT}'):
+def remove_save(save_name:str, is_file:bool|None=None):
+    if (is_file is None or is_file) and os.path.isfile(f'{os.path.join(SAVES_FOLDER_PATH, save_name)}.{SAVE_EXT}'):
         os.remove(f'{os.path.join(SAVES_FOLDER_PATH, save_name)}.{SAVE_EXT}')
     else:
         rmtree(os.path.join(SAVES_FOLDER_PATH, save_name))

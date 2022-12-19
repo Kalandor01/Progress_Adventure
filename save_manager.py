@@ -13,7 +13,7 @@ from chunk_manager import World
 from utils import Color
 from tools import r, sfm, Log_type
 from constants import                               \
-    SAVES_FOLDER_PATH, OLD_SAVE_NAME, SAVE_EXT,     \
+    CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, SAVES_FOLDER_PATH, OLD_SAVE_NAME, SAVE_EXT,     \
     SAVE_FILE_NAME_DATA, SAVE_FOLDER_NAME_CHUNKS,   \
     SAVE_SEED,                                      \
     SAVE_VERSION
@@ -88,10 +88,10 @@ def _save_data_json(data:Save_data):
     return save_data_json
 
 
-def _load_world_json(x:int, y:int, save_folder:str):
+def _load_world_json(x:int, y:int, save_folder_path:str):
     """Converts the world json to object format."""
     world = World()
-    world.load_chunk_from_folder(x, y, save_folder)
+    world.load_chunk_from_folder(x, y, save_folder_path)
     return world
 
 
@@ -104,24 +104,45 @@ def make_save(data:Save_data, actual_data:Save_data|None=None, clear_chunks=True
     backup_status = ts.make_backup(data.save_name, True)
     # FOLDER
     ts.recreate_folder(data.save_name, SAVES_FOLDER_PATH, "save file")
-    save_folder = os.path.join(SAVES_FOLDER_PATH, data.save_name)
+    save_folder_path = os.path.join(SAVES_FOLDER_PATH, data.save_name)
     # DATA FILE
     # display data
     display_data = _save_display_json(data)
     save_data = _save_data_json(data)
     # create new save
-    ts.encode_save_s([display_data, save_data], os.path.join(save_folder, SAVE_FILE_NAME_DATA))
+    ts.encode_save_s([display_data, save_data], os.path.join(save_folder_path, SAVE_FILE_NAME_DATA))
     # CHUNKS/WORLD
-    ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder)
+    ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder_path)
     # WORKING WITH ACTUAL DATA
     if actual_data is None:
         actual_data = data
     ts.logger("Saving chunks")
-    actual_data.world.save_all_chunks_to_files(save_folder, clear_chunks)
+    actual_data.world.save_all_chunks_to_files(save_folder_path, clear_chunks)
     # remove backup
     if backup_status != False:
         os.remove(backup_status[0])
         ts.logger("Removed temporary backup", backup_status[1], Log_type.DEBUG)
+
+
+def load_all_chunks(save_data:Save_data):
+    """
+    Loads all chunks into the save data from a save file.
+    """
+    # read from file (old)
+    save_folder_path = os.path.join(SAVES_FOLDER_PATH, save_data.save_name)
+    chunks_folder = os.path.join(save_folder_path, SAVE_FOLDER_NAME_CHUNKS)
+    ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder_path)
+    # get existing file numbers
+    chunk_names = os.listdir(chunks_folder)
+    existing_chunks:list[tuple[int, int]] = []
+    for name in chunk_names:
+        # get valid files
+        if os.path.isfile(os.path.join(chunks_folder, name)) and name.startswith(f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}") and name.endswith(f".{SAVE_EXT}"):
+            file_numbers = name.replace(f".{SAVE_EXT}", "").replace(f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}", "").split(CHUNK_FILE_NAME_SEP)
+            try: existing_chunks.append((int(file_numbers[0]), int(file_numbers[1])))
+            except (ValueError, IndexError): continue
+    for chunk in existing_chunks:
+        save_data.world.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
 
 
 def create_save_data():
@@ -193,33 +214,42 @@ def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str
     return data
 
 
-def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list[bytes]], is_file=False):
-    """Loads a save file into a `Save_data` object."""
-    full_save_name = os.path.join(SAVES_FOLDER_PATH, save_name)
+def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list[bytes]], is_file=False, backup_choice=True, automatic_backup=True):
+    """
+    Loads a save file into a `Save_data` object.\n
+    If `backup_choice` is False the user can't choose wether or not to backup the save before loading it, or not, depending on `automatic_backup`.
+    """
+    save_folder_path = os.path.join(SAVES_FOLDER_PATH, save_name)
     # get if save is a file
-    if is_file and os.path.isfile(f'{full_save_name}.{SAVE_EXT}'):
-        data = ts.decode_save_s(full_save_name, 1, can_be_old=True)
+    if is_file and os.path.isfile(f'{save_folder_path}.{SAVE_EXT}'):
+        data = ts.decode_save_s(save_folder_path, 1, can_be_old=True)
         save_name = ts.correct_save_name(save_name)
-        old_full_save_name = full_save_name
-        full_save_name = os.path.join(SAVES_FOLDER_PATH, save_name)
-        os.rename(f"{old_full_save_name}.{SAVE_EXT}", f"{full_save_name}.{SAVE_EXT}")
+        old_save_folder_path = save_folder_path
+        save_folder_path = os.path.join(SAVES_FOLDER_PATH, save_name)
+        os.rename(f"{old_save_folder_path}.{SAVE_EXT}", f"{save_folder_path}.{SAVE_EXT}")
     else:
-        data = ts.decode_save_s(os.path.join(full_save_name, SAVE_FILE_NAME_DATA, ), 1)
+        data = ts.decode_save_s(os.path.join(save_folder_path, SAVE_FILE_NAME_DATA, ), 1)
         is_file = False
     # read data
+    
+    # auto backup
+    if not backup_choice and automatic_backup:
+        ts.make_backup(save_name)
     
     # save version
     try: save_version = str(data["save_version"])
     except KeyError: save_version = "0.0"
     if save_version != SAVE_VERSION:
-        is_older = ts.is_up_to_date(save_version, SAVE_VERSION)
-        ts.logger("Trying to load save with an incorrect version", f"{save_version} -> {SAVE_VERSION}", Log_type.WARN)
-        ans = sfm.UI_list(["Yes", "No"], f"\"{save_name}\" is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to back up the save file before loading it?").display(keybind_mapping)
-        if ans == 0:
-            ts.make_backup(save_name)
+        # backup
+        if backup_choice:
+            is_older = ts.is_up_to_date(save_version, SAVE_VERSION)
+            ts.logger("Trying to load save with an incorrect version", f"{save_version} -> {SAVE_VERSION}", Log_type.WARN)
+            ans = sfm.UI_list(["Yes", "No"], f"\"{save_name}\" is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to backup the save file before loading it?").display(keybind_mapping)
+            if ans == 0:
+                ts.make_backup(save_name)
         # delete save file
         if is_file:
-            os.remove(f'{full_save_name}.{SAVE_EXT}')
+            os.remove(f'{save_folder_path}.{SAVE_EXT}')
             ts.logger("Removed save file", "single save files have been deprecated", Log_type.WARN)
         # correct
         data = correct_save_data(data, save_version, {"save_name": save_name})
@@ -232,7 +262,7 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     player = _load_player_json(player_data)
     # world
     ts.logger("Loading world")
-    world = _load_world_json(player.pos[0], player.pos[1], full_save_name)
+    world = _load_world_json(player.pos[0], player.pos[1], save_folder_path)
     ts.logger("Loaded save", f'save name: {save_name}, player name: "{player.name}", last saved: {u.make_date(last_access)} {u.make_time(last_access[3:])}')
     
     # PREPARING
@@ -247,7 +277,10 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
 
 
 def _process_save_display_data(data:tuple[str, dict[str, Any] | Literal[-1]]):
-    """Turns the json display data from a json into more uniform data."""
+    """
+    Turns the json display data from a json into more uniform data.\n
+    Returns a tuple of (save_name, display_text, is_file)
+    """
     try:
         if data[1] != -1:
             data_processed = ""
@@ -289,7 +322,7 @@ def _get_valid_folders(folders:list[str]):
     return datas
 
 def get_saves_data():
-    """Gets all save files from the save folder, and proceses them for diplay."""
+    """Gets all save files from the save folder, and proceses them for display."""
     ts.recreate_saves_folder()
     # read saves
     datas:list[tuple[str, dict[str, Any]|Literal[-1]]] = []

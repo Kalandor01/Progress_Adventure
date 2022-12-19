@@ -318,6 +318,31 @@ def load_save(save_name:str, is_file=False):
     global SAVE_DATA
     SAVE_DATA = sm.load_save(save_name, SETTINGS.keybind_mapping, is_file)
     game_loop()
+    
+
+def regenerate_save_file(save_name:str, is_file=False, make_backup=True):
+    global SAVE_DATA
+    print(f'Regenerating "{save_name}":')
+    ts.logger("Regenerating save file", f"save_name: {save_name}")
+    print(f"\tLoading...", end="")
+    SAVE_DATA = sm.load_save(save_name, SETTINGS.keybind_mapping, is_file, False, make_backup)
+    print(f"DONE!")
+    if not is_file:
+        print(f"\tLoading world...", end="")
+        ts.logger("Loading all chunks from file", f"save_name: {save_name}")
+        sm.load_all_chunks(SAVE_DATA)
+        print(f"DONE!")
+        print(f"\tDeleting...", end="")
+        ts.remove_save(save_name, is_file)
+        print(f"DONE!")
+    else:
+        print(f"\tAlready deleted because it was a file.")
+    print(f"\tSaving...", end="")
+    sm.make_save(SAVE_DATA)
+    print(f"DONE!")
+    ts.logger("Save file regenerated", f"save_name: {save_name}")
+
+
 
 
 # REWORK THIS ASAP
@@ -404,24 +429,34 @@ def main_menu():
             # get data from file_data
             list_data = []
             for data in files_data:
-                print(data[1])
                 list_data.append(data[1])
                 list_data.append(None)
+            list_data.append("Regenerate all save files")
             list_data.append("Delete file")
             list_data.append("Back")
             option = sfm.UI_list_s(list_data, " Level select", True, True, exclude_nones=True).display(SETTINGS.keybind_mapping)
             # load
             if option != -1 and option < len(files_data):
                 status = (0, files_data[int(option)][0], files_data[int(option)][2])
-            # delete
+            # regenerate
             elif option == len(files_data):
-                # remove "delete file"
+                if sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to regenerate ALL save files? This will load, delete then resave EVERY save file!", can_esc=True).display(SETTINGS.keybind_mapping) == 1:
+                    backup_saves = bool(sfm.UI_list_s(["Yes", "No"], f" Do you want to backup your save files before regenerating them?", can_esc=True).display(SETTINGS.keybind_mapping) == 0)
+                    print("Regenerating save files...\n")
+                    for save in files_data:
+                        regenerate_save_file(save[0], save[2], backup_saves)
+                        files_data = sm.get_saves_data()
+                    print("\nDONE!")
+            # delete
+            elif option == len(files_data) + 1:
+                # remove "delete file" + "regenerate save files"
+                list_data.pop(len(list_data) - 2)
                 list_data.pop(len(list_data) - 2)
                 while len(files_data) > 0:
                     option = sfm.UI_list(list_data, " Delete mode!", DELETE_CURSOR_ICONS, True, True, exclude_nones=True).display(SETTINGS.keybind_mapping)
                     if option != -1 and option < (len(list_data) - 1) / 2:
                         if sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(SETTINGS.keybind_mapping):
-                            ts.remove_save(files_data[option][0])
+                            ts.remove_save(files_data[option][0], files_data[option][2])
                             list_data.pop(option * 2)
                             list_data.pop(option * 2)
                             files_data.pop(option)

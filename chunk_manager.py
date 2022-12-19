@@ -2,7 +2,7 @@ from os.path import join
 from typing import Any
 from copy import deepcopy
 
-from constants import CHUNK_SIZE, SAVE_FOLDER_NAME_CHUNKS, SAVE_EXT
+from constants import CHUNK_SIZE, CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, SAVE_FOLDER_NAME_CHUNKS, SAVE_EXT
 from tools import logger, decode_save_s, encode_save_s, Log_type
 
 
@@ -77,11 +77,11 @@ class Chunk:
             return tile
 
 
-    def save_to_file(self, save_folder:str):
+    def save_to_file(self, save_folder_path:str):
         """Saves the chunk's data a file in the save folder."""
         chunk_data = self.to_json()
-        chunk_file_name = f"chunk_{self.base_x}_{self.base_y}"
-        encode_save_s(chunk_data, join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
+        chunk_file_name = f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}{self.base_x}{CHUNK_FILE_NAME_SEP}{self.base_y}"
+        encode_save_s(chunk_data, join(save_folder_path, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
         logger("Saved chunk", f"{chunk_file_name}.{SAVE_EXT}")
         
 
@@ -140,7 +140,7 @@ class World:
         return {tile_name: tile_obj}
 
 
-    def save_all_chunks_to_files(self, save_folder:str, remove_chunks=False):
+    def save_all_chunks_to_files(self, save_folder_path:str, remove_chunks=False):
         """
         Saves all chunks to the save file.\n
         If `remove_chunks` is True, it also removes the chunks from the chunks list.
@@ -151,19 +151,19 @@ class World:
         else:
             chunk_data = self.chunks
         for chunk in chunk_data:
-            chunk_data[chunk].save_to_file(save_folder)
+            chunk_data[chunk].save_to_file(save_folder_path)
 
 
-    def find_chunk_in_folder(self, x:int, y:int, save_folder:str):
+    def find_chunk_in_folder(self, x:int, y:int, save_folder_path:str):
         """
         Returns the `Chunk` if it exists in the chunks folder.\n
         Otherwise it returns `None`.
         """
         base_x = x // CHUNK_SIZE * CHUNK_SIZE
         base_y = y // CHUNK_SIZE * CHUNK_SIZE
-        chunk_file_name = f"chunk_{base_x}_{base_y}"
+        chunk_file_name = f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}{base_x}{CHUNK_FILE_NAME_SEP}{base_y}"
         try:
-            chunk_data = decode_save_s(join(save_folder, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
+            chunk_data = decode_save_s(join(save_folder_path, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
         except FileNotFoundError:
             return None
         else:
@@ -174,13 +174,13 @@ class World:
             return chunk
     
 
-    def load_chunk_from_folder(self, x:int, y:int, save_folder:str, append_mode=True):
+    def load_chunk_from_folder(self, x:int, y:int, save_folder_path:str, append_mode=True):
         """
         Returns the `Chunk` if it exists in the chunks folder, and adds it to the `chunks` dict.\n
         Otherwise it generates a new `Chunk` object.\n
         If `append_mode` is True and the chunk already exists in the `chunks` dict, it appends the tiles from the loaded chunk to the one it the dict.
         """
-        chunk = self.find_chunk_in_folder(x, y, save_folder)
+        chunk = self.find_chunk_in_folder(x, y, save_folder_path)
         if chunk is not None:
             base_x = x // CHUNK_SIZE * CHUNK_SIZE
             base_y = y // CHUNK_SIZE * CHUNK_SIZE
@@ -223,15 +223,15 @@ class World:
         return new_tile
 
 
-    def get_tile(self, x:int, y:int, save_folder:str|None=None):
+    def get_tile(self, x:int, y:int, save_folder_path:str|None=None):
         """
         Returns the `Tile` if it exists in the `chunks` list or in the chunks folder.\n
         Otherwise it generates a new `Tile` and a new `Chunk`, if that also doesn't exist.
         """
         chunk = self.find_chunk(x, y)
         if chunk is None:
-            if save_folder is not None:
-                chunk = self.load_chunk_from_folder(x, y, save_folder)
+            if save_folder_path is not None:
+                chunk = self.load_chunk_from_folder(x, y, save_folder_path)
                 tile = chunk.get_tile(x, y)
             else:
                 tile = self.gen_tile(x, y)
