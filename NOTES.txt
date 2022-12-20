@@ -1,0 +1,77 @@
+Progress Adventure:
+- items, weapons, armor, potions
+- speed: modified by weapons + armor
+- power = weapon + strength = damage multiplier
+- deffence = toughness + armor = damage divider
+- optional enemy phases (if phase[x] = true: phase(name[x]))
+- escape from fight(when low)
+if you win: loop throu and add to inventory ++
+- inventory: when win: add items ( item name + amount) + compact: name = other name: item amount += other item amount
+- join + other built-in functions
+- acuracy?
+- humans(monster type?): monster and nps
+- named monsters: if npc: inportant, if monster: if it kills you or you escape: important
+- important: can show up more
+- npc talk: random sentance
+- method in classes file for diviation calculation and more
+- get, set stuff inherited
+- attack defeat... functions
+- multiple teams in fights
+- entity: human(player+npc) + monster class
+- humans talk: words
+- monsters talk: letters
+- more monster modifications like rare: speedy, slugish, jacked, old, young
+- different voices for different monsters and NPCs
+- monsters use non english letters
+- option to not turn on the sound: no playsound import
+- sounds for: hurt, die, loot, other: from sfx gen
+- colorfull text
+- team swtch chance: base * (1+level_difrence): can be negative
+- team with monters can be permanent between saves
+- team -1: passive
+- connected universe between saves?
+
+
+Progress Adventure: scroll up
+- seed in display
+- delete/override line with ANSI escape characters
+- namable saves?? (only check for extension, encrypt with sum of save name bytes?)
+- put more of preparing into a function (like obj = Obj(stuff, stuff) - > obj = Obj(type, type))
+- player inventory: max items?/slots?, no use: -1?
+- equipment, item types
+- all entitys have an inventory??, all inventory items dropable?
+- object init returns false if there was an error loading data
+- store/load entity/player function
+- split entitys into monsters and other/npcs (different default values)
+- official menu for backup loading?
+- rename save menu
+- rework main menu logic!!!!!!!
+- sound/music playing function
+- key combinations?: crtl+s = save
+- game generates "map"(list of dict-s that have a 10x10 area) that generates as the character goes, and is mostly empty, and has points of intetest
+- copy minecraft chunks: 10x10 chunks of the map, stored in dict-s named XxY %10, in an encoded file file named XxY //10
+- split non-map data into 1< files
+- after sacing only last 10 updated chunks stay in memory
+- make character test object that is swapable for the real character(writes out options and lets you chose)
+- character mostly goes staight
+- monster abilities: jump, heavy, no move,, from enum, each type has it's own ability on spawn
+
+getch() that I can stop from other thread
+
+
+PA: merge save and load: synronize variables
+split save/load into function, and try each one individualy: if exeption: call create function for it
+- const chunk_size
+- Storage: inventory: items usualy have a small chance to drop, always drops on player, equipment: items usualy have a very small chance to drop, always drops on player , loot: drops a predetermined amount/type of items depending on the loot manager sttings, player doesn' t have loot, loot is inaccesable to entitys
+- item types within types: helmets, weapons, plus all items category?
+- player facing: enum, controlls: forward, turns, back
+
+- Tile: type: enum, content: enum?: function that gets called when you step on that tile, data: dict
+- for enums in save file: if on load enum doesn't exist... default?
+- items: big dict of dicts, where key is item enum and dict has the item's actions(call function), with data: {SPEAR: {"use": (throw, [5, "ouch", 69.42]), "drop": (drop, None)}, CURSED_SWORD: {"use": (swing, [8]), "use2": (stab, [10, 2])}}
+if key is missing from item action list, default is used: no "drop": "drop": (drop, None)
+- maybe used for Tile content as well
+- PA GUI
+
+- pass tile.self into content function
+- test world object stuff
