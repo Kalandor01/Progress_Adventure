@@ -317,7 +317,10 @@ def _get_valid_folders(folders:list[str]):
     """Gets the display data from all readable save files in the save folder."""
     datas:list[tuple[str, dict[str, Any]]] = []
     for folder in folders:
-        data = ts.decode_save_s(os.path.join(SAVES_FOLDER_PATH, folder, SAVE_FILE_NAME_DATA), 0)
+        try:
+            data = ts.decode_save_s(os.path.join(SAVES_FOLDER_PATH, folder, SAVE_FILE_NAME_DATA), 0)
+        except ValueError:
+            data = -1
         datas.append((folder, data))
     return datas
 

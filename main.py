@@ -445,7 +445,7 @@ def main_menu():
                     print("Regenerating save files...\n")
                     for save in files_data:
                         regenerate_save_file(save[0], save[2], backup_saves)
-                        files_data = sm.get_saves_data()
+                    files_data = sm.get_saves_data()
                     print("\nDONE!")
             # delete
             elif option == len(files_data) + 1:

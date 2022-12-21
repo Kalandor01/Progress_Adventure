@@ -67,8 +67,9 @@ Other ideas:
     - PA: merge save and load: synronize variables
     - split save/load into function, and try each one individualy: if exeption: call create function for it
     - for enums in save file: if on load enum doesn't exist... default?
+    - main menu: replace list_data mod in delete with get_files()?
 
 IMPORTANT:
-    - rework main menu logic!!!!!!!
-    - getch() that I can stop from other thread
+    - REWORK MAIN MENU LOGIC!!!!!!!!!!!!!!!!!!!!!!!!!!
+    - getch() that I can stop from other thread???
     - PA GUI
