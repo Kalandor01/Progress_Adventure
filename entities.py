@@ -33,7 +33,7 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
     if name is None:
         frame_stack = stack()
         name = str(frame_stack[1][0].f_locals["self"].__class__.__name__)
-    name = name.replace("_", " ")
+    full_name = name.replace("_", " ")
     life = configure_stat(life)
     attack = configure_stat(attack)
     deff = configure_stat(deff)
@@ -42,7 +42,7 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
     rare = False
     if r.random() < c_rare:
         rare = True
-        name = "Rare " + name
+        full_name = "Rare " + full_name
         life *= 2
         attack *= 2
         deff *= 2
@@ -55,7 +55,7 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
         team = 0
         switched = True
     # write
-    return [name, life, attack, deff, speed, rare, team, switched]
+    return [name, full_name, life, attack, deff, speed, rare, team, switched]
 
 
 def _facing_to_movement_vector(facing:Rotation) -> tuple[int, int]:
@@ -112,21 +112,23 @@ def loot_manager(drops:list[Loot_controller]|None=None):
 class Entity:
     def __init__(self, traits:list|None=None, drops:list|None=None):
         if traits is None:
-            traits = entity_master(1, 1, 1, 1, name="test")
+            self.name = "test"
+            traits = entity_master(1, 1, 1, 1, name=self.name)
         if drops is None:
             drops = []
         self.name = str(traits[0])
-        self.hp = int(traits[1])
-        self.attack = int(traits[2])
-        self.defence = int(traits[3])
-        self.speed = int(traits[4])
-        self.rare = bool(traits[5])
-        self.team = int(traits[6])
-        self.switched = bool(traits[7])
+        self.full_name = str(traits[1])
+        self.hp = int(traits[2])
+        self.attack = int(traits[3])
+        self.defence = int(traits[4])
+        self.speed = int(traits[5])
+        self.rare = bool(traits[6])
+        self.team = int(traits[7])
+        self.switched = bool(traits[8])
         self.drops = drops
     
     def __str__(self):
-        return f'Name: {self.name}\nHp: {self.hp}\nAttack: {self.attack}\nDefence: {self.defence}\nSpeed: {self.speed}\nRare: {self.rare}\nTeam: {"Player" if self.team==0 else self.team}\nSwitched sides: {self.switched}'
+        return f'Name: {self.full_name}\nHp: {self.hp}\nAttack: {self.attack}\nDefence: {self.defence}\nSpeed: {self.speed}\nRare: {self.rare}\nTeam: {"Player" if self.team==0 else self.team}\nSwitched sides: {self.switched}'
 
 
     def attack_entity(self, target:Entity):

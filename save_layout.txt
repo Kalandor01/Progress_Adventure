@@ -36,5 +36,7 @@ chunks
             - x: int
             - y: int
             - visited: int
-            - content: ???
+            - content: (Content object data)
+                - type: str
+                - ANITHING!!! (Content data)
         ]

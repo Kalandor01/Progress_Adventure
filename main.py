@@ -124,10 +124,10 @@ def fight(monster_l:list[es.Entity]|None=None):
     for x in range(max_team_n + 1):
         print(f"\nTeam {x}:\n")
         if x == 0:
-            print(f"{player.name}\nHP: {player.hp}\nAttack: {player.attack}\nDefence: {player.defence}\nSpeed: {player.speed}\n")
+            print(f"{player.full_name}\nHP: {player.hp}\nAttack: {player.attack}\nDefence: {player.defence}\nSpeed: {player.speed}\n")
         for m in monster_l:
             if m.team == x:
-                print(f"{m.name}", end="")
+                print(f"{m.full_name}", end="")
                 if m.switched:
                     print(f" (Switched to this side!)", end="")
                 print(f"\nHP: {m.hp}\nAttack: {m.attack}\nDefence: {m.defence}\nSpeed: {m.speed}\n")
@@ -143,20 +143,20 @@ def fight(monster_l:list[es.Entity]|None=None):
                     print("\nCLASH!")
                 # damage
                 elif attack < attack_e:
-                    print(f"\n{m.name} attacked {player.name}: ", end="")
+                    print(f"\n{m.full_name} attacked {player.full_name}: ", end="")
                     if r.random() > player.speed:
                         player.hp -= 2
                         if player.hp < 0:
                             player.hp = 0
                         print(f"-2 HP({player.hp})")
                         if player.hp <= 0:
-                            attacking_m = m.name
+                            attacking_m = m.full_name
                             break
                     else:
                         print("BLOCKED!")
                 # attack
                 else:
-                    print(f"\n{player.name} attacked {m.name}: ", end="")
+                    print(f"\n{player.full_name} attacked {m.full_name}: ", end="")
                     if r.random() > player.speed:
                         m.hp -= 2
                         if m.hp < 0:
@@ -168,7 +168,7 @@ def fight(monster_l:list[es.Entity]|None=None):
                             m.hp = 0
                         print(f"CRITICAL HIT: -4 HP({m.hp})")
                     if m.hp <= 0:
-                        print(f"{player.name} defeated {m.name}")
+                        print(f"{player.full_name} defeated {m.full_name}")
                 sleep(0.5)
         # sum life
         szum = 0
@@ -178,17 +178,17 @@ def fight(monster_l:list[es.Entity]|None=None):
     # outcome
     if player.hp <= 0:
         player.hp = 0
-        print(f"\n{attacking_m} defeated {player.name}!")
+        print(f"\n{attacking_m} defeated {player.full_name}!")
         stats()
     else:
         monsters_n = ""
         for x in range(len(monster_l)):
-            monsters_n += monster_l[x].name
+            monsters_n += monster_l[x].full_name
             if len(monster_l) - 2 == x:
                 monsters_n += " and "
             elif len(monster_l) - 2 > x:
                 monsters_n += ", "
-        print(f"\n{player.name} defeated {monsters_n}!\n")
+        print(f"\n{player.full_name} defeated {monsters_n}!\n")
         loots = []
         for m in monster_l:
             loots.extend(m.drops)
@@ -203,7 +203,7 @@ def stats(won=0):
         print("\nYou Win!!!")
     elif won == 0:
         print("\nYou lost!!!")
-    print(f"\nName: {player.name}\n\nSTATS:")
+    print(f"\nName: {player.full_name}\n\nSTATS:")
     if won != 0:
         print(f"HP: {player.hp}")
     print(f"Attack: {player.attack}\nDefence: {player.defence}\nSpeed: {player.speed}\n")
@@ -227,7 +227,7 @@ def save_game():
     GLOBALS.saving = True
     frozen_data = deepcopy(SAVE_DATA)
     sm.make_save(frozen_data, SAVE_DATA)
-    ts.logger("Game saved", f'save name: {frozen_data.save_name}, player name: "{frozen_data.player.name}"')
+    ts.logger("Game saved", f'save name: {frozen_data.save_name}, player name: "{frozen_data.player.full_name}"')
     GLOBALS.saving = False
 
 
@@ -293,7 +293,8 @@ def game_loop():
         sleep(0.1)
         SAVE_DATA.player.weighted_turn()
         SAVE_DATA.player.move()
-        SAVE_DATA.world.get_tile(SAVE_DATA.player.pos[0], SAVE_DATA.player.pos[1], SAVE_DATA.save_name)
+        tile = SAVE_DATA.world.get_tile(SAVE_DATA.player.pos[0], SAVE_DATA.player.pos[1], SAVE_DATA.save_name)
+        tile.visit(SAVE_DATA)
     sleep(5)
     if not GLOBALS.exiting:
         prepair_fight()
@@ -310,7 +311,7 @@ def new_save():
     global SAVE_DATA
     SAVE_DATA = sm.create_save_data()
     sm.make_save(SAVE_DATA)
-    ts.logger("Created save", f'save_name: {SAVE_DATA.save_name}, player name: "{SAVE_DATA.player.name}"')
+    ts.logger("Created save", f'save_name: {SAVE_DATA.save_name}, player name: "{SAVE_DATA.player.full_name}"')
     game_loop()
 
 

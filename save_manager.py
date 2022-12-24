@@ -8,7 +8,6 @@ import tools as ts
 from data_manager import Save_data
 import entities as es
 import inventory as iy
-from chunk_manager import World
 
 from utils import Color
 from tools import r, sfm, Log_type
@@ -86,13 +85,6 @@ def _save_data_json(data:Save_data):
     # randomstate
     save_data_json["seed"] = ts.random_state_to_json(r)
     return save_data_json
-
-
-def _load_world_json(x:int, y:int, save_folder_path:str):
-    """Converts the world json to object format."""
-    world = World()
-    world.load_chunk_from_folder(x, y, save_folder_path)
-    return world
 
 
 def make_save(data:Save_data, actual_data:Save_data|None=None, clear_chunks=True):
@@ -260,17 +252,14 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     # player
     player_data:dict[str, Any] = data["player"]
     player = _load_player_json(player_data)
-    # world
-    ts.logger("Loading world")
-    world = _load_world_json(player.pos[0], player.pos[1], save_folder_path)
-    ts.logger("Loaded save", f'save name: {save_name}, player name: "{player.name}", last saved: {u.make_date(last_access)} {u.make_time(last_access[3:])}')
+    ts.logger("Loaded save", f'save name: {save_name}, player name: "{player.full_name}", last saved: {u.make_date(last_access)} {u.make_time(last_access[3:])}')
     
     # PREPARING
     ts.logger("Preparing game data")
     # load random state
     r.set_state(ts.json_to_random_state(data["seed"]))
     # load to class
-    save_data = Save_data(save_name, display_name, last_access, player, r.get_state(), world)
+    save_data = Save_data(save_name, display_name, last_access, player, r.get_state())
     if is_file:
         make_save(save_data, clear_chunks=False)
     return save_data
@@ -315,7 +304,7 @@ def _get_save_folders() -> list[str]:
 
 def _get_valid_folders(folders:list[str]):
     """Gets the display data from all readable save files in the save folder."""
-    datas:list[tuple[str, dict[str, Any]]] = []
+    datas:list[tuple[str, dict[str, Any]|Literal[-1]]] = []
     for folder in folders:
         try:
             data = ts.decode_save_s(os.path.join(SAVES_FOLDER_PATH, folder, SAVE_FILE_NAME_DATA), 0)

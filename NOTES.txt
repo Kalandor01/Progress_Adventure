@@ -68,8 +68,12 @@ Other ideas:
     - split save/load into function, and try each one individualy: if exeption: call create function for it
     - for enums in save file: if on load enum doesn't exist... default?
     - main menu: replace list_data mod in delete with get_files()?
+    - chunk_manager Save_data circular call permanent fix
+
+    - VIEW: all tiles in the world, dev only, image
 
 IMPORTANT:
     - REWORK MAIN MENU LOGIC!!!!!!!!!!!!!!!!!!!!!!!!!!
     - getch() that I can stop from other thread???
-    - PA GUI
+    - PA GUI BRANCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    - INVENTORY UPGRADE BRANCH!!!!!!!!!!!!!!!!!!!!!!!!
