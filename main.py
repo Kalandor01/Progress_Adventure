@@ -290,12 +290,14 @@ def game_loop():
     stats(-1)
     print("Wandering...")
     for _ in range(200):
-        sleep(0.1)
-        SAVE_DATA.player.weighted_turn()
-        SAVE_DATA.player.move()
-        tile = SAVE_DATA.world.get_tile(SAVE_DATA.player.pos[0], SAVE_DATA.player.pos[1], SAVE_DATA.save_name)
-        tile.visit(SAVE_DATA)
-    sleep(5)
+        if not GLOBALS.exiting:
+            sleep(0.1)
+            SAVE_DATA.player.weighted_turn()
+            SAVE_DATA.player.move()
+            tile = SAVE_DATA.world.get_tile(SAVE_DATA.player.pos[0], SAVE_DATA.player.pos[1], SAVE_DATA.save_name)
+            tile.visit(SAVE_DATA)
+    if not GLOBALS.exiting:
+        sleep(5)
     if not GLOBALS.exiting:
         prepair_fight()
         save_game()

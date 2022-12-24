@@ -66,6 +66,7 @@ def _load_player_json(player_json:dict[str, Any]):
     player.inventory.items = list(_load_inventory_json(player_json["inventory"]))
     player.pos = (int(player_json["x_pos"]), int(player_json["y_pos"]))
     player.rotation = es.Rotation(es.Rotation._value2member_map_[int(player_json["rotation"])])
+    player.update_full_name()
     return player
 
 

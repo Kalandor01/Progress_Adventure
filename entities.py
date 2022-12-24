@@ -19,7 +19,7 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
     
     def configure_stat(stat_value:int|range):
         # int or range
-        if type(stat_value) is int:
+        if isinstance(stat_value, int):
             stat_value = range(stat_value - fluc_small, stat_value + fluc_big)
         # fluctuation
         if stat_value.start == stat_value.stop:
@@ -33,7 +33,7 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
     if name is None:
         frame_stack = stack()
         name = str(frame_stack[1][0].f_locals["self"].__class__.__name__)
-    full_name = name.replace("_", " ")
+    name = name.replace("_", " ")
     life = configure_stat(life)
     attack = configure_stat(attack)
     deff = configure_stat(deff)
@@ -42,7 +42,6 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
     rare = False
     if r.random() < c_rare:
         rare = True
-        full_name = "Rare " + full_name
         life *= 2
         attack *= 2
         deff *= 2
@@ -55,7 +54,7 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
         team = 0
         switched = True
     # write
-    return [name, full_name, life, attack, deff, speed, rare, team, switched]
+    return [name, life, attack, deff, speed, rare, team, switched]
 
 
 def _facing_to_movement_vector(facing:Rotation) -> tuple[int, int]:
@@ -90,7 +89,7 @@ class Loot_controller:
     def __init__(self, item:Item_categories, chance=1.0, item_num:int|range=1, rolls=1):
         self.item = item
         self.chance = float(chance)
-        if type(item_num) is int:
+        if isinstance(item_num, int):
             item_num = range(item_num, item_num)
         self.item_num:range = item_num
         self.rolls = int(rolls)
@@ -117,19 +116,28 @@ class Entity:
         if drops is None:
             drops = []
         self.name = str(traits[0])
-        self.full_name = str(traits[1])
-        self.hp = int(traits[2])
-        self.attack = int(traits[3])
-        self.defence = int(traits[4])
-        self.speed = int(traits[5])
-        self.rare = bool(traits[6])
-        self.team = int(traits[7])
-        self.switched = bool(traits[8])
+        self.hp = int(traits[1])
+        self.attack = int(traits[2])
+        self.defence = int(traits[3])
+        self.speed = int(traits[4])
+        self.rare = bool(traits[5])
+        self.team = int(traits[6])
+        self.switched = bool(traits[7])
         self.drops = drops
+        self.full_name = ""
+        self.update_full_name()
+
+
+    def update_full_name(self):
+        """Updates the full name of the entity."""
+        full_name = self.name
+        if self.rare:
+            full_name = "Rare " + full_name
+        self.full_name = full_name
 
 
     def __str__(self):
-        return f'Name: {self.full_name}\nHp: {self.hp}\nAttack: {self.attack}\nDefence: {self.defence}\nSpeed: {self.speed}\nRare: {self.rare}\nTeam: {"Player" if self.team==0 else self.team}\nSwitched sides: {self.switched}'
+        return f'Name: {self.name}\nFull name: {self.full_name}\nHp: {self.hp}\nAttack: {self.attack}\nDefence: {self.defence}\nSpeed: {self.speed}\nRare: {self.rare}\nTeam: {"Player" if self.team==0 else self.team}\nSwitched sides: {self.switched}\nDrops: {self.drops}'
 
 
     def attack_entity(self, target:Entity):
@@ -144,6 +152,7 @@ class Player(Entity):
         self.inventory = Inventory()
         self.pos:tuple[int, int] = (0, 0)
         self.rotation:Rotation = Rotation.NORTH
+        self.update_full_name()
 
 
     def weighted_turn(self):
@@ -179,6 +188,10 @@ class Player(Entity):
         move = vector_multiply(move_raw, amount)
         self.pos = vector_add(self.pos, move, True)
         logger("Player moved", f"{old_pos} -> {self.pos}", Log_type.DEBUG)
+
+
+    def __str__(self):
+        return f"{super().__str__}\n{self.inventory}\nPosition: {self.pos}\nRotation: {self.rotation}"
 
 
 class Caveman(Entity):
