@@ -10,13 +10,13 @@ from data_manager import Save_data
 class Base_content:
     def __init__(self, data:dict[str, Any]|None=None):
         self.type = "blank"
-    
+
 
     def _visit(self, tile:'Tile', save_data:Save_data):
         tile.visited += 1
         logger(f"Player visited \"{self.type}\"", f"x: {tile.x}, y: {tile.y}, visits: {tile.visited}")
-    
-    
+
+
     def to_json(self):
         """Returns a json representation of the `Content`."""
         content_json:dict[str, Any] = {"type": self.type}
@@ -43,15 +43,14 @@ class Fight_content(Base_content):
             except KeyError: self.fight = "test"
         else:
             self.fight = "test"
-    
-    
+
 
     def _visit(self, tile:'Tile', save_data:Save_data):
         super()._visit(tile, save_data)
         print(f"{save_data.player.full_name} entered a {self.type}.")
         print(self.fight)
-    
-    
+
+
     def to_json(self):
         content_json = super().to_json()
         content_json["fight"] = self.fight
@@ -206,7 +205,7 @@ class Chunk:
         chunk_file_name = f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}{self.base_x}{CHUNK_FILE_NAME_SEP}{self.base_y}"
         encode_save_s(chunk_data, join(save_folder_path, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
         logger("Saved chunk", f"{chunk_file_name}.{SAVE_EXT}")
-        
+
 
 class World:
     def __init__(self, chunks:dict[str, Chunk]|None=None):
@@ -214,7 +213,7 @@ class World:
         self.chunks:dict[str, Chunk] = {}
         if chunks is not None:
             self.chunks = chunks
-    
+
 
     def find_chunk(self, x:int, y:int):
         """
@@ -228,8 +227,8 @@ class World:
             return self.chunks[chunk_name]
         else:
             return None
-    
-    
+
+
     def gen_chunk(self, x:int, y:int):
         """Generates a new `Chunk` in the specified location."""
         x_con = x // CHUNK_SIZE * CHUNK_SIZE
@@ -238,8 +237,8 @@ class World:
         new_chunk = Chunk(x_con, y_con)
         self.chunks[new_chunk_name] = new_chunk
         return new_chunk
-    
-    
+
+
     def get_chunk(self, x:int, y:int):
         """
         Returns the `Chunk` if it exists.\n
@@ -249,7 +248,7 @@ class World:
         if chunk is None:
             chunk = self.gen_chunk(x, y)
         return chunk
-    
+
 
     def _load_tile_json(self, tile:dict[str, Any]):
         """Converts the tile json to dict format."""
@@ -296,7 +295,7 @@ class World:
                 tiles.update(self._load_tile_json(tile))
             chunk = Chunk(base_x, base_y, tiles)
             return chunk
-    
+
 
     def load_chunk_from_folder(self, x:int, y:int, save_folder_path:str, append_mode=True):
         """

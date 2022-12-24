@@ -65,7 +65,7 @@ def encode_save_s(data:list[dict[str, Any]]|dict[str, Any], file_path:str, seed=
         json_data:list[str] = []
         for dat in data:
             json_data.append(json.dumps(dat))
-        
+    
     sfm.encode_save(json_data, seed, file_path, extension, ENCODING, FILE_ENCODING_VERSION)
 
 
@@ -333,7 +333,7 @@ def random_state_to_json(random_state:np.random.RandomState|tuple|dict[str, Any]
     for num in state[1]:
         state_nums.append(int(num))
     return {"type": state[0], "state": state_nums, "pos": state[2], "has_gauss": state[3], "cached_gaussian": state[4]}
-    
+
 
 def json_to_random_state(random_state:dict):
     """

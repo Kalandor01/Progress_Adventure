@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
 
 
-
+# MOVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Monster cheat sheet: name, life, attack, deff, speed, rare, team, switched
 def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=False):
     monsters:list[es.Entity] = []
@@ -210,7 +210,7 @@ def stats(won=0):
     if won == 0 or won == 1:
         print(player.inventory)
         print()
-
+# MOVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 
@@ -272,7 +272,7 @@ def quit_game():
     except:
         ts.logger("Thread crashed", str(exc_info()), Log_type.FATAL)
         raise
-    
+
 
 def game_loop():
     GLOBALS.in_game_loop = True
@@ -306,7 +306,7 @@ def game_loop():
     ts.press_key("Exiting...Press keys!")
     ts.logger("Game loop ended")
 
-    
+
 def new_save():
     global SAVE_DATA
     SAVE_DATA = sm.create_save_data()
@@ -319,7 +319,7 @@ def load_save(save_name:str, is_file=False):
     global SAVE_DATA
     SAVE_DATA = sm.load_save(save_name, SETTINGS.keybind_mapping, is_file)
     game_loop()
-    
+
 
 def regenerate_save_file(save_name:str, is_file=False, make_backup=True):
     global SAVE_DATA
@@ -345,8 +345,7 @@ def regenerate_save_file(save_name:str, is_file=False, make_backup=True):
 
 
 
-
-# REWORK THIS ASAP
+# REWORK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 def main_menu():
     # action functions
     def other_options():
@@ -483,6 +482,8 @@ def main_menu():
             ts.press_key(f"\nLoading save: {status[1]}!")
             load_save(status[1], status[2])
             files_data = sm.get_saves_data()
+# REWORK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
 
 def main():

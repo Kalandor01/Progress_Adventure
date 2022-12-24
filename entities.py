@@ -126,7 +126,8 @@ class Entity:
         self.team = int(traits[7])
         self.switched = bool(traits[8])
         self.drops = drops
-    
+
+
     def __str__(self):
         return f'Name: {self.full_name}\nHp: {self.hp}\nAttack: {self.attack}\nDefence: {self.defence}\nSpeed: {self.speed}\nRare: {self.rare}\nTeam: {"Player" if self.team==0 else self.team}\nSwitched sides: {self.switched}'
 
@@ -143,8 +144,8 @@ class Player(Entity):
         self.inventory = Inventory()
         self.pos:tuple[int, int] = (0, 0)
         self.rotation:Rotation = Rotation.NORTH
-    
-    
+
+
     def weighted_turn(self):
         """Turns the player in a random direction, that is weighted in the direction that it's already going towards."""
         # turn

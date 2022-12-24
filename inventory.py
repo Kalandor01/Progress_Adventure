@@ -48,13 +48,15 @@ class Item:
         self.name = name
         self.amount = amount
         self.make_item()
-    
+
+
     def make_item(self):
         match(self.name):
             case Weapon_items.CLUB_WITH_TEETH:
                 self.d_name = "Club with teeth"
             case _:
                 self.d_name = self.name.name.lower().capitalize().replace("_", " ")
+
 
     def use(self):
         return False
@@ -63,7 +65,7 @@ class Item:
 class Inventory:
     def __init__(self):
         self.items:list[Item] = []
-    
+
 
     def add(self, name:Item_categories, amount=1):
         for item in self.items:
@@ -71,7 +73,7 @@ class Inventory:
                 item.amount += amount
                 return None
         self.items.append(Item(name, amount))
-    
+
 
     def remove(self, name:Item_categories, amount=1):
         for item in self.items:
@@ -96,8 +98,8 @@ class Inventory:
                     if self.items[x].amount <= 0:
                         self.items.pop(x)
                 break
-    
-    
+
+
     def to_json(self):
         """Convert the items in the inventory into a list for a json format."""
 
@@ -105,14 +107,14 @@ class Inventory:
         for item in self.items:
             items_json.append([item.name.name, item.amount])
         return items_json
-    
+
 
     def __str__(self):
         txt = "Inventory:"
         for item in self.items:
             txt += f"\n\t{item.d_name}{' x' + str(item.amount) if item.amount > 1 else ''}"
         return txt
-    
+
 
 def item_finder(name:str) -> Item_categories|None:
     """

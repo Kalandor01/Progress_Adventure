@@ -346,7 +346,7 @@ def get_saves_data():
             datas.append((data[0], fix_data))
         elif index != -1:
             datas[index] = (data[0], fix_data)
-                
+    
     # read from folder
     folders = _get_save_folders()
     datas.extend(_get_valid_folders(folders))

@@ -194,8 +194,8 @@ class Self_Checks:
         ts.logger(check_name,
             result_type.name + (": " + str(exc_info()) if result_type==ts.Log_type.FATAL else ""),
             result_type)
-        
-    
+
+
     def check(self, check_function:Callable, separate=True):
         ts.threading.current_thread().name = TEST_THREAD_NAME
         check_name = self.begin_check(check_function, separate)
@@ -204,8 +204,8 @@ class Self_Checks:
             check_function(check_name)
         except:
             self._give_result(check_name, ts.Log_type.FATAL)
-    
-    
+
+
     def run_all_tests(self):
         ts.log_separator()
         self.check(self.initialization_check, False)
@@ -227,7 +227,7 @@ class Self_Checks:
         GLOBALS = dm.Globals(False, False, False, False)
         
         self._give_result(check_name, ts.Log_type.PASS)
-    
+
 
     def settings_checks(self, check_name:str):
         good = False
@@ -243,8 +243,8 @@ class Self_Checks:
                 good = True
         if not good:
             self._give_result(check_name, ts.Log_type.FAIL)
-            
-            
+
+
     # def save_file_checks(self, check_name:str):
     #     self.give_result(check_name, ts.Log_type.PASS)
     #     self.give_result(check_name, ts.Log_type.FAIL)
