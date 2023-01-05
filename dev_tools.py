@@ -1,22 +1,30 @@
+from enum import Enum
 import json
+from os import listdir
 from os.path import join, isdir
 from sys import exc_info
-from typing import Callable, Literal
+from typing import Any, Callable, Literal
 from zipfile import ZipFile
+from datetime import datetime
+from PIL import Image, ImageDraw
 
 from utils import Color, make_date, make_time, stylized_text
-from constants import                                   \
-    ENCODING,                                           \
-    TEST_THREAD_NAME,                                   \
-    SAVES_FOLDER_PATH, SAVE_EXT,                        \
-    BACKUPS_FOLDER_PATH, OLD_BACKUP_EXT, BACKUP_EXT,    \
-    SAVE_SEED,                                          \
-    FILE_ENCODING_VERSION,                              \
+from constants import                                                                   \
+    ENCODING,                                                                           \
+    TEST_THREAD_NAME, VISUALIZER_THREAD_NAME,                                           \
+    ROOT_FOLDER,                                                                        \
+    SAVES_FOLDER_PATH, SAVE_EXT,                                                        \
+    BACKUPS_FOLDER_PATH, OLD_BACKUP_EXT, BACKUP_EXT,                                    \
+    SAVE_FILE_NAME_DATA,                                                                \
+    SAVE_SEED,                                                                          \
+    FILE_ENCODING_VERSION, CHUNK_SIZE,                                                  \
     SAVE_VERSION
 import tools as ts
 from tools import sfm
 
 import data_manager as dm
+import chunk_manager as cm
+from save_manager import _load_player_json, load_all_chunks
 
 def decode_save_file(save_name:str, save_name_pre=SAVES_FOLDER_PATH, save_num=SAVE_SEED, save_ext=SAVE_EXT):
     """
@@ -250,4 +258,176 @@ class Self_Checks:
     #     self.give_result(check_name, ts.Log_type.FAIL)
 
 
+def fill_chunk(chunk:cm.Chunk):
+    """Generates ALL not yet generated tiles for a chunks."""
+    for x in range(CHUNK_SIZE):
+        for y in range(CHUNK_SIZE):
+            chunk.get_tile(x, y)
+    return chunk
+
+
+def fill_all_chunka(world:cm.World):
+    """Generates ALL not yet generated tiles for the world."""
+    for chunk in world.chunks.values():
+        fill_chunk(chunk)
+    return world
+
+
+def get_world_corners(world:cm.World):
+    """
+    Returns the four corners of the world.
+    """
+    min_x = 0
+    min_y = 0
+    max_x = 0
+    max_y = 0
+    for chunk in world.chunks.values():
+        if chunk.base_x < min_x:
+            min_x = chunk.base_x
+        if chunk.base_y < min_y:
+            min_y = chunk.base_y
+        if chunk.base_x > max_x:
+            max_x = chunk.base_x
+        if chunk.base_y > max_y:
+            max_y = chunk.base_y
+    max_x += CHUNK_SIZE - 1
+    max_y += CHUNK_SIZE - 1
+    return ((min_x, min_y), (max_x, max_y))
+
+
+class Content_colors(Enum):
+    EMPTY = (0, 0, 0, 0)
+    FIGHT = (255, 0, 0, 255)
+    FIELD = (0, 255, 0, 255)
+
+
+def draw_world_tiles(world:cm.World, image_path="world.png"):
+    """
+    Genarates an image, representing the diferent types of tiles, and their placements in the world.\n
+    Also returns the tile count for all tile types.
+    """
+    tile_size = (1, 1)
+    
+    tile_types = ("-", "field", "fight")
+    tile_colors = (Content_colors.EMPTY.value, Content_colors.FIELD.value, Content_colors.FIGHT.value, )
+    tile_counts = [0, 0, 0]
+    
+    corners = get_world_corners(world)
+    size = ((corners[1][0] - corners[0][0] + 1) * tile_size[0], (corners[1][1] - corners[0][1] + 1) * tile_size[1])
+    min_pos = corners[0]
+
+    im = Image.new("RGBA", size, Content_colors.EMPTY.value)
+    draw = ImageDraw.Draw(im, "RGBA")
+    for chunk in world.chunks.values():
+        for tile in chunk.tiles.values():
+            x = (chunk.base_x - min_pos[0]) + tile.x
+            y = (chunk.base_y - min_pos[1]) + tile.y
+            start_x = int(x * tile_size[0])
+            start_y = int(y * tile_size[1])
+            end_x = int(x * tile_size[0] + tile_size[0] - 1)
+            end_y = int(y * tile_size[1] + tile_size[1] - 1)
+            # find type
+            color = tile_colors[0]
+            tile_counts[0] += 1
+            for index, tt in enumerate(tile_types):
+                if tile.content.type == tt:
+                    color = tile_colors[index]
+                    tile_counts[index] += 1
+            draw.rectangle((start_x, start_y, end_x, end_y), color)
+    im.save(image_path)
+    return tile_counts
+
+
+def save_visualizer(save_name:str):
+    """
+    Visualises the data in a save file
+    """
+    EXPORT_FOLDER = "visualised_saves"
+    EXPORT_DATA_FILE = "data.txt"
+    EXPORT_WORLD_FILE = "world.png"
+    
+    ts.threading.current_thread().name = VISUALIZER_THREAD_NAME
+    
+    try:
+        save_folder_path = join(SAVES_FOLDER_PATH, save_name)
+        now = datetime.now()
+        visualized_save_name = f"{save_name}_{make_date(now)}_{make_time(now, ';')}"
+        display_visualized_save_path = join(EXPORT_FOLDER, visualized_save_name)
+        visualized_save_path = join(ROOT_FOLDER, display_visualized_save_path)
+        
+        ts.recreate_folder(EXPORT_FOLDER)
+        ts.recreate_folder(visualized_save_name, join(ROOT_FOLDER, EXPORT_FOLDER))
+        
+        data = ts.decode_save_s(join(save_folder_path, SAVE_FILE_NAME_DATA, ), 1)
+        
+        # check save version
+        try: save_version = str(data["save_version"])
+        except KeyError: save_version = "0.0"
+        load_continue = True
+        if save_version != SAVE_VERSION:
+            is_older = ts.is_up_to_date(save_version, SAVE_VERSION)
+            ans = sfm.UI_list(["No", "Yes"], f"\"{save_name}\" is {('an older version' if is_older else 'a newer version')} than what it should be! ({save_version}->{SAVE_VERSION}) Do you want to continue?").display()
+            if ans == 0:
+                load_continue = False
+        # load
+        if load_continue:
+            # display_name
+            display_name = str(data["display_name"])
+            # last access
+            last_access:list[int] = data["last_access"]
+            # player
+            player_data:dict[str, Any] = data["player"]
+            player = _load_player_json(player_data)
+            seed = ts.np.random.RandomState()
+            seed.set_state(ts.json_to_random_state(data["seed"]))
+            save_data = dm.Save_data(save_name, display_name, last_access, player, seed.get_state())
+            
+            # display
+            text =  f"---------------------------------------------------------------------------------------------------------------\n"\
+                    f"EXPORTED DATA FROM \"{save_name}\"\n"\
+                    f"Loaded {SAVE_FILE_NAME_DATA}.{SAVE_EXT}:\n"\
+                    f"Save name: {save_data.save_name}\n"\
+                    f"Display save name: {save_data.display_save_name}\n"\
+                    f"Last saved: {make_date(save_data.last_access, '.')} {make_time(save_data.last_access[3:])}\n"\
+                    f"\nPlayer:\n{save_data.player}\n"\
+                    f"\nSeed: {save_data.seed}"\
+                    f"\n---------------------------------------------------------------------------------------------------------------"
+            print(text)
+            ans = sfm.UI_list(["Yes", "No"], f"Do you want export the data from \"{save_name}\" into \"{join(display_visualized_save_path, EXPORT_DATA_FILE)}\"?").display()
+            if ans == 0:
+                with open(join(visualized_save_path, EXPORT_DATA_FILE), "a") as f:
+                    f.write(text + "\n\n")
+            
+            ans = sfm.UI_list(["Yes", "No"], f"Do you want export the world data from \"{save_name}\" into \"{join(display_visualized_save_path, EXPORT_WORLD_FILE)}\"?").display()
+            if ans == 0:
+                print("Getting chunk data...", end="", flush=True)
+                # get chunks data
+                load_all_chunks(save_data)
+                print("DONE!")
+                # fill
+                ans = sfm.UI_list(["No", "Yes"], f"Do you want to fill in ALL tiles in ALL generated chunks?").display()
+                if ans == 1:
+                    print("Filling chunks...", end="", flush=True)
+                    fill_all_chunka(save_data.world)
+                    print("DONE!")
+                # make image
+                print("Generating image...", end="", flush=True)
+                tile_counts = draw_world_tiles(save_data.world, join(visualized_save_path, EXPORT_WORLD_FILE))
+                print("DONE!")
+                tile_types = ("TOTAL", "field", "fight")
+                text =  f"\nTile types:\n"
+                for x, tt in enumerate(tile_types):
+                    text += f"\t{tt}: {tile_counts[x]}\n"
+            print(text)
+    except FileNotFoundError:
+        print(f"ERROR: {exc_info()[1]}")
+    # return save_data
+
+
 # Self_Checks().run_all_tests()
+
+# for folder in listdir(SAVES_FOLDER_PATH):
+#     if isdir(join(SAVES_FOLDER_PATH, folder)):
+#         save_visualizer(folder)
+
+# save_visualizer("new sav")

@@ -191,7 +191,7 @@ class Player(Entity):
 
 
     def __str__(self):
-        return f"{super().__str__}\n{self.inventory}\nPosition: {self.pos}\nRotation: {self.rotation}"
+        return f"{super().__str__()}\n{self.inventory}\nPosition: {self.pos}\nRotation: {self.rotation}"
 
 
 class Caveman(Entity):

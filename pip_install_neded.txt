@@ -1,6 +1,7 @@
 pip:
     - numpy
     - colorama
+    - Pillow
 git:
     - Save File Manager
     - Random Sentance

@@ -60,7 +60,7 @@ def pad_zero(num:int|str):
     return ('0' if int(num) < 10 else '') + str(num)
 
 
-def make_date(date_lis:list|dtime, sep="-"):
+def make_date(date_lis:list[int]|dtime, sep="-"):
     """
     Turns a datetime object's date part or a list into a formated string.
     """
@@ -72,7 +72,7 @@ def make_date(date_lis:list|dtime, sep="-"):
         return "date"
 
 
-def make_time(time_lis:list|dtime, sep=":", write_ms=False, ms_sep:str="."):
+def make_time(time_lis:list[int]|dtime, sep=":", write_ms=False, ms_sep:str="."):
     """
     Turns a datetime object's time part or a list into a formated string.
     """

@@ -19,6 +19,7 @@ MAIN_THREAD_NAME = "Main"
 AUTO_SAVE_THREAD_NAME = "Auto saver"
 MANUAL_SAVE_THREAD_NAME = "Quit manager"
 TEST_THREAD_NAME = "Test"
+VISUALIZER_THREAD_NAME = "Visualizer"
 
 # paths/folders/file names
 ROOT_FOLDER = getcwd()
@@ -65,19 +66,20 @@ SAVE_VERSION = "1.4.1"
 DOUBLE_KEYS = [b"\xe0", b"\x00"]
 
 
-# from constants import                                                                   \
-#     PYTHON_MIN_VERSION,                                                                 \
-#     PIP_NP_MIN_VERSION, PIP_COL_MIN_VERSION,                                            \
-#     PIP_SFM_MIN_VERSION, PIP_RS_MIN_VERSION,                                            \
-#     ENCODING,                                                                           \
-#     MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME, TEST_THREAD_NAME, \
-#     ROOT_FOLDER,                                                                        \
-#     SAVES_FOLDER, SAVES_FOLDER_PATH, OLD_SAVE_NAME, SAVE_EXT,                           \
-#     LOGGING, LOGGING_LEVEL, LOGS_FOLDER, LOGS_FOLDER_PATH, LOG_EXT,                     \
-#     BACKUPS_FOLDER, BACKUPS_FOLDER_PATH, OLD_BACKUP_EXT, BACKUP_EXT,                    \
-#     SAVE_FILE_NAME_DATA, SAVE_FOLDER_NAME_CHUNKS,                                       \
-#     SAVE_SEED, SETTINGS_SEED,                                                           \
-#     STANDARD_CURSOR_ICONS, DELETE_CURSOR_ICONS,                                         \
-#     ERROR_HANDLING, LOG_MS,                                                             \
-#     AUTO_SAVE_INTERVAL, AUTO_SAVE_DELAY, FILE_ENCODING_VERSION, CHUNK_SIZE,             \
+# from constants import                                                       \
+#     PYTHON_MIN_VERSION,                                                     \
+#     PIP_NP_MIN_VERSION, PIP_COL_MIN_VERSION,                                \
+#     PIP_SFM_MIN_VERSION, PIP_RS_MIN_VERSION,                                \
+#     ENCODING,                                                               \
+#     MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME,       \
+#     VISUALIZER_THREAD_NAME, TEST_THREAD_NAME,                               \
+#     ROOT_FOLDER,                                                            \
+#     SAVES_FOLDER, SAVES_FOLDER_PATH, OLD_SAVE_NAME, SAVE_EXT,               \
+#     LOGGING, LOGGING_LEVEL, LOGS_FOLDER, LOGS_FOLDER_PATH, LOG_EXT,         \
+#     BACKUPS_FOLDER, BACKUPS_FOLDER_PATH, OLD_BACKUP_EXT, BACKUP_EXT,        \
+#     SAVE_FILE_NAME_DATA, SAVE_FOLDER_NAME_CHUNKS,                           \
+#     SAVE_SEED, SETTINGS_SEED,                                               \
+#     STANDARD_CURSOR_ICONS, DELETE_CURSOR_ICONS,                             \
+#     ERROR_HANDLING, LOG_MS,                                                 \
+#     AUTO_SAVE_INTERVAL, AUTO_SAVE_DELAY, FILE_ENCODING_VERSION, CHUNK_SIZE, \
 #     SAVE_VERSION, DOUBLE_KEYS
