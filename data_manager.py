@@ -3,7 +3,7 @@ from typing import Any
 
 from utils import Double_Keys
 from constants import ENCODING, DOUBLE_KEYS
-from tools import Log_type, getch, logger, settings_manager, change_logging_level
+from tools import np, Log_type, getch, logger, settings_manager, change_logging_level
 
 from entities import Player
 
@@ -181,12 +181,16 @@ class Settings:
                         self.keybinds[key2].conflict = True
 
 class Save_data:
-    def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player, seed:tuple[Any]|dict[str, Any], world:Any|None=None):
+    def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player,
+                 main_seed:np.random.RandomState, world_seed:np.random.RandomState, tile_type_noise_seeds:dict[str, int],
+                 world:Any|None=None):
         self.save_name = str(save_name)
         self.display_save_name = str(display_save_name)
         self.last_access = list[int](last_access)
         self.player = deepcopy(player)
-        self.seed = tuple(seed)
+        self.main_seed = main_seed
+        self.world_seed = world_seed
+        self.tile_type_noise_seeds = tile_type_noise_seeds
         
         from chunk_manager import World
         if world is not None:

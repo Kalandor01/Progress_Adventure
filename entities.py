@@ -3,7 +3,7 @@ from enum import Enum
 from inspect import stack
 
 from utils import vector_add, vector_multiply
-from tools import r, logger, Log_type
+from tools import main_seed, logger, Log_type
 
 from inventory import Inventory, Item_categories
 
@@ -25,7 +25,7 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
         if stat_value.start == stat_value.stop:
             stat_value = stat_value.start
         else:
-            stat_value = round(r.triangular(stat_value.start, (stat_value.start + stat_value.stop) / 2, stat_value.stop))
+            stat_value = round(main_seed.triangular(stat_value.start, (stat_value.start + stat_value.stop) / 2, stat_value.stop))
         if stat_value < 0:
             stat_value = 0
         return int(stat_value)
@@ -40,7 +40,7 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
     speed = configure_stat(speed)
     # rare
     rare = False
-    if r.random() < c_rare:
+    if main_seed.random() < c_rare:
         rare = True
         life *= 2
         attack *= 2
@@ -50,7 +50,7 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
         life = 1
     # team
     switched = False
-    if r.random() < c_team_change:
+    if main_seed.random() < c_team_change:
         team = 0
         switched = True
     # write
@@ -102,7 +102,7 @@ def loot_manager(drops:list[Loot_controller]|None=None):
         for drop in drops:
             num = 0
             for _ in range(drop.rolls):
-                num += (1 if r.random() <= drop.chance else 0) * r.randint(drop.item_num.start, drop.item_num.stop + 1)
+                num += (1 if main_seed.random() <= drop.chance else 0) * main_seed.randint(drop.item_num.start, drop.item_num.stop + 1)
             if num > 0:
                 loot.append([drop.item, num])
     return loot
@@ -158,11 +158,11 @@ class Player(Entity):
     def weighted_turn(self):
         """Turns the player in a random direction, that is weighted in the direction that it's already going towards."""
         # turn
-        if r.rand() > 0.75:
+        if main_seed.rand() > 0.75:
             old_rot = self.rotation
             move_vec = _facing_to_movement_vector(self.rotation)
             # back
-            if r.rand() > 0.75:
+            if main_seed.rand() > 0.75:
                 new_dir = _movement_vector_to_facing(vector_multiply(move_vec, (-1, -1), True))
             else:
                 new_dir = _movement_vector_to_facing((move_vec[1], move_vec[0]))

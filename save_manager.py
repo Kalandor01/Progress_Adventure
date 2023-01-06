@@ -10,12 +10,11 @@ import entities as es
 import inventory as iy
 
 from utils import Color
-from tools import r, sfm, Log_type
-from constants import                               \
-    CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, SAVES_FOLDER_PATH, OLD_SAVE_NAME, SAVE_EXT,     \
-    SAVE_FILE_NAME_DATA, SAVE_FOLDER_NAME_CHUNKS,   \
-    SAVE_SEED,                                      \
-    SAVE_VERSION
+from tools import main_seed, world_seed, sfm, Log_type
+from constants import                                                                 \
+    CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, SAVES_FOLDER_PATH, OLD_SAVE_NAME, SAVE_EXT, \
+    SAVE_FILE_NAME_DATA, SAVE_FOLDER_NAME_CHUNKS,                                     \
+    SAVE_SEED, SAVE_VERSION
 
 
 def _save_display_json(data:Save_data):
@@ -84,7 +83,11 @@ def _save_data_json(data:Save_data):
     # player
     save_data_json["player"] = _save_player_json(data.player)
     # randomstate
-    save_data_json["seed"] = ts.random_state_to_json(r)
+    save_data_json["seeds"] = {
+        "main_seed": ts.random_state_to_json(main_seed),
+        "world_seed": ts.random_state_to_json(world_seed),
+        "tile_type_noise_seeds": ts.tile_type_noise_seeds
+    }
     return save_data_json
 
 
@@ -151,8 +154,12 @@ def create_save_data():
     # last_access
     now = dtime.now()
     last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
+    # seeds
+    ts.main_seed = ts.np.random.RandomState()
+    ts.world_seed = ts.make_random_seed(main_seed)
+    ts.tile_type_noise_seeds = ts.recalculate_tile_type_noise_seeds(world_seed)
     # load to class
-    save_data = Save_data(save_name, display_save_name, last_access, player, r.get_state())
+    save_data = Save_data(save_name, display_save_name, last_access, player, main_seed, world_seed, ts.tile_type_noise_seeds)
     save_data.world.gen_tile(save_data.player.pos[0], save_data.player.pos[1])
     return save_data
 
@@ -204,6 +211,27 @@ def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str
             data["player"]["rotation"] = 0
         save_version = "1.4.1"
         ts.logger("Corrected save data", "1.4 -> 1.4.1", Log_type.DEBUG)
+    # 1.4.1 -> 1.5
+    if save_version == "1.4.1":
+        # multiple seeds
+        m_seed = data["seed"]
+        main_seed.set_state(ts.json_to_random_state(m_seed))
+        w_seed = ts.make_random_seed(main_seed)
+        ttn_seeds = {
+            "danger": ts.make_perlin_noise_seed(w_seed),
+            "height": ts.make_perlin_noise_seed(w_seed),
+            "temperature": ts.make_perlin_noise_seed(w_seed),
+            "humidity": ts.make_perlin_noise_seed(w_seed)
+        }
+        wj_seed = ts.random_state_to_json(w_seed)
+        
+        data["seeds"] = {
+            "main_seed": m_seed,
+            "world_seed": wj_seed,
+            "tile_type_noise_seeds": ttn_seeds
+        }
+        save_version = "1.5"
+        ts.logger("Corrected save data", "1.4.1 -> 1.5", Log_type.DEBUG)
     return data
 
 
@@ -212,6 +240,7 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     Loads a save file into a `Save_data` object.\n
     If `backup_choice` is False the user can't choose wether or not to backup the save before loading it, or not, depending on `automatic_backup`.
     """
+    
     save_folder_path = os.path.join(SAVES_FOLDER_PATH, save_name)
     # get if save is a file
     if is_file and os.path.isfile(f'{save_folder_path}.{SAVE_EXT}'):
@@ -257,10 +286,13 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     
     # PREPARING
     ts.logger("Preparing game data")
-    # load random state
-    r.set_state(ts.json_to_random_state(data["seed"]))
+    # load seeds
+    seeds = data["seeds"]
+    ts.main_seed.set_state(ts.json_to_random_state(seeds["main_seed"]))
+    ts.world_seed.set_state(ts.json_to_random_state(seeds["world_seed"]))
+    ts.tile_type_noise_seeds = seeds["tile_type_noise_seeds"]
     # load to class
-    save_data = Save_data(save_name, display_name, last_access, player, r.get_state())
+    save_data = Save_data(save_name, display_name, last_access, player, main_seed, world_seed, ts.tile_type_noise_seeds)
     if is_file:
         make_save(save_data, clear_chunks=False)
     return save_data

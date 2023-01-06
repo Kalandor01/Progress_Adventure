@@ -1,9 +1,12 @@
 from os.path import join
 from typing import Any
 from copy import deepcopy
+from perlin_noise import PerlinNoise
 
-from constants import CHUNK_SIZE, CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, SAVE_FOLDER_NAME_CHUNKS, SAVE_EXT
-from tools import r, logger, decode_save_s, encode_save_s, Log_type
+from constants import                                           \
+    SAVE_EXT, SAVE_FOLDER_NAME_CHUNKS, CHUNK_SIZE,              \
+    CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, TILE_NOISE_RESOLUTION
+from tools import main_seed, world_seed, tile_type_noise_seeds, logger, decode_save_s, encode_save_s, Log_type
 from data_manager import Save_data
 
 
@@ -57,17 +60,12 @@ class Fight_content(Base_content):
         return content_json
 
 
-def _nornalise_weights(weights:list[int|float]):
-    sum_w = sum(weights)
-    return [w / sum_w for w in weights]
-
-
 # all content types for `_get_content()`
 _content_types = [
-                        "_",
-                        "blank",
-                        "field",
-                        "fight"
+                    "_",
+                    "blank",
+                    "field",
+                    "fight"
                 ]
 # content classes to map to `_content_types`
 _content_map_objects = [
@@ -77,21 +75,78 @@ _content_map_objects = [
                         Fight_content
                     ]
 # all randomly selectable content classes in `_gen_content()`
-_content_objects = [
-                                        Field_content,
-                                        Fight_content
+_content_objects:list[type[Base_content]] = [
+                    Field_content,
+                    Fight_content
                 ]
-# the chances for content classes to be selected for each selectable content in `_content_objects`
-_content_weights_raw:list[int|float] = [
-                                        20,
-                                        1
+# the properties of content classes used in pairs with perlin noise generators and `_content_objects`
+_content_weights:list[dict[str, float]] = [
+                                            {
+                                                "danger": 0.0,
+                                                "height": 0.5,
+                                                "temperature": 0.5,
+                                                "humidity": 0.5
+                                            },
+                                            {
+                                                "danger": 1.0,
+                                                "height": 0.5,
+                                                "temperature": 0.5,
+                                                "humidity": 0.5
+                                            },
                                     ]
-_content_weights = _nornalise_weights(_content_weights_raw)
 
 
-def _gen_content():
-    """Generates a random content for a tile"""
-    content:type[Base_content] = r.choice(_content_objects, 1, p=_content_weights)[0]
+def recalculate_noise_generators():
+    """Recalculate perlin noise generators for tile generation."""
+    perlin_danger = PerlinNoise(octaves=2**35, seed=tile_type_noise_seeds["danger"])
+    perlin_height = PerlinNoise(octaves=2**35, seed=tile_type_noise_seeds["height"])
+    perlin_temperature = PerlinNoise(octaves=2**35, seed=tile_type_noise_seeds["temperature"])
+    perlin_humidity = PerlinNoise(octaves=2**35, seed=tile_type_noise_seeds["humidity"])
+    tile_type_noises = {
+        "danger": perlin_danger,
+        "height": perlin_height,
+        "temperature": perlin_temperature,
+        "humidity": perlin_humidity
+    }
+    return tile_type_noises
+
+
+# noise generators for tile generation
+_tile_type_noises = recalculate_noise_generators()
+
+
+def _get_nose_values(absolute_x:int, absoulte_y:int):
+    """Gets the noise values for each perlin noise generator at a specific point, and normalises it between 0 and 1."""
+    noise_values:dict[str, float] = {}
+    for name, noise in _tile_type_noises.items():
+        noise_values[name] = ((noise([(absolute_x + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION,
+                                    (absoulte_y + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION])
+                              + 1.0) / 2)
+    return noise_values
+
+
+def _calculate_closest(noise_values:dict[str, float]):
+    """Calculates the best tile type for the space depending on the perlin noise values."""
+    min_diff_num = 0
+    min_diff = 1000000
+    for x, weight in enumerate(_content_weights):
+        sum_diff = 0
+        for name in noise_values:
+            try:
+                sum_diff += abs(weight[name] - noise_values[name])
+            except KeyError:
+                pass
+        if sum_diff < min_diff:
+            min_diff = sum_diff
+            min_diff_num = x
+    return _content_objects[min_diff_num]
+        
+
+
+def _gen_content(absolute_x:int, absoulte_y:int):
+    """Generates a random content for a tile."""
+    noise_values = _get_nose_values(absolute_x, absoulte_y)
+    content:type[Base_content] = _calculate_closest(noise_values)
     return content()
 
 
@@ -119,14 +174,14 @@ def _load_content(content_json:dict[str, Any]|None):
 
 
 class Tile:
-    def __init__(self, x:int, y:int, visited:int|None=None, content:Base_content|None=None):
-        self.x = int(x) % CHUNK_SIZE
-        self.y = int(y) % CHUNK_SIZE
+    def __init__(self, absolute_x:int, absoulte_y:int, visited:int|None=None, content:Base_content|None=None):
+        self.x = int(absolute_x) % CHUNK_SIZE
+        self.y = int(absoulte_y) % CHUNK_SIZE
         if visited is None:
             visited = 0
         self.visited = visited
         if content is None:
-            content = _gen_content()
+            content = _gen_content(absolute_x, absoulte_y)
         self.content = content
 
 
@@ -205,6 +260,15 @@ class Chunk:
         chunk_file_name = f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}{self.base_x}{CHUNK_FILE_NAME_SEP}{self.base_y}"
         encode_save_s(chunk_data, join(save_folder_path, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
         logger("Saved chunk", f"{chunk_file_name}.{SAVE_EXT}")
+
+
+    def fill_chunk(self):
+        """
+        Generates ALL not yet generated tiles.
+        """
+        for x in range(CHUNK_SIZE):
+            for y in range(CHUNK_SIZE):
+                self.get_tile(x, y)
 
 
 class World:
@@ -361,3 +425,49 @@ class World:
         else:
             tile = chunk.get_tile(x, y)
         return tile
+    
+    
+    def fill_all_chunks(self):
+        """
+        Generates ALL not yet generated tiles in ALL chunks.
+        """
+        for chunk in self.chunks.values():
+            chunk.fill_chunk()
+    
+    
+    def _get_corners(self):
+        """
+        Returns the four corners of the world.\n
+        (-x, -y, +x, +y)
+        """
+        min_x = 0
+        min_y = 0
+        max_x = 0
+        max_y = 0
+        for chunk in self.chunks.values():
+            if chunk.base_x < min_x:
+                min_x = chunk.base_x
+            if chunk.base_y < min_y:
+                min_y = chunk.base_y
+            if chunk.base_x > max_x:
+                max_x = chunk.base_x
+            if chunk.base_y > max_y:
+                max_y = chunk.base_y
+        max_x += CHUNK_SIZE - 1
+        max_y += CHUNK_SIZE - 1
+        return (min_x, min_y, max_x, max_y)
+    
+    
+    def make_rectangle(self, save_folder_path:str|None=None, append_mode=True):
+        """
+        Generates chunks in a way that makes the world rectangle shaped.\n
+        If `save_folder_path` is not None, it will try to load the chunks from the save folder first (calls `load_chunk_from_folder`).
+        """
+        corners = self._get_corners()
+        search_folder = save_folder_path is not None
+        for x in range(corners[0], corners[2] + 1, CHUNK_SIZE):
+            for y in range(corners[1], corners[3] + 1, CHUNK_SIZE):
+                if search_folder:
+                    self.load_chunk_from_folder(x, y, save_folder_path, append_mode)
+                else:
+                    self.get_chunk(x, y)

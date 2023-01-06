@@ -24,12 +24,24 @@ data.sav
             - x_pos: int
             - y_pos: int
             - rotation: int(Rotation(Enum).value)
-        - seed:
-            - type: str
-            - state: [int * 624]
-            - pos: int
-            - has_gauss: int
-            - cached_gaussian: float
+        - seeds:
+            - main_seed:
+                - type: str
+                - state: [int * 624]
+                - pos: int
+                - has_gauss: int
+                - cached_gaussian: float
+            - world_seed:
+                - type: str
+                - state: [int * 624]
+                - pos: int
+                - has_gauss: int
+                - cached_gaussian: float
+            - tile_type_noise_seeds:
+                - danger: int,
+                - height: int,
+                - temperature: int,
+                - humidity: int
 chunks
     {base_x}_{base_y}.sav
         - tiles: [

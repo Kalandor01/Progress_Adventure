@@ -12,7 +12,7 @@ try:
     import entities as es
     import save_manager as sm
 
-    from tools import r, Log_type, sfm, col, getch
+    from tools import main_seed, Log_type, sfm, col, getch
     from constants import                                                   \
         MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME,   \
         DELETE_CURSOR_ICONS,                                                \
@@ -43,7 +43,7 @@ if __name__ == "__main__":
                 ts.settings_manager("keybinds"))
             ts.change_logging_level(SETTINGS.logging_level)
             SETTINGS.save_keybind_mapping()
-            SAVE_DATA:dm.Save_data = None
+            SAVE_DATA:dm.Save_data
             GLOBALS = dm.Globals(False, False, False, False)
             
             col.init()
@@ -69,7 +69,7 @@ def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=False):
             costnum = power_min
         # cost calculation
         if num > 1:
-            monster_cost = r.randint(power_min, costnum + 1)
+            monster_cost = main_seed.randint(power_min, costnum + 1)
         else:
             monster_cost = cost
         # cost adjustment
@@ -80,19 +80,19 @@ def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=False):
 
         # monster choice
         if monster_cost >= 3:
-            monster_n = r.randint(0, 1)
+            monster_n = main_seed.randint(0, 1)
             match monster_n:
                 case 0:
                     monster = es.Troll()
             cost -= 3
         elif monster_cost >= 2:
-            monster_n = r.randint(0, 1)
+            monster_n = main_seed.randint(0, 1)
             match monster_n:
                 case 0:
                     monster = es.Ghoul()
             cost -= 2
         else:
-            monster_n = r.randint(0, 1)
+            monster_n = main_seed.randint(0, 1)
             match monster_n:
                 case 0:
                     monster = es.Caveman()
@@ -136,15 +136,15 @@ def fight(monster_l:list[es.Entity]|None=None):
     while player.hp > 0 and szum > 0:
         for m in monster_l:
             if m.hp > 0:
-                attack = r.randint(1, 7) + player.attack
-                attack_e = r.randint(1, 7) + m.attack
+                attack = main_seed.randint(1, 7) + player.attack
+                attack_e = main_seed.randint(1, 7) + m.attack
                 # clash
                 if attack == attack_e:
                     print("\nCLASH!")
                 # damage
                 elif attack < attack_e:
                     print(f"\n{m.full_name} attacked {player.full_name}: ", end="")
-                    if r.random() > player.speed:
+                    if main_seed.random() > player.speed:
                         player.hp -= 2
                         if player.hp < 0:
                             player.hp = 0
@@ -157,7 +157,7 @@ def fight(monster_l:list[es.Entity]|None=None):
                 # attack
                 else:
                     print(f"\n{player.full_name} attacked {m.full_name}: ", end="")
-                    if r.random() > player.speed:
+                    if main_seed.random() > player.speed:
                         m.hp -= 2
                         if m.hp < 0:
                             m.hp = 0

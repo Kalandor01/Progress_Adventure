@@ -2,6 +2,7 @@ pip:
     - numpy
     - colorama
     - Pillow
+    - perlin-noise
 git:
     - Save File Manager
     - Random Sentance

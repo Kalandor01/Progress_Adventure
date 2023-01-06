@@ -7,6 +7,8 @@ from save_file_manager import Cursor_icon
 PYTHON_MIN_VERSION = "3.11.0"
 PIP_NP_MIN_VERSION = "1.23.4"
 PIP_COL_MIN_VERSION = "0.4.6"
+PIP_PIL_MIN_VERSION = "9.4.0"
+PIP_PERLIN_MIN_VERSION = "1.12"
 
 PIP_SFM_MIN_VERSION = "1.13.3"
 PIP_RS_MIN_VERSION = "1.5.1"
@@ -62,8 +64,9 @@ FILE_ENCODING_VERSION = 2
 CHUNK_SIZE = 10
 CHUNK_FILE_NAME = "chunk"
 CHUNK_FILE_NAME_SEP = "_"
-SAVE_VERSION = "1.4.1"
+SAVE_VERSION = "1.5"
 DOUBLE_KEYS = [b"\xe0", b"\x00"]
+TILE_NOISE_RESOLUTION = 1000000000000
 
 
 # from constants import                                                       \
@@ -82,4 +85,5 @@ DOUBLE_KEYS = [b"\xe0", b"\x00"]
 #     STANDARD_CURSOR_ICONS, DELETE_CURSOR_ICONS,                             \
 #     ERROR_HANDLING, LOG_MS,                                                 \
 #     AUTO_SAVE_INTERVAL, AUTO_SAVE_DELAY, FILE_ENCODING_VERSION, CHUNK_SIZE, \
-#     SAVE_VERSION, DOUBLE_KEYS
+#     CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP                                    \
+#     SAVE_VERSION, DOUBLE_KEYS, TILE_NOISE_RESOLUTION

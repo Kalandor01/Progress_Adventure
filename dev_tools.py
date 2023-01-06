@@ -11,13 +11,13 @@ from PIL import Image, ImageDraw
 from utils import Color, make_date, make_time, stylized_text
 from constants import                                                                   \
     ENCODING,                                                                           \
-    TEST_THREAD_NAME, VISUALIZER_THREAD_NAME,                                           \
+    MAIN_THREAD_NAME, TEST_THREAD_NAME, VISUALIZER_THREAD_NAME,                         \
     ROOT_FOLDER,                                                                        \
     SAVES_FOLDER_PATH, SAVE_EXT,                                                        \
     BACKUPS_FOLDER_PATH, OLD_BACKUP_EXT, BACKUP_EXT,                                    \
     SAVE_FILE_NAME_DATA,                                                                \
     SAVE_SEED,                                                                          \
-    FILE_ENCODING_VERSION, CHUNK_SIZE,                                                  \
+    FILE_ENCODING_VERSION,                                                              \
     SAVE_VERSION
 import tools as ts
 from tools import sfm
@@ -258,43 +258,6 @@ class Self_Checks:
     #     self.give_result(check_name, ts.Log_type.FAIL)
 
 
-def fill_chunk(chunk:cm.Chunk):
-    """Generates ALL not yet generated tiles for a chunks."""
-    for x in range(CHUNK_SIZE):
-        for y in range(CHUNK_SIZE):
-            chunk.get_tile(x, y)
-    return chunk
-
-
-def fill_all_chunka(world:cm.World):
-    """Generates ALL not yet generated tiles for the world."""
-    for chunk in world.chunks.values():
-        fill_chunk(chunk)
-    return world
-
-
-def get_world_corners(world:cm.World):
-    """
-    Returns the four corners of the world.
-    """
-    min_x = 0
-    min_y = 0
-    max_x = 0
-    max_y = 0
-    for chunk in world.chunks.values():
-        if chunk.base_x < min_x:
-            min_x = chunk.base_x
-        if chunk.base_y < min_y:
-            min_y = chunk.base_y
-        if chunk.base_x > max_x:
-            max_x = chunk.base_x
-        if chunk.base_y > max_y:
-            max_y = chunk.base_y
-    max_x += CHUNK_SIZE - 1
-    max_y += CHUNK_SIZE - 1
-    return ((min_x, min_y), (max_x, max_y))
-
-
 class Content_colors(Enum):
     EMPTY = (0, 0, 0, 0)
     FIGHT = (255, 0, 0, 255)
@@ -312,16 +275,15 @@ def draw_world_tiles(world:cm.World, image_path="world.png"):
     tile_colors = (Content_colors.EMPTY.value, Content_colors.FIELD.value, Content_colors.FIGHT.value, )
     tile_counts = [0, 0, 0]
     
-    corners = get_world_corners(world)
-    size = ((corners[1][0] - corners[0][0] + 1) * tile_size[0], (corners[1][1] - corners[0][1] + 1) * tile_size[1])
-    min_pos = corners[0]
+    corners = world._get_corners()
+    size = ((corners[2] - corners[0] + 1) * tile_size[0], (corners[3] - corners[1] + 1) * tile_size[1])
 
     im = Image.new("RGBA", size, Content_colors.EMPTY.value)
     draw = ImageDraw.Draw(im, "RGBA")
     for chunk in world.chunks.values():
         for tile in chunk.tiles.values():
-            x = (chunk.base_x - min_pos[0]) + tile.x
-            y = (chunk.base_y - min_pos[1]) + tile.y
+            x = (chunk.base_x - corners[0]) + tile.x
+            y = (chunk.base_y - corners[1]) + tile.y
             start_x = int(x * tile_size[0])
             start_y = int(y * tile_size[1])
             end_x = int(x * tile_size[0] + tile_size[0] - 1)
@@ -355,9 +317,6 @@ def save_visualizer(save_name:str):
         display_visualized_save_path = join(EXPORT_FOLDER, visualized_save_name)
         visualized_save_path = join(ROOT_FOLDER, display_visualized_save_path)
         
-        ts.recreate_folder(EXPORT_FOLDER)
-        ts.recreate_folder(visualized_save_name, join(ROOT_FOLDER, EXPORT_FOLDER))
-        
         data = ts.decode_save_s(join(save_folder_path, SAVE_FILE_NAME_DATA, ), 1)
         
         # check save version
@@ -378,11 +337,17 @@ def save_visualizer(save_name:str):
             # player
             player_data:dict[str, Any] = data["player"]
             player = _load_player_json(player_data)
-            seed = ts.np.random.RandomState()
-            seed.set_state(ts.json_to_random_state(data["seed"]))
-            save_data = dm.Save_data(save_name, display_name, last_access, player, seed.get_state())
+            # seeds
+            seeds = data["seeds"]
+            main_seed = ts.np.random.RandomState()
+            world_seed = ts.np.random.RandomState()
+            main_seed.set_state(ts.json_to_random_state(seeds["main_seed"]))
+            world_seed.set_state(ts.json_to_random_state(seeds["world_seed"]))
+            tile_type_noise_seeds = seeds["tile_type_noise_seeds"]
+            save_data = dm.Save_data(save_name, display_name, last_access, player, main_seed, world_seed, tile_type_noise_seeds)
             
             # display
+            ttn_seed_txt = str(save_data.tile_type_noise_seeds).replace(",", ",\n")
             text =  f"---------------------------------------------------------------------------------------------------------------\n"\
                     f"EXPORTED DATA FROM \"{save_name}\"\n"\
                     f"Loaded {SAVE_FILE_NAME_DATA}.{SAVE_EXT}:\n"\
@@ -390,16 +355,22 @@ def save_visualizer(save_name:str):
                     f"Display save name: {save_data.display_save_name}\n"\
                     f"Last saved: {make_date(save_data.last_access, '.')} {make_time(save_data.last_access[3:])}\n"\
                     f"\nPlayer:\n{save_data.player}\n"\
-                    f"\nSeed: {save_data.seed}"\
+                    f"\nMain seed:\n{ts.random_state_to_json(save_data.main_seed)}\n"\
+                    f"\nWorld seed:\n{ts.random_state_to_json(save_data.world_seed)}\n"\
+                    f"\nTile type noise seeds:\n{ttn_seed_txt}"\
                     f"\n---------------------------------------------------------------------------------------------------------------"
             print(text)
             ans = sfm.UI_list(["Yes", "No"], f"Do you want export the data from \"{save_name}\" into \"{join(display_visualized_save_path, EXPORT_DATA_FILE)}\"?").display()
             if ans == 0:
+                ts.recreate_folder(EXPORT_FOLDER)
+                ts.recreate_folder(visualized_save_name, join(ROOT_FOLDER, EXPORT_FOLDER))
                 with open(join(visualized_save_path, EXPORT_DATA_FILE), "a") as f:
                     f.write(text + "\n\n")
             
             ans = sfm.UI_list(["Yes", "No"], f"Do you want export the world data from \"{save_name}\" into \"{join(display_visualized_save_path, EXPORT_WORLD_FILE)}\"?").display()
             if ans == 0:
+                ts.recreate_folder(EXPORT_FOLDER)
+                ts.recreate_folder(visualized_save_name, join(ROOT_FOLDER, EXPORT_FOLDER))
                 print("Getting chunk data...", end="", flush=True)
                 # get chunks data
                 load_all_chunks(save_data)
@@ -407,8 +378,13 @@ def save_visualizer(save_name:str):
                 # fill
                 ans = sfm.UI_list(["No", "Yes"], f"Do you want to fill in ALL tiles in ALL generated chunks?").display()
                 if ans == 1:
+                    ans = sfm.UI_list(["No", "Yes"], f"Do you want to generates the rest of the chunks in a way that makes the world rectangle shaped?").display()
+                    if ans == 1:
+                        print("Generating chunks...", end="", flush=True)
+                        save_data.world.make_rectangle()
+                        print("DONE!")
                     print("Filling chunks...", end="", flush=True)
-                    fill_all_chunka(save_data.world)
+                    save_data.world.fill_all_chunks()
                     print("DONE!")
                 # make image
                 print("Generating image...", end="", flush=True)
@@ -421,7 +397,7 @@ def save_visualizer(save_name:str):
             print(text)
     except FileNotFoundError:
         print(f"ERROR: {exc_info()[1]}")
-    # return save_data
+    ts.threading.current_thread().name = MAIN_THREAD_NAME
 
 
 # Self_Checks().run_all_tests()
@@ -430,4 +406,22 @@ def save_visualizer(save_name:str):
 #     if isdir(join(SAVES_FOLDER_PATH, folder)):
 #         save_visualizer(folder)
 
-# save_visualizer("new sav")
+save_visualizer("new sav")
+
+
+# noise = PerlinNoise(octaves=2**35, seed=10)
+# for x in range(100):
+#     print(noise([(x + 15 + division / 2) / division, (15 + division / 2) / division]))
+
+# xpix, ypix = 100, 100
+# pic = []
+# for x in range(xpix):
+#     row = []
+#     for y in range(ypix):
+#         noise_val = noise([(x + division / 2) / division, (y + division / 2) / division])
+#         row.append(noise_val)
+#     pic.append(row)
+
+# plt.imshow(pic, cmap='gray')
+# plt.show()
+

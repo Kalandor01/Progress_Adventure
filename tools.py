@@ -16,6 +16,7 @@ import utils as u
 from constants import                                                   \
     PYTHON_MIN_VERSION,                                                 \
     PIP_NP_MIN_VERSION, PIP_COL_MIN_VERSION,                            \
+    PIP_PIL_MIN_VERSION, PIP_PERLIN_MIN_VERSION,                         \
     PIP_SFM_MIN_VERSION, PIP_RS_MIN_VERSION,                            \
     ENCODING,                                                           \
     ROOT_FOLDER,                                                        \
@@ -29,7 +30,36 @@ from constants import                                                   \
 
 
 # random
-r = np.random.RandomState()
+def make_random_seed(parrent_seed:np.random.RandomState):
+    """Returns a new numpy.RandomState from another numpy.RandomState."""
+    return np.random.RandomState(int(parrent_seed.rand() * 4294967296))
+
+
+main_seed = np.random.RandomState()
+world_seed = make_random_seed(main_seed)
+
+
+def make_perlin_noise_seed(parrent_seed:np.random.RandomState=world_seed):
+    """Returns a seed for a perlin noise."""
+    return int(parrent_seed.rand() * 10000000000000000)
+
+
+def recalculate_tile_type_noise_seeds(parrent_seed:np.random.RandomState=world_seed):
+    """Recalculate seeds for perlin noise generators."""
+    danger_seed = make_perlin_noise_seed(parrent_seed)
+    height_seed = make_perlin_noise_seed(parrent_seed)
+    temperature_seed = make_perlin_noise_seed(parrent_seed)
+    humidity_seed = make_perlin_noise_seed(parrent_seed)
+    ttn_seeds = {
+        "danger": danger_seed,
+        "height": height_seed,
+        "temperature": temperature_seed,
+        "humidity": humidity_seed
+    }
+    return ttn_seeds
+
+
+tile_type_noise_seeds:dict[str, int] = recalculate_tile_type_noise_seeds(world_seed)
 
 
 class Log_type(Enum):
@@ -321,21 +351,21 @@ def settings_manager(line_name:str, write_value:Any=None):
                 raise KeyError(line_name)
 
 
-def random_state_to_json(random_state:np.random.RandomState|tuple|dict[str, Any]):
+def random_state_to_json(random_state:np.random.RandomState|tuple):
     """
-    Converts a numpy RandomState.getstate() into a json format.
+    Converts a numpy RandomState(.getstate()) into a json format.
     """
-    if type(random_state) is tuple or type(random_state) is dict:
-        state = random_state
-    elif isinstance(random_state, np.random.RandomState):
-        state = random_state.get_state()
+    if isinstance(random_state, np.random.RandomState):
+        state:tuple = tuple(random_state.get_state())
+    else:
+        state:tuple = random_state
     state_nums = []
     for num in state[1]:
         state_nums.append(int(num))
     return {"type": state[0], "state": state_nums, "pos": state[2], "has_gauss": state[3], "cached_gaussian": state[4]}
 
 
-def json_to_random_state(random_state:dict):
+def json_to_random_state(random_state:dict[str, Any]):
     """
     Converts a json formated numpy RandomState.getstate() into a numpy RandomState.getstate().
     """
@@ -400,11 +430,16 @@ def check_package_versions():
     - python
     - numpy
     - colorama
+    - Pillow
+    - perlin-noise
     - Save File Manager
     - random sentance
     """
+    from importlib.metadata import version
     from platform import python_version
     import random_sentance as rs
+    import PIL
+    import perlin_noise as perlin
 
     logger("Checking python version")
     py_good = True
@@ -413,6 +448,8 @@ def check_package_versions():
     logger("Checking package versions")
     packages = [[PIP_NP_MIN_VERSION, np.__version__, "numpy"],
                 [PIP_COL_MIN_VERSION, col.__version__, "colorama"],
+                [PIP_PIL_MIN_VERSION, PIL.__version__, "Pillow"],
+                [PIP_PERLIN_MIN_VERSION, version("perlin-noise"), "perlin-noise"],
                 [PIP_SFM_MIN_VERSION, sfm.__version__, "Save File Manager"],
                 [PIP_RS_MIN_VERSION, rs.__version__, "Random Sentance"]]
 
