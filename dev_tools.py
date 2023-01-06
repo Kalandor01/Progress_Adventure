@@ -406,7 +406,7 @@ def save_visualizer(save_name:str):
 #     if isdir(join(SAVES_FOLDER_PATH, folder)):
 #         save_visualizer(folder)
 
-save_visualizer("new sav")
+# save_visualizer("new sav")
 
 
 # noise = PerlinNoise(octaves=2**35, seed=10)
