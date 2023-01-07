@@ -41,7 +41,8 @@ data.sav
                 - danger: int,
                 - height: int,
                 - temperature: int,
-                - humidity: int
+                - humidity: int,
+                - population: int
 chunks
     {base_x}_{base_y}.sav
         - tiles: [

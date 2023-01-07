@@ -50,11 +50,13 @@ def recalculate_tile_type_noise_seeds(parrent_seed:np.random.RandomState=world_s
     height_seed = make_perlin_noise_seed(parrent_seed)
     temperature_seed = make_perlin_noise_seed(parrent_seed)
     humidity_seed = make_perlin_noise_seed(parrent_seed)
+    population_seed = make_perlin_noise_seed(parrent_seed)
     ttn_seeds = {
         "danger": danger_seed,
         "height": height_seed,
         "temperature": temperature_seed,
-        "humidity": humidity_seed
+        "humidity": humidity_seed,
+        "population": population_seed
     }
     return ttn_seeds
 

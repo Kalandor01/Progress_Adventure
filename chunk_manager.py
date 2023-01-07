@@ -1,3 +1,4 @@
+from enum import Enum
 from os.path import join
 from typing import Any
 from copy import deepcopy
@@ -6,13 +7,22 @@ from perlin_noise import PerlinNoise
 from constants import                                           \
     SAVE_EXT, SAVE_FOLDER_NAME_CHUNKS, CHUNK_SIZE,              \
     CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, TILE_NOISE_RESOLUTION
-from tools import main_seed, world_seed, tile_type_noise_seeds, logger, decode_save_s, encode_save_s, Log_type
+from tools import world_seed, tile_type_noise_seeds, logger, decode_save_s, encode_save_s, Log_type
 from data_manager import Save_data
+
+
+class Content_types(Enum):
+    NONE =      "_"
+    BLANK =     "blank"
+    FIELD =     "field"
+    MOUNTAIN =  "mountain"
+    FIGHT =     "fight"
+    VILLAGE =   "village"
 
 
 class Base_content:
     def __init__(self, data:dict[str, Any]|None=None):
-        self.type = "blank"
+        self.type = Content_types.BLANK
 
 
     def _visit(self, tile:'Tile', save_data:Save_data):
@@ -22,35 +32,72 @@ class Base_content:
 
     def to_json(self):
         """Returns a json representation of the `Content`."""
-        content_json:dict[str, Any] = {"type": self.type}
+        content_json:dict[str, Any] = {"type": self.type.value}
         return content_json
 
 
 class Field_content(Base_content):
     def __init__(self, data:dict[str, Any]|None=None):
         super().__init__()
-        self.type = "field"
+        self.type = Content_types.FIELD
 
 
     def _visit(self, tile:'Tile', save_data:Save_data):
         super()._visit(tile, save_data)
-        print(f"{save_data.player.full_name} entered a {self.type}.")
+        print(f"{save_data.player.full_name} entered a {self.type.value}.")
 
+
+class Mountain_content(Base_content):
+    def __init__(self, data:dict[str, Any]|None=None):
+        super().__init__()
+        self.type = Content_types.MOUNTAIN
+        if data is not None:
+            try: self._set_height(data["height"])
+            except KeyError: self._set_height()
+        else:
+            self._set_height()
+
+    
+    def _set_height(self, height:int|None=None):
+        if height is None:
+            self.height = world_seed.randint(500, 10000)
+        else:
+            self.height = int(height)
+    
+
+    def _visit(self, tile:'Tile', save_data:Save_data):
+        super()._visit(tile, save_data)
+        print(f"{save_data.player.full_name} climbed a {self.type.value}.")
+        print(f"The {self.type.value} is {self.height}m tall.")
+
+
+    def to_json(self):
+        content_json = super().to_json()
+        content_json["height"] = self.height
+        return content_json
+    
 
 class Fight_content(Base_content):
     def __init__(self, data:dict[str, Any]|None=None):
         super().__init__()
-        self.type = "fight"
+        self.type = Content_types.FIGHT
         if data is not None:
-            try: self.fight = str(data["fight"])
-            except KeyError: self.fight = "test"
+            try: self._set_fight(data["fight"])
+            except KeyError: self._set_fight()
         else:
+            self._set_fight()
+
+
+    def _set_fight(self, fight:str|None=None):
+        if fight is None:
             self.fight = "test"
+        else:
+            self.fight = str(fight)
 
 
     def _visit(self, tile:'Tile', save_data:Save_data):
         super()._visit(tile, save_data)
-        print(f"{save_data.player.full_name} entered a {self.type}.")
+        print(f"{save_data.player.full_name} entered a {self.type.value}.")
         print(self.fight)
 
 
@@ -60,86 +107,140 @@ class Fight_content(Base_content):
         return content_json
 
 
-# all content types for `_get_content()`
-_content_types = [
-                    "_",
-                    "blank",
-                    "field",
-                    "fight"
-                ]
-# content classes to map to `_content_types`
-_content_map_objects = [
-                        Field_content,
-                        Field_content,
-                        Field_content,
-                        Fight_content
-                    ]
-# all randomly selectable content classes in `_gen_content()`
-_content_objects:list[type[Base_content]] = [
-                    Field_content,
-                    Fight_content
-                ]
-# the properties of content classes used in pairs with perlin noise generators and `_content_objects`
-_content_weights:list[dict[str, float]] = [
+class Village_content(Base_content):
+    def __init__(self, data:dict[str, Any]|None=None):
+        super().__init__()
+        self.type = Content_types.VILLAGE
+        if data is not None:
+            try: self._set_population(data["population"])
+            except KeyError: self._set_population()
+        else:
+            self._set_population()
+
+
+    def _set_population(self, population:int|None=None):
+        if population is None:
+            self.population = world_seed.randint(100, 100000)
+        else:
+            self.population = int(population)
+
+
+    def _visit(self, tile:'Tile', save_data:Save_data):
+        super()._visit(tile, save_data)
+        print(f"{save_data.player.full_name} entered a {self.type.value}.")
+        print(f"The {self.type.value} has a population of {self.population} people.")
+
+
+    def to_json(self):
+        content_json = super().to_json()
+        content_json["population"] = self.population
+        return content_json
+
+
+# mapps all content types to content classes for `_get_content()`
+_content_type_map:dict[str, type[Base_content]] = {
+                    Content_types.NONE.value: Field_content,
+                    Content_types.BLANK.value: Field_content,
+                    Content_types.FIELD.value: Field_content,
+                    Content_types.MOUNTAIN.value: Mountain_content,
+                    Content_types.FIGHT.value: Fight_content,
+                    Content_types.VILLAGE.value: Village_content
+                }
+
+# all randomly selectable content classes in `_gen_content()` with the properties of that content class
+_content_properties:dict[type[Base_content], dict[str, float]] = {
+                                            Field_content:
                                             {
                                                 "danger": 0.0,
                                                 "height": 0.5,
                                                 "temperature": 0.5,
-                                                "humidity": 0.5
+                                                "humidity": 0.5,
+                                                "population": 0.1
                                             },
+                                            Mountain_content:
+                                            {
+                                                "danger": 0.1,
+                                                "height": 1.0,
+                                                "temperature": 0.25,
+                                                "humidity": 0.3,
+                                                "population": 0.0
+                                            },
+                                            Fight_content:
                                             {
                                                 "danger": 1.0,
                                                 "height": 0.5,
                                                 "temperature": 0.5,
-                                                "humidity": 0.5
+                                                "humidity": 0.5,
+                                                "population": 0.8
                                             },
-                                    ]
+                                            Village_content:
+                                            {
+                                                "danger": 0.1,
+                                                "height": 0.5,
+                                                "temperature": 0.6,
+                                                "humidity": 0.6,
+                                                "population": 1.0
+                                            },
+                                        }
 
 
-def recalculate_noise_generators():
+# Offsets for the calculated noise value in `_get_nose_values()`.
+tile_type_noise_offsets:dict[str, float] = {
+    "danger": -0.1,
+    "height": 0,
+    "temperature": 0,
+    "humidity": 0,
+    "population": -0.1
+}
+
+
+def recalculate_noise_generators(ttn_seeds:dict[str, int]):
     """Recalculate perlin noise generators for tile generation."""
-    perlin_danger = PerlinNoise(octaves=2**35, seed=tile_type_noise_seeds["danger"])
-    perlin_height = PerlinNoise(octaves=2**35, seed=tile_type_noise_seeds["height"])
-    perlin_temperature = PerlinNoise(octaves=2**35, seed=tile_type_noise_seeds["temperature"])
-    perlin_humidity = PerlinNoise(octaves=2**35, seed=tile_type_noise_seeds["humidity"])
+    perlin_danger = PerlinNoise(octaves=2**36, seed=ttn_seeds["danger"])
+    perlin_height = PerlinNoise(octaves=2**35, seed=ttn_seeds["height"])
+    perlin_temperature = PerlinNoise(octaves=2**34, seed=ttn_seeds["temperature"])
+    perlin_humidity = PerlinNoise(octaves=2**34, seed=ttn_seeds["humidity"])
+    perlin_population = PerlinNoise(octaves=2**36, seed=ttn_seeds["population"])
+    
     tile_type_noises = {
         "danger": perlin_danger,
         "height": perlin_height,
         "temperature": perlin_temperature,
-        "humidity": perlin_humidity
+        "humidity": perlin_humidity,
+        "population": perlin_population
     }
     return tile_type_noises
 
 
 # noise generators for tile generation
-_tile_type_noises = recalculate_noise_generators()
+_tile_type_noises = recalculate_noise_generators(tile_type_noise_seeds)
 
 
 def _get_nose_values(absolute_x:int, absoulte_y:int):
     """Gets the noise values for each perlin noise generator at a specific point, and normalises it between 0 and 1."""
     noise_values:dict[str, float] = {}
     for name, noise in _tile_type_noises.items():
-        noise_values[name] = ((noise([(absolute_x + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION,
+        noise_values[name] = (noise([(absolute_x + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION,
                                     (absoulte_y + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION])
-                              + 1.0) / 2)
+                                    + 0.5 + tile_type_noise_offsets[name])
     return noise_values
 
 
 def _calculate_closest(noise_values:dict[str, float]):
     """Calculates the best tile type for the space depending on the perlin noise values."""
-    min_diff_num = 0
+    min_diff_content = Field_content
     min_diff = 1000000
-    for x, weight in enumerate(_content_weights):
+    for content_type, properties in _content_properties.items():
         sum_diff = 0
-        for name in noise_values:
+        for name in properties:
             try:
-                sum_diff += abs(weight[name] - noise_values[name])
+                sum_diff += abs(properties[name] - noise_values[name])
             except KeyError:
                 pass
         if sum_diff < min_diff:
             min_diff = sum_diff
-            min_diff_num = x
-    return _content_objects[min_diff_num]
+            min_diff_content = content_type
+    return min_diff_content
         
 
 
@@ -150,14 +251,13 @@ def _gen_content(absolute_x:int, absoulte_y:int):
     return content()
 
 
-def _get_content(content_type:str):
+def _get_content(content_type:str) -> type[Base_content]:
     """Get the content class from the content type."""
     # get content type index
-    try: content_index = _content_types.index(content_type)
-    except ValueError: content_index = 0
-    # get content class
-    content:type[Base_content] = _content_map_objects[content_index]
-    return content
+    try: return _content_type_map[content_type]
+    except KeyError:
+        logger("Unknown content type", f'type: "{content_type}"', Log_type.ERROR)
+        return Field_content
 
 
 def _load_content(content_json:dict[str, Any]|None):
@@ -175,6 +275,9 @@ def _load_content(content_json:dict[str, Any]|None):
 
 class Tile:
     def __init__(self, absolute_x:int, absoulte_y:int, visited:int|None=None, content:Base_content|None=None):
+        """
+        If `content` is None, the x and y must be absolute coordinates.
+        """
         self.x = int(absolute_x) % CHUNK_SIZE
         self.y = int(absoulte_y) % CHUNK_SIZE
         if visited is None:
@@ -231,31 +334,31 @@ class Chunk:
             return None
 
 
-    def gen_tile(self, x:int, y:int):
+    def gen_tile(self, absolute_x:int, absolute_y:int):
         """Generates a `Tile` in the specified location."""
-        x_con = x % CHUNK_SIZE
-        y_con = y % CHUNK_SIZE
+        x_con = absolute_x % CHUNK_SIZE
+        y_con = absolute_y % CHUNK_SIZE
         new_tile_name = f"{x_con}_{y_con}"
-        new_tile = Tile(x_con, y_con)
+        new_tile = Tile(absolute_x, absolute_y)
         self.tiles[new_tile_name] = new_tile
-        logger("Creating tile", f"x: {x} , y: {y}", Log_type.DEBUG)
+        logger("Creating tile", f"x: {x_con} , y: {y_con}", Log_type.DEBUG)
         return new_tile
 
 
-    def get_tile(self, x:int, y:int):
+    def get_tile(self, absolute_x:int, absolute_y:int):
         """
         Returns the `Tile` if it exists.\n
         Otherwise it generates a new one.
         """
-        tile = self.find_tile(x, y)
+        tile = self.find_tile(absolute_x, absolute_y)
         if tile is None:
-            return self.gen_tile(x, y)
+            return self.gen_tile(absolute_x, absolute_y)
         else:
             return tile
 
 
     def save_to_file(self, save_folder_path:str):
-        """Saves the chunk's data a file in the save folder."""
+        """Saves the chunk's data into a file in the save folder."""
         chunk_data = self.to_json()
         chunk_file_name = f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}{self.base_x}{CHUNK_FILE_NAME_SEP}{self.base_y}"
         encode_save_s(chunk_data, join(save_folder_path, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
@@ -268,7 +371,7 @@ class Chunk:
         """
         for x in range(CHUNK_SIZE):
             for y in range(CHUNK_SIZE):
-                self.get_tile(x, y)
+                self.get_tile(self.base_x + x, self.base_y + y)
 
 
 class World:
@@ -327,18 +430,27 @@ class World:
         return {tile_name: tile_obj}
 
 
-    def save_all_chunks_to_files(self, save_folder_path:str, remove_chunks=False):
+    def save_all_chunks_to_files(self, save_folder_path:str, remove_chunks=False, show_progress_text:str|None=None):
         """
         Saves all chunks to the save file.\n
-        If `remove_chunks` is True, it also removes the chunks from the chunks list.
+        If `remove_chunks` is True, it also removes the chunks from the chunks list.\n
+        If `show_progress_text` is not None, it writes out a progress percentage while saving.
         """
         if remove_chunks:
             chunk_data = deepcopy(self.chunks)
             self.chunks.clear()
         else:
             chunk_data = self.chunks
-        for chunk in chunk_data:
-            chunk_data[chunk].save_to_file(save_folder_path)
+        if show_progress_text is not None:
+            cl = len(chunk_data)
+            print(show_progress_text, end="", flush=True)
+            for x, chunk in enumerate(chunk_data.values()):
+                chunk.save_to_file(save_folder_path)
+                print(f"\r{show_progress_text}{round((x + 1) / cl * 100, 1)}%", end="", flush=True)
+            print(f"\r{show_progress_text}DONE!             ")
+        else:
+            for chunk in chunk_data.values():
+                chunk.save_to_file(save_folder_path)
 
 
     def find_chunk_in_folder(self, x:int, y:int, save_folder_path:str):
@@ -400,41 +512,51 @@ class World:
             return None
 
 
-    def gen_tile(self, x:int, y:int):
+    def gen_tile(self, absolute_x:int, absolute_y:int):
         """
         Generates a new `Tile`.\n
         Generates a new `Chunk` if that also doesn't exist.
         """
-        chunk = self.get_chunk(x, y)
-        new_tile = chunk.gen_tile(x, y)
+        chunk = self.get_chunk(absolute_x, absolute_y)
+        new_tile = chunk.gen_tile(absolute_x, absolute_y)
         return new_tile
 
 
-    def get_tile(self, x:int, y:int, save_folder_path:str|None=None):
+    def get_tile(self, absolute_x:int, absolute_y:int, save_folder_path:str|None=None):
         """
         Returns the `Tile` if it exists in the `chunks` list or in the chunks folder.\n
         Otherwise it generates a new `Tile` and a new `Chunk`, if that also doesn't exist.
         """
-        chunk = self.find_chunk(x, y)
+        chunk = self.find_chunk(absolute_x, absolute_y)
         if chunk is None:
             if save_folder_path is not None:
-                chunk = self.load_chunk_from_folder(x, y, save_folder_path)
-                tile = chunk.get_tile(x, y)
+                chunk = self.load_chunk_from_folder(absolute_x, absolute_y, save_folder_path)
+                tile = chunk.get_tile(absolute_x, absolute_y)
             else:
-                tile = self.gen_tile(x, y)
+                tile = self.gen_tile(absolute_x, absolute_y)
         else:
-            tile = chunk.get_tile(x, y)
+            tile = chunk.get_tile(absolute_x, absolute_y)
         return tile
     
     
-    def fill_all_chunks(self):
+    def fill_all_chunks(self, show_progress_text:str|None=None):
         """
-        Generates ALL not yet generated tiles in ALL chunks.
+        Generates ALL not yet generated tiles in ALL chunks.\n
+        If `show_progress_text` is not None, it writes out a progress percentage while generating.
         """
-        for chunk in self.chunks.values():
-            chunk.fill_chunk()
-    
-    
+        if show_progress_text is not None:
+            chunks = self.chunks.values()
+            cl = len(chunks)
+            print(show_progress_text, end="", flush=True)
+            for x, chunk in enumerate(chunks):
+                chunk.fill_chunk()
+                print(f"\r{show_progress_text}{round((x + 1) / cl * 100, 1)}%", end="", flush=True)
+            print(f"\r{show_progress_text}DONE!             ")
+        else:
+            for chunk in self.chunks.values():
+                chunk.fill_chunk()
+
+
     def _get_corners(self):
         """
         Returns the four corners of the world.\n

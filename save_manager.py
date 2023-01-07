@@ -10,7 +10,7 @@ import entities as es
 import inventory as iy
 
 from utils import Color
-from tools import main_seed, world_seed, sfm, Log_type
+from tools import sfm, Log_type
 from constants import                                                                 \
     CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, SAVES_FOLDER_PATH, OLD_SAVE_NAME, SAVE_EXT, \
     SAVE_FILE_NAME_DATA, SAVE_FOLDER_NAME_CHUNKS,                                     \
@@ -84,17 +84,18 @@ def _save_data_json(data:Save_data):
     save_data_json["player"] = _save_player_json(data.player)
     # randomstate
     save_data_json["seeds"] = {
-        "main_seed": ts.random_state_to_json(main_seed),
-        "world_seed": ts.random_state_to_json(world_seed),
-        "tile_type_noise_seeds": ts.tile_type_noise_seeds
+        "main_seed": ts.random_state_to_json(data.main_seed),
+        "world_seed": ts.random_state_to_json(data.world_seed),
+        "tile_type_noise_seeds": data.tile_type_noise_seeds
     }
     return save_data_json
 
 
-def make_save(data:Save_data, actual_data:Save_data|None=None, clear_chunks=True):
+def make_save(data:Save_data, actual_data:Save_data|None=None, clear_chunks=True, show_progress_text: str | None = None):
     """
     Creates a save file from the save data.\n
-    Makes a temporary backup.
+    Makes a temporary backup.\n
+    If `show_progress_text` is not None, it writes out a progress percentage while saving.
     """
     # make backup
     backup_status = ts.make_backup(data.save_name, True)
@@ -113,16 +114,17 @@ def make_save(data:Save_data, actual_data:Save_data|None=None, clear_chunks=True
     if actual_data is None:
         actual_data = data
     ts.logger("Saving chunks")
-    actual_data.world.save_all_chunks_to_files(save_folder_path, clear_chunks)
+    actual_data.world.save_all_chunks_to_files(save_folder_path, clear_chunks, show_progress_text)
     # remove backup
     if backup_status != False:
         os.remove(backup_status[0])
         ts.logger("Removed temporary backup", backup_status[1], Log_type.DEBUG)
 
 
-def load_all_chunks(save_data:Save_data):
+def load_all_chunks(save_data:Save_data, show_progress_text:str|None=None):
     """
-    Loads all chunks into the save data from a save file.
+    Loads all chunks into the save data from a save file.\n
+        If `show_progress_text` is not None, it writes out a progress percentage while loading.
     """
     # read from file (old)
     save_folder_path = os.path.join(SAVES_FOLDER_PATH, save_data.save_name)
@@ -137,8 +139,16 @@ def load_all_chunks(save_data:Save_data):
             file_numbers = name.replace(f".{SAVE_EXT}", "").replace(f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}", "").split(CHUNK_FILE_NAME_SEP)
             try: existing_chunks.append((int(file_numbers[0]), int(file_numbers[1])))
             except (ValueError, IndexError): continue
-    for chunk in existing_chunks:
-        save_data.world.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
+    if show_progress_text is not None:
+        ecl = len(existing_chunks)
+        print(show_progress_text, end="", flush=True)
+        for x, chunk in enumerate(existing_chunks):
+            save_data.world.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
+            print(f"\r{show_progress_text}{round((x + 1) / ecl * 100, 1)}%", end="", flush=True)
+        print(f"\r{show_progress_text}DONE!             ")
+    else:
+        for chunk in existing_chunks:
+            save_data.world.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
 
 
 def create_save_data():
@@ -156,10 +166,10 @@ def create_save_data():
     last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
     # seeds
     ts.main_seed = ts.np.random.RandomState()
-    ts.world_seed = ts.make_random_seed(main_seed)
-    ts.tile_type_noise_seeds = ts.recalculate_tile_type_noise_seeds(world_seed)
+    ts.world_seed = ts.make_random_seed(ts.main_seed)
+    ts.tile_type_noise_seeds = ts.recalculate_tile_type_noise_seeds(ts.world_seed)
     # load to class
-    save_data = Save_data(save_name, display_save_name, last_access, player, main_seed, world_seed, ts.tile_type_noise_seeds)
+    save_data = Save_data(save_name, display_save_name, last_access, player, ts.main_seed, ts.world_seed, ts.tile_type_noise_seeds)
     save_data.world.gen_tile(save_data.player.pos[0], save_data.player.pos[1])
     return save_data
 
@@ -214,24 +224,32 @@ def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str
     # 1.4.1 -> 1.5
     if save_version == "1.4.1":
         # multiple seeds
-        m_seed = data["seed"]
-        main_seed.set_state(ts.json_to_random_state(m_seed))
-        w_seed = ts.make_random_seed(main_seed)
+        ts.main_seed.set_state(ts.json_to_random_state(data["seed"]))
+        ts.world_seed = ts.make_random_seed(ts.main_seed)
         ttn_seeds = {
-            "danger": ts.make_perlin_noise_seed(w_seed),
-            "height": ts.make_perlin_noise_seed(w_seed),
-            "temperature": ts.make_perlin_noise_seed(w_seed),
-            "humidity": ts.make_perlin_noise_seed(w_seed)
+            "danger": ts.make_perlin_noise_seed(ts.world_seed),
+            "height": ts.make_perlin_noise_seed(ts.world_seed),
+            "temperature": ts.make_perlin_noise_seed(ts.world_seed),
+            "humidity": ts.make_perlin_noise_seed(ts.world_seed)
         }
-        wj_seed = ts.random_state_to_json(w_seed)
+        m_seed = ts.random_state_to_json(ts.main_seed)
+        w_seed = ts.random_state_to_json(ts.world_seed)
         
         data["seeds"] = {
             "main_seed": m_seed,
-            "world_seed": wj_seed,
+            "world_seed": w_seed,
             "tile_type_noise_seeds": ttn_seeds
         }
         save_version = "1.5"
         ts.logger("Corrected save data", "1.4.1 -> 1.5", Log_type.DEBUG)
+    # 1.5 -> 1.5.1
+    if save_version == "1.5":
+        # ttn_seeds: population
+        ts.world_seed.set_state(ts.json_to_random_state(data["seeds"]["world_seed"]))
+        ttn_seeds = data["seeds"]["tile_type_noise_seeds"]["population"] = ts.make_perlin_noise_seed(ts.world_seed)
+        data["seeds"]["world_seed"] = ts.random_state_to_json(ts.world_seed)
+        save_version = "1.5.1"
+        ts.logger("Corrected save data", "1.5 -> 1.5.1", Log_type.DEBUG)
     return data
 
 
@@ -292,7 +310,7 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     ts.world_seed.set_state(ts.json_to_random_state(seeds["world_seed"]))
     ts.tile_type_noise_seeds = seeds["tile_type_noise_seeds"]
     # load to class
-    save_data = Save_data(save_name, display_name, last_access, player, main_seed, world_seed, ts.tile_type_noise_seeds)
+    save_data = Save_data(save_name, display_name, last_access, player, ts.main_seed, ts.world_seed, ts.tile_type_noise_seeds)
     if is_file:
         make_save(save_data, clear_chunks=False)
     return save_data

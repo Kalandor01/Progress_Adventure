@@ -327,22 +327,19 @@ def regenerate_save_file(save_name:str, is_file=False, make_backup=True):
     global SAVE_DATA
     print(f'Regenerating "{save_name}":')
     ts.logger("Regenerating save file", f"save_name: {save_name}")
-    print(f"\tLoading...", end="")
+    print(f"\tLoading...", end="", flush=True)
     SAVE_DATA = sm.load_save(save_name, SETTINGS.keybind_mapping, is_file, False, make_backup)
     print(f"DONE!")
     if not is_file:
-        print(f"\tLoading world...", end="")
         ts.logger("Loading all chunks from file", f"save_name: {save_name}")
-        sm.load_all_chunks(SAVE_DATA)
-        print(f"DONE!")
-        print(f"\tDeleting...", end="")
+        sm.load_all_chunks(SAVE_DATA, "\tLoading world...")
+        print(f"\tDeleting...", end="", flush=True)
         ts.remove_save(save_name, is_file)
         print(f"DONE!")
     else:
         print(f"\tAlready deleted because it was a file.")
-    print(f"\tSaving...", end="")
-    sm.make_save(SAVE_DATA)
-    print(f"DONE!")
+    print("\tSaving...\r", end="", flush=True)
+    sm.make_save(SAVE_DATA, show_progress_text="\tSaving...")
     ts.logger("Save file regenerated", f"save_name: {save_name}")
 
 

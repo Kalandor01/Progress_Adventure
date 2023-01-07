@@ -18,7 +18,7 @@ from constants import                                                           
     SAVE_FILE_NAME_DATA,                                                                \
     SAVE_SEED,                                                                          \
     FILE_ENCODING_VERSION,                                                              \
-    SAVE_VERSION
+    SAVE_VERSION, TILE_NOISE_RESOLUTION
 import tools as ts
 from tools import sfm
 
@@ -260,8 +260,10 @@ class Self_Checks:
 
 class Content_colors(Enum):
     EMPTY = (0, 0, 0, 0)
-    FIGHT = (255, 0, 0, 255)
     FIELD = (0, 255, 0, 255)
+    MOUNTAIN = (75, 75, 75, 255)
+    FIGHT = (255, 0, 0, 255)
+    VILLAGE = (61, 42, 27, 255)
 
 
 def draw_world_tiles(world:cm.World, image_path="world.png"):
@@ -271,9 +273,12 @@ def draw_world_tiles(world:cm.World, image_path="world.png"):
     """
     tile_size = (1, 1)
     
-    tile_types = ("-", "field", "fight")
-    tile_colors = (Content_colors.EMPTY.value, Content_colors.FIELD.value, Content_colors.FIGHT.value, )
-    tile_counts = [0, 0, 0]
+    tile_type_colors = {cm.Content_types.FIELD: Content_colors.FIELD,
+                        cm.Content_types.MOUNTAIN: Content_colors.MOUNTAIN,
+                        cm.Content_types.FIGHT: Content_colors.FIGHT,
+                        cm.Content_types.VILLAGE: Content_colors.VILLAGE
+                    }
+    tile_type_counts = {"TOTAL": 0}
     
     corners = world._get_corners()
     size = ((corners[2] - corners[0] + 1) * tile_size[0], (corners[3] - corners[1] + 1) * tile_size[1])
@@ -289,15 +294,14 @@ def draw_world_tiles(world:cm.World, image_path="world.png"):
             end_x = int(x * tile_size[0] + tile_size[0] - 1)
             end_y = int(y * tile_size[1] + tile_size[1] - 1)
             # find type
-            color = tile_colors[0]
-            tile_counts[0] += 1
-            for index, tt in enumerate(tile_types):
-                if tile.content.type == tt:
-                    color = tile_colors[index]
-                    tile_counts[index] += 1
-            draw.rectangle((start_x, start_y, end_x, end_y), color)
+            tile_type_counts["TOTAL"] += 1
+            try: tile_type_counts[tile.content.type.value] += 1
+            except KeyError: tile_type_counts[tile.content.type.value] = 1
+            try: color = tile_type_colors[tile.content.type]
+            except KeyError: color = Content_colors.EMPTY
+            draw.rectangle((start_x, start_y, end_x, end_y), color.value)
     im.save(image_path)
-    return tile_counts
+    return tile_type_counts
 
 
 def save_visualizer(save_name:str):
@@ -371,10 +375,8 @@ def save_visualizer(save_name:str):
             if ans == 0:
                 ts.recreate_folder(EXPORT_FOLDER)
                 ts.recreate_folder(visualized_save_name, join(ROOT_FOLDER, EXPORT_FOLDER))
-                print("Getting chunk data...", end="", flush=True)
                 # get chunks data
-                load_all_chunks(save_data)
-                print("DONE!")
+                load_all_chunks(save_data, "Getting chunk data...")
                 # fill
                 ans = sfm.UI_list(["No", "Yes"], f"Do you want to fill in ALL tiles in ALL generated chunks?").display()
                 if ans == 1:
@@ -383,17 +385,14 @@ def save_visualizer(save_name:str):
                         print("Generating chunks...", end="", flush=True)
                         save_data.world.make_rectangle()
                         print("DONE!")
-                    print("Filling chunks...", end="", flush=True)
-                    save_data.world.fill_all_chunks()
-                    print("DONE!")
+                    save_data.world.fill_all_chunks("Filling chunks...")
                 # make image
                 print("Generating image...", end="", flush=True)
-                tile_counts = draw_world_tiles(save_data.world, join(visualized_save_path, EXPORT_WORLD_FILE))
+                tile_type_counts = draw_world_tiles(save_data.world, join(visualized_save_path, EXPORT_WORLD_FILE))
                 print("DONE!")
-                tile_types = ("TOTAL", "field", "fight")
                 text =  f"\nTile types:\n"
-                for x, tt in enumerate(tile_types):
-                    text += f"\t{tt}: {tile_counts[x]}\n"
+                for tt, count in tile_type_counts.items():
+                    text += f"\t{tt}: {count}\n"
             print(text)
     except FileNotFoundError:
         print(f"ERROR: {exc_info()[1]}")
@@ -409,16 +408,36 @@ def save_visualizer(save_name:str):
 # save_visualizer("new sav")
 
 
-# noise = PerlinNoise(octaves=2**35, seed=10)
-# for x in range(100):
-#     print(noise([(x + 15 + division / 2) / division, (15 + division / 2) / division]))
+# import entities as es
+# import save_manager as sm
+# mseed = ts.np.random.RandomState()
+# wseed = ts.make_random_seed(mseed)
+# sd = dm.Save_data("test", "test save", [0, 0, 0, 0, 0, 0], es.Player(), mseed, wseed, ts.recalculate_tile_type_noise_seeds(wseed))
+# sd.world.gen_tile(-100, -100)
+# sd.world.gen_tile(99, 99)
+# sd.world.make_rectangle()
+# sd.world.fill_all_chunks("Filling chunks...")
+# sm.make_save(sd, show_progress_text="Saving...")
+save_visualizer("test")
+
+
+# from perlin_noise import PerlinNoise
+# from matplotlib import pyplot as plt
+
+# # noise = PerlinNoise(octaves=2**37, seed=1)
+# noise = PerlinNoise(octaves=2**36, seed=1)
+# # noise = PerlinNoise(octaves=2**35, seed=1)
+# # noise = PerlinNoise(octaves=2**34, seed=1)
+# offset = 0.0
 
 # xpix, ypix = 100, 100
 # pic = []
 # for x in range(xpix):
 #     row = []
 #     for y in range(ypix):
-#         noise_val = noise([(x + division / 2) / division, (y + division / 2) / division])
+#         noise_val = (noise([(x + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION,
+#                             (y + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION])
+#                             + 0.5)
 #         row.append(noise_val)
 #     pic.append(row)
 
