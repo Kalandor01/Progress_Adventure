@@ -259,26 +259,92 @@ class Self_Checks:
 
 
 class Content_colors(Enum):
-    EMPTY = (0, 0, 0, 0)
-    FIELD = (0, 255, 0, 255)
-    MOUNTAIN = (75, 75, 75, 255)
-    FIGHT = (255, 0, 0, 255)
-    VILLAGE = (61, 42, 27, 255)
+    ERROR =         (255, 0, 255, 255)
+    EMPTY =         (0, 0, 0, 0)
+    RED =           (255, 0, 0, 255)
+    GREEN =         (0, 255, 0, 255)
+    BLUE =          (0, 0, 255, 255)
+    BROWN =         (61, 42, 27, 255)
+    SKIN =          (212, 154, 99, 255)
+    LIGHT_BLUE =    (60, 60, 255, 255)
+    LIGHT_GRAY =    (75, 75, 75, 255)
+    LIGHT_BROWN =   (82, 56, 36, 255)
+    LIGHTER_BLUE =  (99, 99, 255, 255)
+    DARK_GREEN =    (28, 87, 25, 255)
 
 
-def draw_world_tiles(world:cm.World, image_path="world.png"):
+class Terrain_colors(Enum):
+    EMPTY = Content_colors.EMPTY.value
+    FIELD = Content_colors.DARK_GREEN.value
+    MOUNTAIN = Content_colors.LIGHT_GRAY.value
+    OCEAN = Content_colors.LIGHT_BLUE.value
+    SHORE = Content_colors.LIGHTER_BLUE.value
+
+
+class Structure_colors(Enum):
+    EMPTY = Content_colors.EMPTY.value
+    BANDIT_CAMP = Content_colors.RED.value
+    VILLAGE = Content_colors.LIGHT_BROWN.value
+    KINGDOM = Content_colors.BROWN.value
+
+
+class Population_colors(Enum):
+    EMPTY = Content_colors.EMPTY.value
+    HUMAN = Content_colors.SKIN.value
+    ELF = Content_colors.DARK_GREEN.value
+    DWARF = Content_colors.BROWN.value
+    DEMON = Content_colors.RED.value
+
+
+terrain_type_colors = {
+                    cm.Terrain_types.NONE: Terrain_colors.EMPTY,
+                    cm.Terrain_types.FIELD: Terrain_colors.FIELD,
+                    cm.Terrain_types.MOUNTAIN: Terrain_colors.MOUNTAIN,
+                    cm.Terrain_types.OCEAN: Terrain_colors.OCEAN,
+                    cm.Terrain_types.SHORE: Terrain_colors.SHORE
+                    }
+    
+structure_type_colors = {
+                    cm.Structure_types.NONE: Structure_colors.EMPTY,
+                    cm.Structure_types.BANDIT_CAMP: Structure_colors.BANDIT_CAMP,
+                    cm.Structure_types.VILLAGE: Structure_colors.VILLAGE,
+                    cm.Structure_types.KINGDOM: Structure_colors.KINGDOM
+                    }
+    
+population_type_colors = {
+                    cm.Population_types.NONE: Population_colors.EMPTY,
+                    cm.Population_types.HUMAN: Population_colors.HUMAN,
+                    cm.Population_types.ELF: Population_colors.ELF,
+                    cm.Population_types.DWARF: Population_colors.DWARF,
+                    cm.Population_types.DEMON: Population_colors.DEMON
+                    }
+
+
+def draw_world_tiles(world:cm.World, type_colors="terrain", image_path="world.png"):
     """
     Genarates an image, representing the diferent types of tiles, and their placements in the world.\n
-    Also returns the tile count for all tile types.
+    Also returns the tile count for all tile types.\n
+    `type_colors` sets witch map to export (terrain, structure, population).
     """
     tile_size = (1, 1)
     
-    tile_type_colors = {cm.Content_types.FIELD: Content_colors.FIELD,
-                        cm.Content_types.MOUNTAIN: Content_colors.MOUNTAIN,
-                        cm.Content_types.FIGHT: Content_colors.FIGHT,
-                        cm.Content_types.VILLAGE: Content_colors.VILLAGE
-                    }
     tile_type_counts = {"TOTAL": 0}
+    
+    def get_tile_color(tile:cm.Tile, type_colors_map="terrain"):
+        if type_colors_map == "structure":
+            tcm = structure_type_colors
+            subtype = tile.structure.subtype
+        elif type_colors_map == "population":
+            tcm = population_type_colors
+            subtype = tile.population.subtype
+        else:
+            tcm = terrain_type_colors
+            subtype = tile.terrain.subtype
+        
+        try: tile_type_counts[subtype.value] += 1
+        except KeyError: tile_type_counts[subtype.value] = 1
+        try: return tcm[subtype]
+        except KeyError: return Content_colors.ERROR
     
     corners = world._get_corners()
     size = ((corners[2] - corners[0] + 1) * tile_size[0], (corners[3] - corners[1] + 1) * tile_size[1])
@@ -295,12 +361,12 @@ def draw_world_tiles(world:cm.World, image_path="world.png"):
             end_y = int(y * tile_size[1] + tile_size[1] - 1)
             # find type
             tile_type_counts["TOTAL"] += 1
-            try: tile_type_counts[tile.content.type.value] += 1
-            except KeyError: tile_type_counts[tile.content.type.value] = 1
-            try: color = tile_type_colors[tile.content.type]
-            except KeyError: color = Content_colors.EMPTY
+            color = get_tile_color(tile, type_colors)
             draw.rectangle((start_x, start_y, end_x, end_y), color.value)
     im.save(image_path)
+    # reorder tile_type_counts
+    total = tile_type_counts.pop("TOTAL")
+    tile_type_counts["TOTAL"] = total
     return tile_type_counts
 
 
@@ -310,9 +376,23 @@ def save_visualizer(save_name:str):
     """
     EXPORT_FOLDER = "visualised_saves"
     EXPORT_DATA_FILE = "data.txt"
-    EXPORT_WORLD_FILE = "world.png"
+    EXPORT_TERRAIN_FILE = "terrain.png"
+    EXPORT_STRUCTURE_FILE = "structure.png"
+    EXPORT_POPULATOIN_FILE = "population.png"
     
     ts.threading.current_thread().name = VISUALIZER_THREAD_NAME
+    
+    
+    def make_img(type_colors:str, export_file:str):
+        """`type_colors`: terrain, structure or population"""
+        print("Generating image...", end="", flush=True)
+        tile_type_counts = draw_world_tiles(save_data.world, type_colors, join(visualized_save_path, export_file))
+        print("DONE!")
+        text =  f"\nTile types:\n"
+        for tt, count in tile_type_counts.items():
+            text += f"\t{tt}: {count}\n"
+        print(text)
+    
     
     try:
         save_folder_path = join(SAVES_FOLDER_PATH, save_name)
@@ -363,7 +443,7 @@ def save_visualizer(save_name:str):
                     f"\nWorld seed:\n{ts.random_state_to_json(save_data.world_seed)}\n"\
                     f"\nTile type noise seeds:\n{ttn_seed_txt}"\
                     f"\n---------------------------------------------------------------------------------------------------------------"
-            print(text)
+            input(text)
             ans = sfm.UI_list(["Yes", "No"], f"Do you want export the data from \"{save_name}\" into \"{join(display_visualized_save_path, EXPORT_DATA_FILE)}\"?").display()
             if ans == 0:
                 ts.recreate_folder(EXPORT_FOLDER)
@@ -371,7 +451,7 @@ def save_visualizer(save_name:str):
                 with open(join(visualized_save_path, EXPORT_DATA_FILE), "a") as f:
                     f.write(text + "\n\n")
             
-            ans = sfm.UI_list(["Yes", "No"], f"Do you want export the world data from \"{save_name}\" into \"{join(display_visualized_save_path, EXPORT_WORLD_FILE)}\"?").display()
+            ans = sfm.UI_list(["Yes", "No"], f"Do you want export the world data from \"{save_name}\" into an image at \"{display_visualized_save_path}\"?").display()
             if ans == 0:
                 ts.recreate_folder(EXPORT_FOLDER)
                 ts.recreate_folder(visualized_save_name, join(ROOT_FOLDER, EXPORT_FOLDER))
@@ -386,14 +466,20 @@ def save_visualizer(save_name:str):
                         save_data.world.make_rectangle()
                         print("DONE!")
                     save_data.world.fill_all_chunks("Filling chunks...")
-                # make image
-                print("Generating image...", end="", flush=True)
-                tile_type_counts = draw_world_tiles(save_data.world, join(visualized_save_path, EXPORT_WORLD_FILE))
-                print("DONE!")
-                text =  f"\nTile types:\n"
-                for tt, count in tile_type_counts.items():
-                    text += f"\t{tt}: {count}\n"
-            print(text)
+                # generate images
+                # terrain
+                ans = sfm.UI_list(["Yes", "No"], f"Do you want export the terrain data into \"{EXPORT_TERRAIN_FILE}\"?").display()
+                if ans == 0:
+                    make_img("terrain", EXPORT_TERRAIN_FILE)
+                # structure
+                ans = sfm.UI_list(["Yes", "No"], f"Do you want export the structure data into \"{EXPORT_STRUCTURE_FILE}\"?").display()
+                if ans == 0:
+                    make_img("structure", EXPORT_STRUCTURE_FILE)
+                # population
+                ans = sfm.UI_list(["Yes", "No"], f"Do you want export the population data into \"{EXPORT_POPULATOIN_FILE}\"?").display()
+                if ans == 0:
+                    make_img("population", EXPORT_POPULATOIN_FILE)
+                    input()
     except FileNotFoundError:
         print(f"ERROR: {exc_info()[1]}")
     ts.threading.current_thread().name = MAIN_THREAD_NAME
@@ -417,6 +503,7 @@ def save_visualizer(save_name:str):
 # sd.world.gen_tile(99, 99)
 # sd.world.make_rectangle()
 # sd.world.fill_all_chunks("Filling chunks...")
+# ts.remove_save("test", False)
 # sm.make_save(sd, show_progress_text="Saving...")
 save_visualizer("test")
 
@@ -443,4 +530,3 @@ save_visualizer("test")
 
 # plt.imshow(pic, cmap='gray')
 # plt.show()
-

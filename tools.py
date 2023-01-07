@@ -46,16 +46,16 @@ def make_perlin_noise_seed(parrent_seed:np.random.RandomState=world_seed):
 
 def recalculate_tile_type_noise_seeds(parrent_seed:np.random.RandomState=world_seed):
     """Recalculate seeds for perlin noise generators."""
-    danger_seed = make_perlin_noise_seed(parrent_seed)
+    hostility_seed = make_perlin_noise_seed(parrent_seed)
     height_seed = make_perlin_noise_seed(parrent_seed)
     temperature_seed = make_perlin_noise_seed(parrent_seed)
     humidity_seed = make_perlin_noise_seed(parrent_seed)
     population_seed = make_perlin_noise_seed(parrent_seed)
     ttn_seeds = {
-        "danger": danger_seed,
         "height": height_seed,
         "temperature": temperature_seed,
         "humidity": humidity_seed,
+        "hostility": hostility_seed,
         "population": population_seed
     }
     return ttn_seeds

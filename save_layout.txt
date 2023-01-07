@@ -38,7 +38,7 @@ data.sav
                 - has_gauss: int
                 - cached_gaussian: float
             - tile_type_noise_seeds:
-                - danger: int,
+                - hostility: int,
                 - height: int,
                 - temperature: int,
                 - humidity: int,
@@ -49,7 +49,16 @@ chunks
             - x: int
             - y: int
             - visited: int
-            - content: (Content object data)
-                - type: str
-                - ANITHING!!! (Content data)
+            - terrain: (Terrain object data)
+                - type: str = terrain
+                - subtype: str
+                - ANITHING!!! (Terrain data)
+            - structure: (Structure object data)
+                - type: str = structure
+                - subtype: str
+                - ANITHING!!! (Structure data)
+            - population: (Population object data)
+                - type: str = population
+                - subtype: str
+                - ANITHING!!! (Population data)
         ]

@@ -250,6 +250,11 @@ def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str
         data["seeds"]["world_seed"] = ts.random_state_to_json(ts.world_seed)
         save_version = "1.5.1"
         ts.logger("Corrected save data", "1.5 -> 1.5.1", Log_type.DEBUG)
+    if save_version == "1.5.1":
+        # ttn_seeds: danger -> hostility
+        data["seeds"]["tile_type_noise_seeds"]["hostility"] = data["seeds"]["tile_type_noise_seeds"]["danger"]
+        save_version = "1.5.2"
+        ts.logger("Corrected save data", "1.5.1 -> 1.5.2", Log_type.DEBUG)
     return data
 
 

@@ -12,21 +12,41 @@ from data_manager import Save_data
 
 
 class Content_types(Enum):
-    NONE =      "_"
-    BLANK =     "blank"
+    NONE =          "none"
+    TERRAIN =       "terrain"
+    STRUCTURE =     "structure"
+    POPULATION =    "population"
+
+
+class Terrain_types(Enum):
+    NONE =      "none"
     FIELD =     "field"
     MOUNTAIN =  "mountain"
-    FIGHT =     "fight"
-    VILLAGE =   "village"
+    OCEAN =     "ocean"
+    SHORE =     "shore"
+
+
+class Structure_types(Enum):
+    NONE =          "none"
+    VILLAGE =       "village"
+    KINGDOM =       "kingdom"
+    BANDIT_CAMP =   "bandit_camp"
+
+
+class Population_types(Enum):
+    NONE =      "none"
+    HUMAN =     "human"
+    DWARF =     "dwarf"
+    ELF =       "elf"
+    DEMON =     "demon"
 
 
 class Base_content:
     def __init__(self, data:dict[str, Any]|None=None):
-        self.type = Content_types.BLANK
+        self.type = Content_types.NONE
 
 
     def _visit(self, tile:'Tile', save_data:Save_data):
-        tile.visited += 1
         logger(f"Player visited \"{self.type}\"", f"x: {tile.x}, y: {tile.y}, visits: {tile.visited}")
 
 
@@ -34,23 +54,101 @@ class Base_content:
         """Returns a json representation of the `Content`."""
         content_json:dict[str, Any] = {"type": self.type.value}
         return content_json
-
-
-class Field_content(Base_content):
+    
+    
+class Terrain_content(Base_content):
     def __init__(self, data:dict[str, Any]|None=None):
-        super().__init__()
-        self.type = Content_types.FIELD
+        super().__init__(data)
+        self.type = Content_types.TERRAIN
+        self.subtype = Terrain_types.NONE
+
+
+    def _visit(self, tile:'Tile', save_data:Save_data):
+        logger(f"Player visited \"{self.type}\": \"{self.subtype}\"", f"x: {tile.x}, y: {tile.y}, visits: {tile.visited}")
+
+
+    def to_json(self):
+        """Returns a json representation of the `Terrain`."""
+        terrain_json = super().to_json()
+        terrain_json["subtype"] = self.subtype.value
+        return terrain_json
+
+
+class Structure_content(Base_content):
+    def __init__(self, data:dict[str, Any]|None=None):
+        super().__init__(data)
+        self.type = Content_types.STRUCTURE
+        self.subtype = Structure_types.NONE
+
+
+    def _visit(self, tile:'Tile', save_data:Save_data):
+        logger(f"Player visited \"{self.type}\": \"{self.subtype}\"", f"x: {tile.x}, y: {tile.y}, visits: {tile.visited}")
+
+
+    def to_json(self):
+        """Returns a json representation of the `Structure`."""
+        structure_json = super().to_json()
+        structure_json["subtype"] = self.subtype.value
+        return structure_json
+
+
+class Population_content(Base_content):
+    def __init__(self, data:dict[str, Any]|None=None):
+        super().__init__(data)
+        self.type = Content_types.POPULATION
+        self.subtype = Population_types.NONE
+        if data is not None:
+            try: self._set_amount(data["amount"])
+            except KeyError: self._set_amount()
+        else:
+            self._set_amount()
+
+
+    def _set_amount(self, population:int|range|None=None):
+        if isinstance(population, int):
+            self.amount = population
+        elif isinstance(population, range):
+            self.amount = world_seed.randint(population.start, population.stop)
+        else:
+            self.amount = world_seed.randint(1, 1000)
+
+
+    def _visit(self, tile:'Tile', save_data:Save_data):
+        logger(f"Player visited \"{self.type}\": \"{self.subtype}\"", f"x: {tile.x}, y: {tile.y}, visits: {tile.visited}")
+        if self.subtype != Population_types.NONE and self.amount > 0:
+            print(f"There {'is' if self.amount == 1 else 'are'} {self.amount} {self.subtype.value}{'' if self.amount == 1 else 's'} here.")
+        if self.subtype != Population_types.NONE and tile.structure.subtype != Structure_types.NONE:
+            if tile.structure.subtype == Structure_types.BANDIT_CAMP:
+                if save_data.world_seed.rand() < 0.75:
+                    print("fight")
+            elif tile.structure.subtype in [Structure_types.VILLAGE, Structure_types.KINGDOM]:
+                if save_data.world_seed.rand() < 0.01:
+                    print("fight")
+
+
+    def to_json(self):
+        """Returns a json representation of the `Population`."""
+        population_json = super().to_json()
+        population_json["subtype"] = self.subtype.value
+        population_json["amount"] = self.amount
+        return population_json
+
+
+class Field_terrain(Terrain_content):
+    def __init__(self, data:dict[str, Any]|None=None):
+        super().__init__(data)
+        self.subtype = Terrain_types.FIELD
 
 
     def _visit(self, tile:'Tile', save_data:Save_data):
         super()._visit(tile, save_data)
-        print(f"{save_data.player.full_name} entered a {self.type.value}.")
+        print(f"{save_data.player.full_name} entered a field.")
 
 
-class Mountain_content(Base_content):
+class Mountain_terrain(Terrain_content):
     def __init__(self, data:dict[str, Any]|None=None):
-        super().__init__()
-        self.type = Content_types.MOUNTAIN
+        super().__init__(data)
+        self.subtype = Terrain_types.MOUNTAIN
         if data is not None:
             try: self._set_height(data["height"])
             except KeyError: self._set_height()
@@ -67,50 +165,101 @@ class Mountain_content(Base_content):
 
     def _visit(self, tile:'Tile', save_data:Save_data):
         super()._visit(tile, save_data)
-        print(f"{save_data.player.full_name} climbed a {self.type.value}.")
-        print(f"The {self.type.value} is {self.height}m tall.")
+        print(f"{save_data.player.full_name} climbed a mountain.")
+        print(f"The mountain is {self.height}m tall.")
 
 
     def to_json(self):
-        content_json = super().to_json()
-        content_json["height"] = self.height
-        return content_json
-    
+        terrain_json = super().to_json()
+        terrain_json["height"] = self.height
+        return terrain_json
 
-class Fight_content(Base_content):
+
+class Ocean_terrain(Terrain_content):
     def __init__(self, data:dict[str, Any]|None=None):
-        super().__init__()
-        self.type = Content_types.FIGHT
+        super().__init__(data)
+        self.subtype = Terrain_types.OCEAN
         if data is not None:
-            try: self._set_fight(data["fight"])
-            except KeyError: self._set_fight()
+            try: self._set_depth(data["depth"])
+            except KeyError: self._set_depth()
         else:
-            self._set_fight()
+            self._set_depth()
 
-
-    def _set_fight(self, fight:str|None=None):
-        if fight is None:
-            self.fight = "test"
+    
+    def _set_depth(self, depth:int|None=None):
+        if depth is None:
+            self.depth = world_seed.randint(100, 20000)
         else:
-            self.fight = str(fight)
-
+            self.depth = int(depth)
+    
 
     def _visit(self, tile:'Tile', save_data:Save_data):
         super()._visit(tile, save_data)
-        print(f"{save_data.player.full_name} entered a {self.type.value}.")
-        print(self.fight)
+        print(f"{save_data.player.full_name} entered an ocean.")
+        print(f"The ocean is {self.depth}m deep.")
 
 
     def to_json(self):
-        content_json = super().to_json()
-        content_json["fight"] = self.fight
-        return content_json
+        terrain_json = super().to_json()
+        terrain_json["depth"] = self.depth
+        return terrain_json
 
 
-class Village_content(Base_content):
+class Shore_terrain(Terrain_content):
     def __init__(self, data:dict[str, Any]|None=None):
-        super().__init__()
-        self.type = Content_types.VILLAGE
+        super().__init__(data)
+        self.subtype = Terrain_types.SHORE
+        if data is not None:
+            try: self._set_depth(data["depth"])
+            except KeyError: self._set_depth()
+        else:
+            self._set_depth()
+
+    
+    def _set_depth(self, depth:int|None=None):
+        if depth is None:
+            self.depth = world_seed.randint(1, 100)
+        else:
+            self.depth = int(depth)
+    
+
+    def _visit(self, tile:'Tile', save_data:Save_data):
+        super()._visit(tile, save_data)
+        print(f"{save_data.player.full_name} entered an shore.")
+        print(f"The shore is {self.depth}m deep.")
+
+
+    def to_json(self):
+        terrain_json = super().to_json()
+        terrain_json["depth"] = self.depth
+        return terrain_json
+
+
+class No_structure(Structure_content):
+    def __init__(self, data:dict[str, Any]|None=None):
+        super().__init__(data)
+        self.subtype = Structure_types.NONE
+
+
+    def _visit(self, tile:'Tile', save_data:Save_data):
+        pass
+
+
+class Bandit_camp_structure(Structure_content):
+    def __init__(self, data:dict[str, Any]|None=None):
+        super().__init__(data)
+        self.subtype = Structure_types.BANDIT_CAMP
+
+
+    def _visit(self, tile:'Tile', save_data:Save_data):
+        print(f"{save_data.player.full_name} entered a bandit camp.")
+        super()._visit(tile, save_data)
+
+
+class Village_structure(Structure_content):
+    def __init__(self, data:dict[str, Any]|None=None):
+        super().__init__(data)
+        self.subtype = Structure_types.VILLAGE
         if data is not None:
             try: self._set_population(data["population"])
             except KeyError: self._set_population()
@@ -120,93 +269,235 @@ class Village_content(Base_content):
 
     def _set_population(self, population:int|None=None):
         if population is None:
-            self.population = world_seed.randint(100, 100000)
+            self.population = world_seed.randint(50, 10000)
         else:
             self.population = int(population)
 
 
     def _visit(self, tile:'Tile', save_data:Save_data):
         super()._visit(tile, save_data)
-        print(f"{save_data.player.full_name} entered a {self.type.value}.")
-        print(f"The {self.type.value} has a population of {self.population} people.")
+        print(f"{save_data.player.full_name} entered a village.")
+        print(f"The village has a population of {self.population} people.")
 
 
     def to_json(self):
-        content_json = super().to_json()
-        content_json["population"] = self.population
-        return content_json
+        structure_json = super().to_json()
+        structure_json["population"] = self.population
+        return structure_json
 
 
-# mapps all content types to content classes for `_get_content()`
-_content_type_map:dict[str, type[Base_content]] = {
-                    Content_types.NONE.value: Field_content,
-                    Content_types.BLANK.value: Field_content,
-                    Content_types.FIELD.value: Field_content,
-                    Content_types.MOUNTAIN.value: Mountain_content,
-                    Content_types.FIGHT.value: Fight_content,
-                    Content_types.VILLAGE.value: Village_content
+class Kingdom_structure(Structure_content):
+    def __init__(self, data:dict[str, Any]|None=None):
+        super().__init__(data)
+        self.subtype = Structure_types.KINGDOM
+        if data is not None:
+            try: self._set_population(data["population"])
+            except KeyError: self._set_population()
+        else:
+            self._set_population()
+
+
+    def _set_population(self, population:int|None=None):
+        if population is None:
+            self.population = world_seed.randint(10000, 10000000)
+        else:
+            self.population = int(population)
+
+
+    def _visit(self, tile:'Tile', save_data:Save_data):
+        super()._visit(tile, save_data)
+        print(f"{save_data.player.full_name} entered a kingdom.")
+        print(f"The kingdom has a population of {self.population} people.")
+
+
+    def to_json(self):
+        structure_json = super().to_json()
+        structure_json["population"] = self.population
+        return structure_json
+
+
+class No_population(Population_content):
+    def __init__(self, data:dict[str, Any]|None=None):
+        super().__init__(data)
+        self.subtype = Population_types.NONE
+        self.amount = 0
+    
+    
+    def _visit(self, tile:'Tile', save_data:Save_data):
+        pass
+
+
+class Human_population(Population_content):
+    def __init__(self, data:dict[str, Any]|None=None):
+        super().__init__(data)
+        self.subtype = Population_types.HUMAN
+
+
+class Elf_population(Population_content):
+    def __init__(self, data:dict[str, Any]|None=None):
+        super().__init__(data)
+        self.subtype = Population_types.ELF
+
+
+class Dwarf_population(Population_content):
+    def __init__(self, data:dict[str, Any]|None=None):
+        super().__init__(data)
+        self.subtype = Population_types.DWARF
+
+
+class Demon_population(Population_content):
+    def __init__(self, data:dict[str, Any]|None=None):
+        super().__init__(data)
+        self.subtype = Population_types.DEMON
+
+
+# mapps all terrain types to terrain classes for `_get_terrain()`
+_terrain_type_map:dict[str, type[Terrain_content]] = {
+                    Terrain_types.NONE.value: Field_terrain,
+                    Terrain_types.FIELD.value: Field_terrain,
+                    Terrain_types.MOUNTAIN.value: Mountain_terrain,
+                    Terrain_types.OCEAN.value: Ocean_terrain,
+                    Terrain_types.SHORE.value: Shore_terrain
                 }
 
-# all randomly selectable content classes in `_gen_content()` with the properties of that content class
-_content_properties:dict[type[Base_content], dict[str, float]] = {
-                                            Field_content:
+# mapps all structure types to structure classes for `_get_structure()`
+_structure_type_map:dict[str, type[Structure_content]] = {
+                    Structure_types.NONE.value: No_structure,
+                    Structure_types.BANDIT_CAMP.value: Bandit_camp_structure,
+                    Structure_types.VILLAGE.value: Village_structure,
+                    Structure_types.KINGDOM.value: Kingdom_structure
+                }
+
+# mapps all population types to population classes for `_get_population()`
+_population_type_map:dict[str, type[Population_content]] = {
+                    Population_types.NONE.value: No_population,
+                    Population_types.HUMAN.value: Human_population,
+                    Population_types.DWARF.value: Dwarf_population,
+                    Population_types.ELF.value: Elf_population,
+                    Population_types.DEMON.value: Demon_population
+                }
+
+
+# all randomly selectable terrain classes in `_gen_terrain()` with the properties of that terrain class
+_terrain_properties:dict[type[Terrain_content], dict[str, float]] = {
+                                            Field_terrain:
                                             {
-                                                "danger": 0.0,
                                                 "height": 0.5,
                                                 "temperature": 0.5,
                                                 "humidity": 0.5,
-                                                "population": 0.1
                                             },
-                                            Mountain_content:
+                                            Mountain_terrain:
                                             {
-                                                "danger": 0.1,
                                                 "height": 1.0,
                                                 "temperature": 0.25,
                                                 "humidity": 0.3,
+                                            },
+                                            Ocean_terrain:
+                                            {
+                                                "height": 0.0,
+                                                "temperature": 0.3,
+                                                "humidity": 0.8,
+                                            },
+                                            Shore_terrain:
+                                            {
+                                                "height": 0.2,
+                                                "temperature": 0.4,
+                                                "humidity": 0.75,
+                                            },
+                                        }
+
+# all randomly selectable structure classes in `_gen_structure()` with the properties of that structure class
+_structure_properties:dict[type[Structure_content], dict[str, float]] = {
+                                            No_structure:
+                                            {
+                                                "hostility": 0.5,
                                                 "population": 0.0
                                             },
-                                            Fight_content:
+                                            Bandit_camp_structure:
                                             {
-                                                "danger": 1.0,
+                                                "hostility": 1.0,
+                                                "population": 0.3
+                                            },
+                                            Village_structure:
+                                            {
+                                                "hostility": 0.0,
+                                                "population": 0.6
+                                            },
+                                            Kingdom_structure:
+                                            {
+                                                "hostility": 0.0,
+                                                "population": 1.0
+                                            },
+                                        }
+
+# all randomly selectable population classes in `_gen_population()` with the properties of that population class
+_population_properties:dict[type[Population_content], dict[str, float]] = {
+                                            No_population:
+                                            {
                                                 "height": 0.5,
                                                 "temperature": 0.5,
                                                 "humidity": 0.5,
-                                                "population": 0.8
+                                                "hostility": 0.5,
+                                                "population": 0.0
                                             },
-                                            Village_content:
+                                            Human_population:
                                             {
-                                                "danger": 0.1,
                                                 "height": 0.5,
+                                                "temperature": 0.5,
+                                                "humidity": 0.5,
+                                                "hostility": 0.5,
+                                                "population": 0.5
+                                            },
+                                            Elf_population:
+                                            {
+                                                "height": 1.0,
+                                                "temperature": 0.5,
+                                                "humidity": 0.75,
+                                                "hostility": 0.3,
+                                                "population": 0.5
+                                            },
+                                            Dwarf_population:
+                                            {
+                                                "height": 0.0,
                                                 "temperature": 0.6,
-                                                "humidity": 0.6,
-                                                "population": 1.0
+                                                "humidity": 0.3,
+                                                "hostility": 0.6,
+                                                "population": 0.5
+                                            },
+                                            Demon_population:
+                                            {
+                                                "height": 0.0,
+                                                "temperature": 1.0,
+                                                "humidity": 0.0,
+                                                "hostility": 1.0,
+                                                "population": 0.5
                                             },
                                         }
 
 
 # Offsets for the calculated noise value in `_get_nose_values()`.
 tile_type_noise_offsets:dict[str, float] = {
-    "danger": -0.1,
     "height": 0,
     "temperature": 0,
     "humidity": 0,
+    "hostility": -0.1,
     "population": -0.1
 }
 
 
 def recalculate_noise_generators(ttn_seeds:dict[str, int]):
     """Recalculate perlin noise generators for tile generation."""
-    perlin_danger = PerlinNoise(octaves=2**36, seed=ttn_seeds["danger"])
     perlin_height = PerlinNoise(octaves=2**35, seed=ttn_seeds["height"])
     perlin_temperature = PerlinNoise(octaves=2**34, seed=ttn_seeds["temperature"])
     perlin_humidity = PerlinNoise(octaves=2**34, seed=ttn_seeds["humidity"])
+    perlin_hostility = PerlinNoise(octaves=2**36, seed=ttn_seeds["hostility"])
     perlin_population = PerlinNoise(octaves=2**36, seed=ttn_seeds["population"])
     
     tile_type_noises = {
-        "danger": perlin_danger,
         "height": perlin_height,
         "temperature": perlin_temperature,
         "humidity": perlin_humidity,
+        "hostility": perlin_hostility,
         "population": perlin_population
     }
     return tile_type_noises
@@ -226,11 +517,11 @@ def _get_nose_values(absolute_x:int, absoulte_y:int):
     return noise_values
 
 
-def _calculate_closest(noise_values:dict[str, float]):
+def _calculate_closest(noise_values:dict[str, float], content_properties:dict[type[Base_content], dict[str, float]]):
     """Calculates the best tile type for the space depending on the perlin noise values."""
-    min_diff_content = Field_content
+    min_diff_content = list(content_properties.keys())[0]
     min_diff = 1000000
-    for content_type, properties in _content_properties.items():
+    for content_type, properties in content_properties.items():
         sum_diff = 0
         for name in properties:
             try:
@@ -240,41 +531,33 @@ def _calculate_closest(noise_values:dict[str, float]):
         if sum_diff < min_diff:
             min_diff = sum_diff
             min_diff_content = content_type
-    return min_diff_content
-        
+    return min_diff_content()
 
 
-def _gen_content(absolute_x:int, absoulte_y:int):
-    """Generates a random content for a tile."""
-    noise_values = _get_nose_values(absolute_x, absoulte_y)
-    content:type[Base_content] = _calculate_closest(noise_values)
-    return content()
-
-
-def _get_content(content_type:str) -> type[Base_content]:
-    """Get the content class from the content type."""
+def _get_content(content_type:str, type_map:dict[str, type[Base_content]]) -> type[Base_content]:
+    """Get the content class from the content type and type map."""
     # get content type index
-    try: return _content_type_map[content_type]
+    try: return type_map[content_type]
     except KeyError:
         logger("Unknown content type", f'type: "{content_type}"', Log_type.ERROR)
-        return Field_content
+        return list(type_map.values())[0]
 
 
-def _load_content(content_json:dict[str, Any]|None):
+def _load_content(content_json:dict[str, Any]|None, type_map:dict[str, type[Base_content]]):
     """Load a content object from the content json."""
     # get content type
     if content_json is not None:
-        try: content_type = content_json["type"]
-        except KeyError: content_type = "_"
+        try: content_type = content_json["subtype"]
+        except KeyError: content_type = list(type_map.keys())[0]
     else:
-        content_type = "_"
+        content_type = list(type_map.keys())[0]
     # get content
-    content_class = _get_content(content_type)
+    content_class = _get_content(content_type, type_map)
     return content_class(content_json)
 
 
 class Tile:
-    def __init__(self, absolute_x:int, absoulte_y:int, visited:int|None=None, content:Base_content|None=None):
+    def __init__(self, absolute_x:int, absoulte_y:int, visited:int|None=None, terrain:Terrain_content|None=None, structure:Structure_content|None=None, population:Population_content|None=None):
         """
         If `content` is None, the x and y must be absolute coordinates.
         """
@@ -283,22 +566,54 @@ class Tile:
         if visited is None:
             visited = 0
         self.visited = visited
-        if content is None:
-            content = _gen_content(absolute_x, absoulte_y)
-        self.content = content
+        if terrain is None or structure is None or population is None:
+            noise_values = _get_nose_values(absolute_x, absoulte_y)
+            if terrain is None:
+                terrain:Terrain_content = _calculate_closest(noise_values, _terrain_properties)
+            if structure is None:
+                # less structures on water
+                if terrain.subtype == Terrain_types.OCEAN:
+                    noise_values["population"] -= 0.2
+                elif terrain.subtype == Terrain_types.SHORE:
+                    noise_values["population"] -= 0.1
+                structure:Structure_content = _calculate_closest(noise_values, _structure_properties)
+                if terrain.subtype == Terrain_types.OCEAN:
+                    noise_values["population"] += 0.2
+                elif terrain.subtype == Terrain_types.SHORE:
+                    noise_values["population"] += 0.1
+            if population is None:
+                # less population on not structures
+                if structure.subtype == Structure_types.NONE:
+                    noise_values["population"] -= 0.2
+                population:Population_content = _calculate_closest(noise_values, _population_properties)
+                if structure.subtype == Structure_types.NONE:
+                    noise_values["population"] += 0.2
+        self.terrain = terrain
+        self.structure = structure
+        self.population = population
 
 
     def visit(self, save_data:Save_data):
-        return self.content._visit(self, save_data)
+        self.visited += 1
+        self.terrain._visit(self, save_data)
+        self.structure._visit(self, save_data)
+        self.population._visit(self, save_data)
 
 
     def to_json(self):
         """Returns a json representation of the `Tile`."""
-        content_json = None
-        if self.content is not None:
-            content_json = self.content.to_json()
+        terrain_json = self.terrain.to_json()
+        structure_json = self.structure.to_json()
+        population_json = self.population.to_json()
         
-        tile_json:dict[str, Any] = {"x": self.x, "y": self.y, "visited": self.visited, "content": content_json}
+        tile_json:dict[str, Any] = {
+            "x": self.x,
+            "y": self.y,
+            "visited": self.visited,
+            "terrain": terrain_json,
+            "structure": structure_json,
+            "population": population_json
+        }
         return tile_json
 
 
@@ -423,10 +738,21 @@ class World:
         y = int(tile["y"])
         try: visited = int(tile["visited"])
         except KeyError: visited = None
-        content = tile["content"]
+        try:
+            terrain = tile["terrain"]
+            structure = tile["structure"]
+            population = tile["population"]
+        except KeyError:
+            terrain = tile["content"]
+            try: terrain["subtype"] = terrain["type"]
+            except KeyError: terrain = None
+            structure = None
+            population = None
         tile_name = f"{x}_{y}"
-        content_obj = _load_content(content)
-        tile_obj = Tile(x, y, visited, content_obj)
+        terrain_obj:Terrain_content = _load_content(terrain, _terrain_type_map)
+        structure_obj:Structure_content = _load_content(structure, _structure_type_map)
+        population_obj:Population_content = _load_content(population, _population_type_map)
+        tile_obj = Tile(x, y, visited, terrain_obj, structure_obj, population_obj)
         return {tile_name: tile_obj}
 
 
