@@ -192,7 +192,6 @@ def fight(monster_l:list[es.Entity]|None=None):
         loots = []
         for m in monster_l:
             loots.extend(m.drops)
-            print(loots)
         player.inventory.loot(loots)
 
 

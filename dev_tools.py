@@ -320,6 +320,27 @@ population_type_colors = {
                     }
 
 
+def get_tile_color(tile:cm.Tile, tile_type_counts:dict[str, int], type_colors_map="terrain", opacity_multi=None) -> tuple[dict[str, int], tuple[int, int, int, int]]:
+    if type_colors_map == "structure":
+        tcm = structure_type_colors
+        subtype = tile.structure.subtype
+    elif type_colors_map == "population":
+        tcm = population_type_colors
+        subtype = tile.population.subtype
+    else:
+        tcm = terrain_type_colors
+        subtype = tile.terrain.subtype
+    
+    try: tile_type_counts[subtype.value] += 1
+    except KeyError: tile_type_counts[subtype.value] = 1
+    try: t_color:tuple[int, int, int, int] = tcm[subtype].value
+    except KeyError: t_color = Content_colors.ERROR.value
+    if opacity_multi is None:
+        return (tile_type_counts, t_color)
+    else:
+        return (tile_type_counts, (t_color[0], t_color[1], t_color[2], int(t_color[3] * opacity_multi)))
+
+
 def draw_world_tiles(world:cm.World, type_colors="terrain", image_path="world.png"):
     """
     Genarates an image, representing the diferent types of tiles, and their placements in the world.\n
@@ -329,22 +350,6 @@ def draw_world_tiles(world:cm.World, type_colors="terrain", image_path="world.pn
     tile_size = (1, 1)
     
     tile_type_counts = {"TOTAL": 0}
-    
-    def get_tile_color(tile:cm.Tile, type_colors_map="terrain"):
-        if type_colors_map == "structure":
-            tcm = structure_type_colors
-            subtype = tile.structure.subtype
-        elif type_colors_map == "population":
-            tcm = population_type_colors
-            subtype = tile.population.subtype
-        else:
-            tcm = terrain_type_colors
-            subtype = tile.terrain.subtype
-        
-        try: tile_type_counts[subtype.value] += 1
-        except KeyError: tile_type_counts[subtype.value] = 1
-        try: return tcm[subtype]
-        except KeyError: return Content_colors.ERROR
     
     corners = world._get_corners()
     size = ((corners[2] - corners[0] + 1) * tile_size[0], (corners[3] - corners[1] + 1) * tile_size[1])
@@ -361,9 +366,55 @@ def draw_world_tiles(world:cm.World, type_colors="terrain", image_path="world.pn
             end_y = int(y * tile_size[1] + tile_size[1] - 1)
             # find type
             tile_type_counts["TOTAL"] += 1
-            color = get_tile_color(tile, type_colors)
-            draw.rectangle((start_x, start_y, end_x, end_y), color.value)
+            data = get_tile_color(tile, tile_type_counts, type_colors)
+            tile_type_counts = data[0]
+            draw.rectangle((start_x, start_y, end_x, end_y), data[1])
     im.save(image_path)
+    # reorder tile_type_counts
+    total = tile_type_counts.pop("TOTAL")
+    tile_type_counts["TOTAL"] = total
+    return tile_type_counts
+
+
+
+def draw_combined_img(world:cm.World, image_path="combined.png"):
+    """
+    Genarates an image, representing the diferent types of tiles with the layers overlayed, and their placements in the world.\n
+    Also returns the tile count for all tile types.
+    """
+    tile_size = (1, 1)
+    
+    tile_type_counts = {"TOTAL": 0}
+
+    corners = world._get_corners()
+    size = ((corners[2] - corners[0] + 1) * tile_size[0], (corners[3] - corners[1] + 1) * tile_size[1])
+    
+    def make_transparrent_img(world:cm.World, ttc:dict[str, int], type_colors="terrain", opacity=1/3):
+        im = Image.new("RGBA", size, Content_colors.EMPTY.value)
+        draw = ImageDraw.Draw(im, "RGBA")
+        for chunk in world.chunks.values():
+            for tile in chunk.tiles.values():
+                x = (chunk.base_x - corners[0]) + tile.x
+                y = (chunk.base_y - corners[1]) + tile.y
+                start_x = int(x * tile_size[0])
+                start_y = int(y * tile_size[1])
+                end_x = int(x * tile_size[0] + tile_size[0] - 1)
+                end_y = int(y * tile_size[1] + tile_size[1] - 1)
+                # find type
+                ttc["TOTAL"] += 1
+                data = get_tile_color(tile, ttc, type_colors, opacity)
+                ttc = data[0]
+                draw.rectangle((start_x, start_y, end_x, end_y), data[1])
+        return im
+    
+
+    terrain_img = make_transparrent_img(world, tile_type_counts, "terrain", 1)
+    structure_img = make_transparrent_img(world, tile_type_counts, "structure", 1/2)
+    population_img = make_transparrent_img(world, tile_type_counts, "population")
+    terrain_img.paste(structure_img, (0, 0), structure_img)
+    terrain_img.paste(population_img, (0, 0), population_img)
+
+    terrain_img.save(image_path)
     # reorder tile_type_counts
     total = tile_type_counts.pop("TOTAL")
     tile_type_counts["TOTAL"] = total
@@ -379,6 +430,7 @@ def save_visualizer(save_name:str):
     EXPORT_TERRAIN_FILE = "terrain.png"
     EXPORT_STRUCTURE_FILE = "structure.png"
     EXPORT_POPULATOIN_FILE = "population.png"
+    EXPORT_COMBINED_FILE = "combined.png"
     
     ts.threading.current_thread().name = VISUALIZER_THREAD_NAME
     
@@ -387,6 +439,15 @@ def save_visualizer(save_name:str):
         """`type_colors`: terrain, structure or population"""
         print("Generating image...", end="", flush=True)
         tile_type_counts = draw_world_tiles(save_data.world, type_colors, join(visualized_save_path, export_file))
+        print("DONE!")
+        text =  f"\nTile types:\n"
+        for tt, count in tile_type_counts.items():
+            text += f"\t{tt}: {count}\n"
+        print(text)
+    
+    def make_combined_img(export_file:str):
+        print("Generating image...", end="", flush=True)
+        tile_type_counts = draw_combined_img(save_data.world, join(visualized_save_path, export_file))
         print("DONE!")
         text =  f"\nTile types:\n"
         for tt, count in tile_type_counts.items():
@@ -471,14 +532,20 @@ def save_visualizer(save_name:str):
                 ans = sfm.UI_list(["Yes", "No"], f"Do you want export the terrain data into \"{EXPORT_TERRAIN_FILE}\"?").display()
                 if ans == 0:
                     make_img("terrain", EXPORT_TERRAIN_FILE)
+                    input()
                 # structure
                 ans = sfm.UI_list(["Yes", "No"], f"Do you want export the structure data into \"{EXPORT_STRUCTURE_FILE}\"?").display()
                 if ans == 0:
                     make_img("structure", EXPORT_STRUCTURE_FILE)
+                    input()
                 # population
                 ans = sfm.UI_list(["Yes", "No"], f"Do you want export the population data into \"{EXPORT_POPULATOIN_FILE}\"?").display()
                 if ans == 0:
                     make_img("population", EXPORT_POPULATOIN_FILE)
+                    input()
+                ans = sfm.UI_list(["Yes", "No"], f"Do you want export a combined image into \"{EXPORT_COMBINED_FILE}\"?").display()
+                if ans == 0:
+                    make_combined_img(EXPORT_COMBINED_FILE)
                     input()
     except FileNotFoundError:
         print(f"ERROR: {exc_info()[1]}")

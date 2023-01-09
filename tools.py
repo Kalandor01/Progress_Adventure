@@ -486,8 +486,12 @@ def correct_save_name(raw_save_name:str):
 
 
 def remove_save(save_name:str, is_file:bool|None=None):
+    removed = False
     if (is_file is None or is_file) and os.path.isfile(f'{os.path.join(SAVES_FOLDER_PATH, save_name)}.{SAVE_EXT}'):
         os.remove(f'{os.path.join(SAVES_FOLDER_PATH, save_name)}.{SAVE_EXT}')
-    else:
+        removed = True
+    elif(is_file is None or not is_file) and os.path.isdir(os.path.join(SAVES_FOLDER_PATH, save_name)):
         rmtree(os.path.join(SAVES_FOLDER_PATH, save_name))
-    logger("Deleted save", f'save name: {save_name}')
+        removed = True
+    if removed:
+        logger("Deleted save", f'save name: {save_name}')

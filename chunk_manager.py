@@ -380,29 +380,21 @@ _population_type_map:dict[str, type[Population_content]] = {
 
 # all randomly selectable terrain classes in `_gen_terrain()` with the properties of that terrain class
 _terrain_properties:dict[type[Terrain_content], dict[str, float]] = {
-                                            Field_terrain:
-                                            {
-                                                "height": 0.5,
-                                                "temperature": 0.5,
-                                                "humidity": 0.5,
-                                            },
                                             Mountain_terrain:
                                             {
                                                 "height": 1.0,
-                                                "temperature": 0.25,
-                                                "humidity": 0.3,
                                             },
-                                            Ocean_terrain:
+                                            Field_terrain:
                                             {
-                                                "height": 0.0,
-                                                "temperature": 0.3,
-                                                "humidity": 0.8,
+                                                "height": 0.5,
                                             },
                                             Shore_terrain:
                                             {
-                                                "height": 0.2,
-                                                "temperature": 0.4,
-                                                "humidity": 0.75,
+                                                "height": 0.325,
+                                            },
+                                            Ocean_terrain:
+                                            {
+                                                "height": 0.29,
                                             },
                                         }
 
@@ -410,7 +402,6 @@ _terrain_properties:dict[type[Terrain_content], dict[str, float]] = {
 _structure_properties:dict[type[Structure_content], dict[str, float]] = {
                                             No_structure:
                                             {
-                                                "hostility": 0.5,
                                                 "population": 0.0
                                             },
                                             Bandit_camp_structure:
@@ -426,7 +417,7 @@ _structure_properties:dict[type[Structure_content], dict[str, float]] = {
                                             Kingdom_structure:
                                             {
                                                 "hostility": 0.0,
-                                                "population": 1.0
+                                                "population": 0.8
                                             },
                                         }
 
@@ -434,11 +425,7 @@ _structure_properties:dict[type[Structure_content], dict[str, float]] = {
 _population_properties:dict[type[Population_content], dict[str, float]] = {
                                             No_population:
                                             {
-                                                "height": 0.5,
-                                                "temperature": 0.5,
-                                                "humidity": 0.5,
-                                                "hostility": 0.5,
-                                                "population": 0.0
+                                                "population": 0.1
                                             },
                                             Human_population:
                                             {
@@ -446,7 +433,6 @@ _population_properties:dict[type[Population_content], dict[str, float]] = {
                                                 "temperature": 0.5,
                                                 "humidity": 0.5,
                                                 "hostility": 0.5,
-                                                "population": 0.5
                                             },
                                             Elf_population:
                                             {
@@ -454,7 +440,6 @@ _population_properties:dict[type[Population_content], dict[str, float]] = {
                                                 "temperature": 0.5,
                                                 "humidity": 0.75,
                                                 "hostility": 0.3,
-                                                "population": 0.5
                                             },
                                             Dwarf_population:
                                             {
@@ -462,7 +447,6 @@ _population_properties:dict[type[Population_content], dict[str, float]] = {
                                                 "temperature": 0.6,
                                                 "humidity": 0.3,
                                                 "hostility": 0.6,
-                                                "population": 0.5
                                             },
                                             Demon_population:
                                             {
@@ -470,7 +454,6 @@ _population_properties:dict[type[Population_content], dict[str, float]] = {
                                                 "temperature": 1.0,
                                                 "humidity": 0.0,
                                                 "hostility": 1.0,
-                                                "population": 0.5
                                             },
                                         }
 
@@ -523,13 +506,16 @@ def _calculate_closest(noise_values:dict[str, float], content_properties:dict[ty
     min_diff = 1000000
     for content_type, properties in content_properties.items():
         sum_diff = 0
+        property_num = 0
         for name in properties:
             try:
                 sum_diff += abs(properties[name] - noise_values[name])
+                property_num += 1
             except KeyError:
                 pass
-        if sum_diff < min_diff:
-            min_diff = sum_diff
+        prop_dif = sum_diff / property_num
+        if prop_dif < min_diff:
+            min_diff = prop_dif
             min_diff_content = content_type
     return min_diff_content()
 
@@ -572,22 +558,23 @@ class Tile:
                 terrain:Terrain_content = _calculate_closest(noise_values, _terrain_properties)
             if structure is None:
                 # less structures on water
+                generate = True
                 if terrain.subtype == Terrain_types.OCEAN:
-                    noise_values["population"] -= 0.2
+                    if world_seed.rand() > 0.10: generate = False
                 elif terrain.subtype == Terrain_types.SHORE:
-                    noise_values["population"] -= 0.1
-                structure:Structure_content = _calculate_closest(noise_values, _structure_properties)
-                if terrain.subtype == Terrain_types.OCEAN:
-                    noise_values["population"] += 0.2
-                elif terrain.subtype == Terrain_types.SHORE:
-                    noise_values["population"] += 0.1
+                    if world_seed.rand() > 0.25: generate = False
+                if generate:
+                    structure:Structure_content = _calculate_closest(noise_values, _structure_properties)
+                else: structure = No_structure()
             if population is None:
                 # less population on not structures
+                generate = True
                 if structure.subtype == Structure_types.NONE:
-                    noise_values["population"] -= 0.2
-                population:Population_content = _calculate_closest(noise_values, _population_properties)
-                if structure.subtype == Structure_types.NONE:
-                    noise_values["population"] += 0.2
+                    if world_seed.rand() > 0.10: generate = False
+                if generate:
+                    population:Population_content = _calculate_closest(noise_values, _population_properties)
+                else:
+                    population = No_population()
         self.terrain = terrain
         self.structure = structure
         self.population = population
