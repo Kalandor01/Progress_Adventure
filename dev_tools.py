@@ -572,26 +572,37 @@ def save_visualizer(save_name:str):
 # sd.world.fill_all_chunks("Filling chunks...")
 # ts.remove_save("test", False)
 # sm.make_save(sd, show_progress_text="Saving...")
-save_visualizer("test")
+# save_visualizer("test")
 
+"""
+(make_rectangle + fill + save) in n parts
+"""
 
 # from perlin_noise import PerlinNoise
 # from matplotlib import pyplot as plt
 
-# # noise = PerlinNoise(octaves=2**37, seed=1)
-# noise = PerlinNoise(octaves=2**36, seed=1)
-# # noise = PerlinNoise(octaves=2**35, seed=1)
-# # noise = PerlinNoise(octaves=2**34, seed=1)
+# # noise4 = PerlinNoise(octaves=2**37, seed=1)
+# noise3 = PerlinNoise(octaves=2**36, seed=1)
+# noise2 = PerlinNoise(octaves=2**35, seed=1)
+# noise = PerlinNoise(octaves=2**34, seed=1)
 # offset = 0.0
 
-# xpix, ypix = 100, 100
+# xpix, ypix = 500, 500
 # pic = []
 # for x in range(xpix):
 #     row = []
 #     for y in range(ypix):
 #         noise_val = (noise([(x + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION,
 #                             (y + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION])
-#                             + 0.5)
+#                             )
+#         noise_val += (noise2([(x + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION,
+#                             (y + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION])
+#                             * 0.5)
+#         noise_val += (noise3([(x + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION,
+#                             (y + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION])
+#                             * 0.25)
+#         noise_val += 0.875
+#         noise_val /= 1.75
 #         row.append(noise_val)
 #     pic.append(row)
 

@@ -470,18 +470,28 @@ tile_type_noise_offsets:dict[str, float] = {
 
 def recalculate_noise_generators(ttn_seeds:dict[str, int]):
     """Recalculate perlin noise generators for tile generation."""
-    perlin_height = PerlinNoise(octaves=2**35, seed=ttn_seeds["height"])
-    perlin_temperature = PerlinNoise(octaves=2**34, seed=ttn_seeds["temperature"])
-    perlin_humidity = PerlinNoise(octaves=2**34, seed=ttn_seeds["humidity"])
-    perlin_hostility = PerlinNoise(octaves=2**36, seed=ttn_seeds["hostility"])
-    perlin_population = PerlinNoise(octaves=2**36, seed=ttn_seeds["population"])
+    height1 = PerlinNoise(octaves=2**35, seed=ttn_seeds["height"])
+    height2 = PerlinNoise(octaves=2**36, seed=ttn_seeds["height"])
+    height3 = PerlinNoise(octaves=2**37, seed=ttn_seeds["height"])
+    temperature1 = PerlinNoise(octaves=2**34, seed=ttn_seeds["temperature"])
+    temperature2 = PerlinNoise(octaves=2**35, seed=ttn_seeds["temperature"])
+    temperature3 = PerlinNoise(octaves=2**36, seed=ttn_seeds["temperature"])
+    humidity1 = PerlinNoise(octaves=2**34, seed=ttn_seeds["humidity"])
+    humidity2 = PerlinNoise(octaves=2**35, seed=ttn_seeds["humidity"])
+    humidity3 = PerlinNoise(octaves=2**36, seed=ttn_seeds["humidity"])
+    hostility1 = PerlinNoise(octaves=2**36, seed=ttn_seeds["hostility"])
+    hostility2 = PerlinNoise(octaves=2**37, seed=ttn_seeds["hostility"])
+    hostility3 = PerlinNoise(octaves=2**38, seed=ttn_seeds["hostility"])
+    population1 = PerlinNoise(octaves=2**36, seed=ttn_seeds["population"])
+    population2 = PerlinNoise(octaves=2**37, seed=ttn_seeds["population"])
+    population3 = PerlinNoise(octaves=2**38, seed=ttn_seeds["population"])
     
     tile_type_noises = {
-        "height": perlin_height,
-        "temperature": perlin_temperature,
-        "humidity": perlin_humidity,
-        "hostility": perlin_hostility,
-        "population": perlin_population
+        "height": (height1, height2, height3),
+        "temperature": (temperature1, temperature2, temperature3),
+        "humidity": (humidity1, humidity2, humidity3),
+        "hostility": (hostility1, hostility2, hostility3),
+        "population": (population1, population2, population3)
     }
     return tile_type_noises
 
@@ -493,10 +503,17 @@ _tile_type_noises = recalculate_noise_generators(tile_type_noise_seeds)
 def _get_nose_values(absolute_x:int, absoulte_y:int):
     """Gets the noise values for each perlin noise generator at a specific point, and normalises it between 0 and 1."""
     noise_values:dict[str, float] = {}
-    for name, noise in _tile_type_noises.items():
-        noise_values[name] = (noise([(absolute_x + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION,
+    for name, noises in _tile_type_noises.items():
+        noise_values[name] = (noises[0]([(absolute_x + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION,
                                     (absoulte_y + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION])
-                                    + 0.5 + tile_type_noise_offsets[name])
+                                    )
+        noise_values[name] += (noises[1]([(absolute_x + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION,
+                                    (absoulte_y + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION])
+                                    * 0.5)
+        noise_values[name] += (noises[2]([(absolute_x + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION,
+                                    (absoulte_y + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION])
+                                    * 0.25)
+        noise_values[name] = (noise_values[name] + 0.875 + tile_type_noise_offsets[name]) / 1.75
     return noise_values
 
 
@@ -555,7 +572,7 @@ class Tile:
         if terrain is None or structure is None or population is None:
             noise_values = _get_nose_values(absolute_x, absoulte_y)
             if terrain is None:
-                terrain:Terrain_content = _calculate_closest(noise_values, _terrain_properties)
+                terrain = _calculate_closest(noise_values, _terrain_properties)
             if structure is None:
                 # less structures on water
                 generate = True
@@ -564,7 +581,7 @@ class Tile:
                 elif terrain.subtype == Terrain_types.SHORE:
                     if world_seed.rand() > 0.25: generate = False
                 if generate:
-                    structure:Structure_content = _calculate_closest(noise_values, _structure_properties)
+                    structure = _calculate_closest(noise_values, _structure_properties)
                 else: structure = No_structure()
             if population is None:
                 # less population on not structures
@@ -572,7 +589,7 @@ class Tile:
                 if structure.subtype == Structure_types.NONE:
                     if world_seed.rand() > 0.10: generate = False
                 if generate:
-                    population:Population_content = _calculate_closest(noise_values, _population_properties)
+                    population = _calculate_closest(noise_values, _population_properties)
                 else:
                     population = No_population()
         self.terrain = terrain
