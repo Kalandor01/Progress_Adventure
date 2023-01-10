@@ -572,24 +572,27 @@ class Tile:
         if terrain is None or structure is None or population is None:
             noise_values = _get_nose_values(absolute_x, absoulte_y)
             if terrain is None:
-                terrain = _calculate_closest(noise_values, _terrain_properties)
+                terrain:Terrain_content = _calculate_closest(noise_values, _terrain_properties)
             if structure is None:
                 # less structures on water
                 generate = True
                 if terrain.subtype == Terrain_types.OCEAN:
-                    if world_seed.rand() > 0.10: generate = False
+                    # if world_seed.rand() > 0.10:
+                        generate = False
                 elif terrain.subtype == Terrain_types.SHORE:
-                    if world_seed.rand() > 0.25: generate = False
+                    # if world_seed.rand() > 0.25:
+                        generate = False
                 if generate:
-                    structure = _calculate_closest(noise_values, _structure_properties)
+                    structure:Structure_content = _calculate_closest(noise_values, _structure_properties)
                 else: structure = No_structure()
             if population is None:
                 # less population on not structures
                 generate = True
                 if structure.subtype == Structure_types.NONE:
-                    if world_seed.rand() > 0.10: generate = False
+                    # if world_seed.rand() > 0.10:
+                        generate = False
                 if generate:
-                    population = _calculate_closest(noise_values, _population_properties)
+                    population:Population_content = _calculate_closest(noise_values, _population_properties)
                 else:
                     population = No_population()
         self.terrain = terrain
@@ -869,7 +872,7 @@ class World:
         return tile
     
     
-    def fill_all_chunks(self, show_progress_text:str|None=None):
+    def fill_all_chunks(self, show_progress_text:str|None=None, save_num:int|None=None):
         """
         Generates ALL not yet generated tiles in ALL chunks.\n
         If `show_progress_text` is not None, it writes out a progress percentage while generating.

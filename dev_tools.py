@@ -1,5 +1,6 @@
 from enum import Enum
 import json
+import math
 from os import listdir
 from os.path import join, isdir
 from sys import exc_info
@@ -17,7 +18,7 @@ from constants import                                                           
     BACKUPS_FOLDER_PATH, OLD_BACKUP_EXT, BACKUP_EXT,                                    \
     SAVE_FILE_NAME_DATA,                                                                \
     SAVE_SEED,                                                                          \
-    FILE_ENCODING_VERSION,                                                              \
+    FILE_ENCODING_VERSION, CHUNK_SIZE,                                                  \
     SAVE_VERSION, TILE_NOISE_RESOLUTION
 import tools as ts
 from tools import sfm
@@ -421,6 +422,42 @@ def draw_combined_img(world:cm.World, image_path="combined.png"):
     return tile_type_counts
 
 
+"""
+def _fill_separated_process(save_folder_path:str, corners:tuple[int, int, int, int]):
+    world = cm.World()
+    world.gen_tile(corners[0], corners[1])
+    world.gen_tile(corners[2], corners[3])
+    world.make_rectangle()
+    world.fill_all_chunks("Filling chunks...")
+    world.save_all_chunks_to_files(save_folder_path, True, "Saving...")
+
+
+def fill_chunks_separated(save_folder_path:str, corners:tuple[int, int, int, int], split:tuple[int, int]|None=None):
+    import multiprocessing as mp
+    if split is None:
+        sqrt_split = int(math.sqrt(mp.cpu_count()))
+        split = (sqrt_split, sqrt_split)
+    size = ((corners[2] - corners[0] + 1), (corners[3] - corners[1] + 1))
+    split_size_x = int(size[0] / split[0])
+    split_size_y = int(size[1] / split[1])
+    min_x = corners[0]
+    min_y = corners[1]
+    max_x = corners[0] + split_size_x - 1
+    max_y = corners[1] + split_size_y - 1
+    for _ in range(split[0]):
+        for _ in range(split[0]):
+            this_corners = (min_x, min_y, max_x, max_y)
+            process = mp.Process(target=_fill_separated_process, args=[save_folder_path, this_corners])
+            process.start()
+            _fill_separated_process(save_folder_path, this_corners)
+            min_y = min(min_y + split_size_y, corners[3])
+            max_y = min(max_y + split_size_y, corners[3])
+        min_x = min(min_x + split_size_x, corners[2])
+        max_x = min(max_x + split_size_x, corners[2])
+"""
+    
+
+
 def save_visualizer(save_name:str):
     """
     Visualises the data in a save file
@@ -552,6 +589,24 @@ def save_visualizer(save_name:str):
     ts.threading.current_thread().name = MAIN_THREAD_NAME
 
 
+def fill_world_segmented(world:cm.World, save_folder_path:str, corners:tuple[int, int, int, int], save_num:int):
+    """
+    Generates chunks in a way that makes the world rectangle shaped.\n
+    If `save_folder_path` is not None, it will try to load the chunks from the save folder first (calls `load_chunk_from_folder`).\n
+    HELL!!!
+    """
+    cl = (((corners[2] + 1) - corners[0]) // CHUNK_SIZE) * (((corners[3] + 1) - corners[1]) // CHUNK_SIZE)
+    for x in range(corners[0], corners[2] + 1, CHUNK_SIZE):
+        for y in range(corners[1], corners[3] + 1, CHUNK_SIZE):
+            world.get_chunk(x, y).fill_chunk()
+            print(f"\r({int((cl / save_num) / ((x+1) * (y+1)))}/{save_num})Filling chunks...{round((((x+1) * (y+1)) / save_num + 1) / (cl / save_num) * 100, 1)}%", end="", flush=True)
+            if ((x+1) * (y+1)) % int(cl / save_num) == 0:
+                print(f"\r({int((cl / save_num) / ((x+1) * (y+1)))}/{save_num})Filling chunks...DONE!           ")
+                world.save_all_chunks_to_files(save_folder_path, True, f"({int((cl / save_num) / ((x+1) * (y+1)))}/{save_num})Saving...")
+    world.save_all_chunks_to_files(save_folder_path, True, f"(FINAL)Saving...")
+    print("DONE!")
+
+
 # Self_Checks().run_all_tests()
 
 # for folder in listdir(SAVES_FOLDER_PATH):
@@ -565,18 +620,15 @@ def save_visualizer(save_name:str):
 # import save_manager as sm
 # mseed = ts.np.random.RandomState()
 # wseed = ts.make_random_seed(mseed)
-# sd = dm.Save_data("test", "test save", [0, 0, 0, 0, 0, 0], es.Player(), mseed, wseed, ts.recalculate_tile_type_noise_seeds(wseed))
-# sd.world.gen_tile(-100, -100)
-# sd.world.gen_tile(99, 99)
-# sd.world.make_rectangle()
-# sd.world.fill_all_chunks("Filling chunks...")
-# ts.remove_save("test", False)
+# test_save_name = "ttest"
+# sd = dm.Save_data(test_save_name, "test save", [0, 0, 0, 0, 0, 0], es.Player(), mseed, wseed, ts.recalculate_tile_type_noise_seeds(wseed))
+# ts.remove_save(test_save_name, False)
 # sm.make_save(sd, show_progress_text="Saving...")
-# save_visualizer("test")
+# fill_world_segmented(sd.world, join(SAVES_FOLDER_PATH, sd.save_name), (-100, -100, 99, 99), 10)
+# save_visualizer(test_save_name)
 
-"""
-(make_rectangle + fill + save) in n parts
-"""
+
+
 
 # from perlin_noise import PerlinNoise
 # from matplotlib import pyplot as plt
