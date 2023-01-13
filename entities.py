@@ -21,7 +21,7 @@ class Attributes(Enum):
     
 
 
-def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|range, fluc_small=2, fluc_big=3, c_rare=0.02, team=1, c_team_change=0.005, name:str|None=None):
+def entity_master(base_hp:int|range, base_attack:int|range, base_defence:int|range, base_speed:int|range, fluc_small=2, fluc_big=3, c_rare=0.02, team=1, c_team_change=0.005, name:str|None=None):
     
     def configure_stat(stat_value:int|range):
         # int or range
@@ -40,22 +40,22 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
         frame_stack = stack()
         name = str(frame_stack[1][0].f_locals["self"].__class__.__name__)
     name = name.replace("_", " ")
-    life = configure_stat(life)
-    attack = configure_stat(attack)
-    deff = configure_stat(deff)
-    speed = configure_stat(speed)
+    base_hp = configure_stat(base_hp)
+    base_attack = configure_stat(base_attack)
+    base_defence = configure_stat(base_defence)
+    base_speed = configure_stat(base_speed)
     attributes:list[Attributes] = []
     if main_seed.random() < c_rare:
         attributes.append(Attributes.RARE)
-    if life <= 0:
-        life = 1
+    if base_hp <= 0:
+        base_hp = 1
     # team
     switched = False
     if main_seed.random() < c_team_change:
         team = 0
         switched = True
     # write
-    return (name, life, attack, deff, speed, team, switched, attributes)
+    return (name, base_hp, base_attack, base_defence, base_speed, team, switched, attributes)
 
 
 def _facing_to_movement_vector(facing:Rotation) -> tuple[int, int]:
@@ -110,20 +110,19 @@ def loot_manager(drops:list[Loot_controller]|None=None):
 
 
 class Entity:
-    def __init__(self, traits:tuple|None=None, drops:list|None=None):
-        if traits is None:
-            self.name = "test"
-            traits = entity_master(1, 1, 1, 1, name=self.name)
+    def __init__(self, name:str, base_hp:int, base_attack:int, base_defence:int, base_speed:int, team:int=0, switched:bool=False, attributes:list[Attributes]|None=None, drops:list|None=None):
+        if attributes is None:
+            attributes = []
         if drops is None:
             drops = []
-        self.name = str(traits[0])
-        self.base_hp = int(traits[1])
-        self.base_attack = int(traits[2])
-        self.base_defence = int(traits[3])
-        self.base_speed = int(traits[4])
-        self.team = int(traits[5])
-        self.switched = bool(traits[6])
-        self.attributes:list[Attributes] = traits[7]
+        self.name = str(name)
+        self.base_hp = int(base_hp)
+        self.base_attack = int(base_attack)
+        self.base_defence = int(base_defence)
+        self.base_speed = int(base_speed)
+        self.team = int(team)
+        self.switched = bool(switched)
+        self.attributes:list[Attributes] = attributes
         self.drops:list[tuple[Item_categories, int]] = drops
         # adjust properties
         self._apply_attributes()
@@ -192,7 +191,7 @@ class Player(Entity):
     def __init__(self, name=""):
         if name == "":
             name = "You"
-        super().__init__(entity_master(range(14, 26), range(7, 13), range(7, 13), range(1, 20), 0, 0, 0, 0, 0, name))
+        super().__init__(*entity_master(range(14, 26), range(7, 13), range(7, 13), range(1, 20), 0, 0, 0, 0, 0, name))
         self.inventory = Inventory()
         self.pos:tuple[int, int] = (0, 0)
         self.rotation:Rotation = Rotation.NORTH
@@ -250,7 +249,7 @@ class Player(Entity):
 
 class Caveman(Entity):
     def __init__(self):
-        super().__init__(entity_master(7, 7, 7, 7), loot_manager(
+        super().__init__(*entity_master(7, 7, 7, 7), loot_manager(
             [Loot_controller(Item_categories.WEAPONS.value.WOODEN_CLUB, 0.3),
             Loot_controller(Item_categories.MATERIALS.value.CLOTH, 0.15, range(0, 1), 3),
             Loot_controller(Item_categories.MISC.value.COPPER_COIN, 0.35, range(0, 4), 3)]))
@@ -258,7 +257,7 @@ class Caveman(Entity):
 
 class Ghoul(Entity):
     def __init__(self):
-        super().__init__(entity_master(11, 9, 9, 9), loot_manager(
+        super().__init__(*entity_master(11, 9, 9, 9), loot_manager(
             [Loot_controller(Item_categories.WEAPONS.value.STONE_SWORD, 0.2),
             Loot_controller(Item_categories.MISC.value.ROTTEN_FLESH, 0.55, range(0, 3)),
             Loot_controller(Item_categories.MISC.value.COPPER_COIN, 0.40, range(0, 5), 4)]))
@@ -266,13 +265,8 @@ class Ghoul(Entity):
 
 class Troll(Entity):
     def __init__(self):
-        super().__init__(entity_master(13, 11, 11, 5), loot_manager(
+        super().__init__(*entity_master(13, 11, 11, 5), loot_manager(
             [Loot_controller(Item_categories.WEAPONS.value.CLUB_WITH_TEETH, 0.25),
             Loot_controller(Item_categories.MATERIALS.value.CLOTH, 0.25, range(1, 3), 2),
             Loot_controller(Item_categories.MATERIALS.value.TEETH, 0.35, range(1, 5), 2),
             Loot_controller(Item_categories.MISC.value.SILVER_COIN, 0.30, range(1, 3), 3)]))
-
-
-class Test(Entity):
-    def __init__(self):
-        super().__init__()
