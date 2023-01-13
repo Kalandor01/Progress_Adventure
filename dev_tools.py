@@ -613,7 +613,7 @@ def fill_world_segmented(world:cm.World, save_folder_path:str, corners:tuple[int
 #     if isdir(join(SAVES_FOLDER_PATH, folder)):
 #         save_visualizer(folder)
 
-# save_visualizer("new sav")
+save_visualizer("new sav")
 
 
 # import entities as es

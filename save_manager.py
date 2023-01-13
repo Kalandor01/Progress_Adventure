@@ -29,42 +29,27 @@ def _save_display_json(data:Save_data):
     return display_data
 
 
-def _save_player_json(player_data:es.Player):
-    """Converts the player data to json format."""
-    player_json = {
-                    "name": player_data.name,
-                    "hp": player_data.hp,
-                    "attack": player_data.attack,
-                    "defence": player_data.defence,
-                    "speed": player_data.speed,
-                    "x_pos": player_data.pos[0],
-                    "y_pos": player_data.pos[1],
-                    "rotation": player_data.rotation.value
-                    }
-    player_json["inventory"] = player_data.inventory.to_json()
-    return player_json
-
-
-def _load_inventory_json(inventory_json:list):
+def _load_inventory_json(inventory_json:list[dict[str, Any]]):
     """Converts the inventory json to object format."""
     items = []
     for item in inventory_json:
-        item_type = iy.item_finder(item[0])
+        item_type = iy.item_finder(item["type"])
         if item_type is not None:
-            items.append(iy.Item(item_type, item[1]))
+            items.append(iy.Item(item_type, item["amount"]))
     return items
 
 
 def _load_player_json(player_json:dict[str, Any]):
     """Converts the player json to object format."""
     player = es.Player(player_json["name"])
-    player.hp = int(player_json["hp"])
-    player.attack = int(player_json["attack"])
-    player.defence = int(player_json["defence"])
-    player.speed = int(player_json["speed"])
+    player.base_hp = int(player_json["base_hp"])
+    player.base_attack = int(player_json["base_attack"])
+    player.base_defence = int(player_json["base_defence"])
+    player.base_speed = int(player_json["base_speed"])
     player.inventory.items = list(_load_inventory_json(player_json["inventory"]))
     player.pos = (int(player_json["x_pos"]), int(player_json["y_pos"]))
     player.rotation = es.Rotation(es.Rotation._value2member_map_[int(player_json["rotation"])])
+    player._apply_attributes()
     player.update_full_name()
     return player
 
@@ -81,7 +66,7 @@ def _save_data_json(data:Save_data):
     last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
     save_data_json["last_access"] = last_access
     # player
-    save_data_json["player"] = _save_player_json(data.player)
+    save_data_json["player"] = data.player.to_json()
     # randomstate
     save_data_json["seeds"] = {
         "main_seed": ts.random_state_to_json(data.main_seed),
@@ -124,7 +109,7 @@ def make_save(data:Save_data, actual_data:Save_data|None=None, clear_chunks=True
 def load_all_chunks(save_data:Save_data, show_progress_text:str|None=None):
     """
     Loads all chunks into the save data from a save file.\n
-        If `show_progress_text` is not None, it writes out a progress percentage while loading.
+    If `show_progress_text` is not None, it writes out a progress percentage while loading.
     """
     # read from file (old)
     save_folder_path = os.path.join(SAVES_FOLDER_PATH, save_data.save_name)
@@ -255,6 +240,22 @@ def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str
         data["seeds"]["tile_type_noise_seeds"]["hostility"] = data["seeds"]["tile_type_noise_seeds"]["danger"]
         save_version = "1.5.2"
         ts.logger("Corrected save data", "1.5.1 -> 1.5.2", Log_type.DEBUG)
+    if save_version == "1.5.2":
+        # entity properties updated + inventory to dict
+        player = data["player"]
+        player["base_hp"] = player["hp"]
+        player["base_attack"] = player["attack"]
+        player["base_defence"] = player["defence"]
+        player["base_speed"] = player["speed"]
+        inventory = []
+        for item in player["inventory"]:
+            inventory.append({
+                "type": item[0],
+                "amount": item[1] 
+            })
+        player["inventory"] = inventory
+        save_version = "1.5.3"
+        ts.logger("Corrected save data", "1.5.2 -> 1.5.3", Log_type.DEBUG)
     return data
 
 
@@ -343,7 +344,7 @@ def _process_save_display_data(data:tuple[str, dict[str, Any] | Literal[-1]]):
             return (data[0], data_processed, not ts.is_up_to_date("1.3", save_version))
         else:
             raise IndexError
-    except (TypeError, IndexError):
+    except (TypeError, IndexError, KeyError):
         ts.logger("Parse error", f"Save name: {data[0]}", Log_type.ERROR)
         ts.press_key(f"\"{data[0]}\" could not be parsed!")
         return None

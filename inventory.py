@@ -1,4 +1,5 @@
 from enum import Enum, auto
+from typing import Any
 
 from tools import logger, Log_type
 
@@ -46,14 +47,14 @@ class Item_categories(Enum):
 class Item:
     def __init__(self, name:Item_categories, amount=1):
         self.name = name
-        self.amount = amount
+        self.amount = int(amount)
         self.make_item()
 
 
     def make_item(self):
         match(self.name):
             case Weapon_items.CLUB_WITH_TEETH:
-                self.d_name = "Club with teeth"
+                self.d_name = "Teeth club"
             case _:
                 self.d_name = self.name.name.lower().capitalize().replace("_", " ")
 
@@ -85,7 +86,7 @@ class Inventory:
         return False
 
 
-    def loot(self, loot:list):
+    def loot(self, loot:list[tuple[Item_categories, int]]):
         for item in loot:
             self.add(item[0], item[1])
 
@@ -103,9 +104,12 @@ class Inventory:
     def to_json(self):
         """Convert the items in the inventory into a list for a json format."""
 
-        items_json = []
+        items_json:list[dict[str, Any]] = []
         for item in self.items:
-            items_json.append([item.name.name, item.amount])
+            items_json.append({
+                "type": item.name.name,
+                "amount": item.amount
+            })
         return items_json
 
 

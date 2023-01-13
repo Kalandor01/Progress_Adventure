@@ -11,14 +11,17 @@ data.sav
         - last_access: [year, month, day, hour, min, sec]: int
         - player:
             - name: str
-            - hp: int
-            - attack: int
-            - defence: int
-            - speed: int
+            - base_hp: int
+            - base_attack: int
+            - base_defence: int
+            - base_speed: int
+            - attributes: [
+                - (attribute): str(Attribute(Enum))
+            ]
             - inventory: [
                 [
-                    - (type): str(Item_categories(Enum))
-                    - (amount): int
+                    - type: str(Item_categories(Enum))
+                    - amount: int
                 ]
             ]
             - x_pos: int
