@@ -16,7 +16,7 @@ class Rotation(Enum):
     EAST = 3
 
 
-class Attibutes(Enum):
+class Attributes(Enum):
     RARE = auto()
     
 
@@ -44,9 +44,9 @@ def entity_master(life:int|range, attack:int|range, deff:int|range, speed:int|ra
     attack = configure_stat(attack)
     deff = configure_stat(deff)
     speed = configure_stat(speed)
-    attributes:list[Attibutes] = []
+    attributes:list[Attributes] = []
     if main_seed.random() < c_rare:
-        attributes.append(Attibutes.RARE)
+        attributes.append(Attributes.RARE)
     if life <= 0:
         life = 1
     # team
@@ -123,7 +123,7 @@ class Entity:
         self.base_speed = int(traits[4])
         self.team = int(traits[5])
         self.switched = bool(traits[6])
-        self.attributes:list[Attibutes] = traits[7]
+        self.attributes:list[Attributes] = traits[7]
         self.drops:list[tuple[Item_categories, int]] = drops
         # adjust properties
         self._apply_attributes()
@@ -137,7 +137,7 @@ class Entity:
         self.attack = self.base_attack
         self.defence = self.base_defence
         self.speed = self.base_speed
-        if Attibutes.RARE in self.attributes:
+        if Attributes.RARE in self.attributes:
             self.hp *= 2
             self.attack *= 2
             self.defence *= 2
@@ -147,7 +147,7 @@ class Entity:
     def update_full_name(self):
         """Updates the full name of the entity."""
         full_name = self.name
-        if Attibutes.RARE in self.attributes:
+        if Attributes.RARE in self.attributes:
             full_name = "Rare " + full_name
         self.full_name = full_name
 
