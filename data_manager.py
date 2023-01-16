@@ -138,6 +138,12 @@ class Settings:
                 keybind_obj[key] = Key(keybinds[key])
         if ask_package_check_fail is None:
             ask_package_check_fail = self.get_ask_package_check_fail()
+        if ask_delete_save is None:
+            ask_delete_save = self.get_ask_delete_save()
+        if ask_regenerate_save is None:
+            ask_regenerate_save = self.get_ask_regenerate_save()
+        if def_backup_action is None:
+            def_backup_action = self.get_def_backup_action()
         self.auto_save = bool(auto_save)
         self.logging = (int(logging_level) != -1)
         self.logging_level = int(logging_level)
@@ -166,6 +172,26 @@ class Settings:
         for key in keybinds:
             keybind_obj[key] = Key(keybinds[key])
         return keybind_obj
+    
+    
+    def get_ask_package_check_fail(self):
+        """Returns the value of the `ask_package_check_fail` from the setting file."""
+        return bool(settings_manager("ask_package_check_fail"))
+    
+    
+    def get_ask_delete_save(self):
+        """Returns the value of the `ask_delete_save` from the setting file."""
+        return bool(settings_manager("ask_delete_save"))
+    
+    
+    def get_ask_regenerate_save(self):
+        """Returns the value of the `ask_regenerate_save` from the setting file."""
+        return bool(settings_manager("ask_regenerate_save"))
+    
+    
+    def get_def_backup_action(self):
+        """Returns the value of the `def_backup_action` from the setting file."""
+        return int(settings_manager("def_backup_action"))
 
 
     def update_logging_level(self, logging_level:int):
@@ -215,6 +241,31 @@ class Settings:
                     if self.keybinds[key1].value == self.keybinds[key2].value:
                         self.keybinds[key1].conflict = True
                         self.keybinds[key2].conflict = True
+
+
+    def update_ask_package_check_fail(self, ask_package_check_fail:bool):
+        """Updates the value of `ask_package_check_fail` in the program and in the setting file."""
+        self.ask_package_check_fail = bool(ask_package_check_fail)
+        settings_manager("ask_package_check_fail", self.ask_package_check_fail)
+
+
+    def update_ask_delete_save(self, ask_delete_save:bool):
+        """Updates the value of `ask_delete_save` in the program and in the setting file."""
+        self.ask_delete_save = bool(ask_delete_save)
+        settings_manager("ask_delete_save", self.ask_delete_save)
+
+
+    def update_ask_regenerate_save(self, ask_regenerate_save:bool):
+        """Updates the value of `ask_regenerate_save` in the program and in the setting file."""
+        self.ask_regenerate_save = bool(ask_regenerate_save)
+        settings_manager("ask_regenerate_save", self.ask_regenerate_save)
+
+
+    def update_def_backup_action(self, def_backup_action:int):
+        """Updates the value of `def_backup_action` in the program and in the setting file."""
+        self.def_backup_action = int(def_backup_action)
+        settings_manager("def_backup_action", self.def_backup_action)
+
 
 class Save_data:
     def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player,

@@ -775,18 +775,18 @@ class World:
         """
         if remove_chunks:
             if show_progress_text is not None:
-                print(f"{show_progress_text}COPYING...", end="", flush=True)
+                print(f"{show_progress_text}COPYING...\r", end="", flush=True)
             chunk_data = deepcopy(self.chunks)
             self.chunks.clear()
         else:
             chunk_data = self.chunks
         if show_progress_text is not None:
             cl = len(chunk_data)
-            print(show_progress_text, end="", flush=True)
+            print(show_progress_text + "              ", end="", flush=True)
             for x, chunk in enumerate(chunk_data.values()):
                 chunk.save_to_file(save_folder_path)
                 print(f"\r{show_progress_text}{round((x + 1) / cl * 100, 1)}%", end="", flush=True)
-            print(f"\r{show_progress_text}DONE!             ")
+            print(f"\r{show_progress_text}DONE!                       ")
         else:
             for chunk in chunk_data.values():
                 chunk.save_to_file(save_folder_path)

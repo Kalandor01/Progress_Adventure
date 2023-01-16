@@ -317,7 +317,9 @@ def new_save():
 
 def load_save(save_name:str, is_file=False):
     global SAVE_DATA
-    SAVE_DATA = sm.load_save(save_name, SETTINGS.keybind_mapping, is_file)
+    backup_choice = SETTINGS.def_backup_action == -1
+    automatic_backup = bool(SETTINGS.def_backup_action)
+    SAVE_DATA = sm.load_save(save_name, SETTINGS.keybind_mapping, is_file, backup_choice, automatic_backup)
     game_loop()
 
 
@@ -356,13 +358,35 @@ def main_menu():
                 logging_value = x
                 break
         logging_level_names = ["MINIMAL", Log_type.FATAL.name, Log_type.ERROR.name, Log_type.WARN.name, Log_type.INFO.name, "ALL"]
-        logging = sfm.Choice(logging_level_names, logging_value, "Logging: ")
+        logging = ts.sfm_choice_s(logging_level_names, logging_value, "Logging: ")
         other_settings = [auto_save, logging, None, sfm.UI_list(["Done"])]
         # response
         response = sfm.options_ui(other_settings, " Other options", key_mapping=SETTINGS.keybind_mapping)
         if response is not None:
             SETTINGS.update_auto_save(bool(auto_save.value))
             SETTINGS.update_logging_level(logging_values[logging.value])
+
+    def ask_options():
+        ask_package_check_fail = sfm.Toggle(SETTINGS.ask_package_check_fail, "!!!Ask on package check fail!!!: ", "YES", "no")
+        ask_delete_save = sfm.Toggle(SETTINGS.ask_delete_save, "Ask on save folder delete: ", "yes", "no")
+        ask_regenerate_save = sfm.Toggle(SETTINGS.ask_regenerate_save, "Ask on save folders regeneration: ", "yes", "no")
+        # def_backup_action
+        backup_action_values = [-1, 0, 1]
+        backup_action_value = backup_action_values[0]
+        for x in range(len(backup_action_values)):
+            if backup_action_values[x] == SETTINGS.def_backup_action:
+                backup_action_value = x
+                break
+        backup_action__names = ["ask", "don't backup", "backup"]
+        def_backup_action = ts.sfm_choice_s(backup_action__names, backup_action_value, "On save folder backup prompt: ")
+        ask_settings = [ask_package_check_fail, ask_delete_save, ask_regenerate_save, def_backup_action, None, sfm.UI_list(["Done"])]
+        # response
+        response = sfm.options_ui(ask_settings, " Question popups", key_mapping=SETTINGS.keybind_mapping)
+        if response is not None:
+            SETTINGS.update_ask_package_check_fail(bool(ask_package_check_fail.value))
+            SETTINGS.update_ask_delete_save(bool(ask_delete_save.value))
+            SETTINGS.update_ask_regenerate_save(bool(ask_regenerate_save.value))
+            SETTINGS.update_def_backup_action(backup_action_values[def_backup_action.value])
 
     def set_keybind(name:str):
         print("\n\nPress any key\n\n", end="")
@@ -437,8 +461,11 @@ def main_menu():
                 status = (0, files_data[int(option)][0], files_data[int(option)][2])
             # regenerate
             elif option == len(files_data):
-                if sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to regenerate ALL save files? This will load, delete then resave EVERY save file!", can_esc=True).display(SETTINGS.keybind_mapping) == 1:
-                    backup_saves = bool(sfm.UI_list_s(["Yes", "No"], f" Do you want to backup your save files before regenerating them?", can_esc=True).display(SETTINGS.keybind_mapping) == 0)
+                if not SETTINGS.ask_regenerate_save or sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to regenerate ALL save files? This will load, delete then resave EVERY save file!", can_esc=True).display(SETTINGS.keybind_mapping) == 1:
+                    if SETTINGS.def_backup_action == -1:
+                        backup_saves = bool(sfm.UI_list_s(["Yes", "No"], f" Do you want to backup your save files before regenerating them?", can_esc=True).display(SETTINGS.keybind_mapping) == 0)
+                    else:
+                        backup_saves = bool(SETTINGS.def_backup_action)
                     print("Regenerating save files...\n")
                     for save in files_data:
                         regenerate_save_file(save[0], save[2], backup_saves)
@@ -452,7 +479,7 @@ def main_menu():
                 while len(files_data) > 0:
                     option = sfm.UI_list(list_data, " Delete mode!", DELETE_CURSOR_ICONS, True, True, exclude_nones=True).display(SETTINGS.keybind_mapping)
                     if option != -1 and option < (len(list_data) - 1) / 2:
-                        if sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(SETTINGS.keybind_mapping):
+                        if not SETTINGS.ask_delete_save or sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(SETTINGS.keybind_mapping):
                             ts.remove_save(files_data[option][0], files_data[option][2])
                             list_data.pop(option * 2)
                             list_data.pop(option * 2)
@@ -465,7 +492,7 @@ def main_menu():
             else:
                 in_main_menu = True
         elif (option == 2 and len(files_data)) or (option == 1 and not len(files_data)):
-            sfm.UI_list(["Keybinds", "Other", None, "Back"], " Options", None, False, True, [keybind_setting, other_options], True).display(SETTINGS.keybind_mapping)
+            sfm.UI_list(["Keybinds", "Question popups", "Other", None, "Back"], " Options", None, False, True, [keybind_setting, ask_options, other_options], True).display(SETTINGS.keybind_mapping)
             in_main_menu = True
 
         # action

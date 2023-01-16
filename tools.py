@@ -113,6 +113,11 @@ def decode_save_s(file_path:str, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT,
     return json.loads(decoded_lines[line_num])
 
 
+def sfm_choice_s(choice_list:list|range, value=0, pre_text="", pre_value="", display_value=False, post_value="", multiline=False):
+    """`sfm.Choice()`, but adds <> around the answer to signal that it is a choice."""
+    return sfm.Choice(choice_list, value, pre_text + "<", ">" + pre_value, display_value, post_value, multiline)
+
+
 def change_logging_level(value:int):
     """
     Sets the `LOGGING_LEVEL`, and if logging is enabled or not.
@@ -284,11 +289,31 @@ def settings_manager(line_name:str, write_value:Any=None):
     \t- left
     \t- right
     \t- enter
+    - ask_package_check_fail: bool
+    - ask_delete_save: bool
+    - ask_regenerate_save: bool
+    - def_backup_action: int
     """
 
     # default values
-    settings_lines = ["auto_save", "logging_level", "keybinds"]
-    def_settings:dict[str, Any] = {"auto_save": True, "logging_level": 0, "keybinds": {"esc": [[b"\x1b"]], "up": [[], [b"H"]], "down": [[], [b"P"]], "left": [[], [b"K"]], "right": [[], [b"M"]], "enter": [[b"\r"]]}}
+    settings_lines = ["auto_save", "logging_level", "keybinds", "ask_package_check_fail",
+                      "ask_delete_save", "ask_regenerate_save", "def_backup_action"]
+    def_settings:dict[str, Any] = {
+        "auto_save": True,
+        "logging_level": 0,
+        "keybinds": {
+            "esc": [[b"\x1b"]],
+            "up": [[], [b"H"]],
+            "down": [[], [b"P"]],
+            "left": [[], [b"K"]],
+            "right": [[], [b"M"]],
+            "enter": [[b"\r"]]
+        },
+        "ask_package_check_fail": True,
+        "ask_delete_save": True,
+        "ask_regenerate_save": True,
+        "def_backup_action": -1
+    }
 
     def recreate_settings():
         new_settings = deepcopy(def_settings)
@@ -403,6 +428,9 @@ def _package_response(bad_packages:list, py_good:bool):
         print(f"{'Some packages are' if len(bad_packages) > 1 else 'A package is'} not up to date:\n\t" + "\n\t".join([p for p in bad_packages_str]))
     # return
     if len(bad_packages) == 0 and py_good:
+        return True
+    # BAD BUT WORKS???!
+    elif not bool(settings_manager("ask_package_check_fail")):
         return True
     else:
         ans = input("Do you want to continue?(Y/N): ")
