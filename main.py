@@ -6,13 +6,13 @@ from time import sleep
 from typing import Literal
 
 try:
-    from utils import Color, stylized_text
+    from utils import Color, stylized_text, getch, press_key
     import tools as ts
     import data_manager as dm
     import entities as es
     import save_manager as sm
 
-    from tools import main_seed, Log_type, sfm, col, getch
+    from tools import main_seed, Log_type, sfm, col
     from constants import                                                   \
         MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME,   \
         DELETE_CURSOR_ICONS,                                                \
@@ -37,12 +37,9 @@ if __name__ == "__main__":
 
             # GLOBAL VARIABLES
             GOOD_PACKAGES = True
-            SETTINGS = dm.Settings(
-                ts.settings_manager("auto_save"),
-                ts.settings_manager("logging_level"),
-                ts.settings_manager("keybinds"))
+            SETTINGS = dm.Settings()
             ts.change_logging_level(SETTINGS.logging_level)
-            SETTINGS.save_keybind_mapping()
+            SETTINGS.update_keybinds()
             SAVE_DATA:dm.Save_data
             GLOBALS = dm.Globals(False, False, False, False)
             
@@ -79,6 +76,7 @@ def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=False):
             monster_cost = power_max
 
         # monster choice
+        monster = None
         if monster_cost >= 3:
             monster_n = main_seed.randint(0, 1)
             match monster_n:
@@ -98,7 +96,8 @@ def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=False):
                     monster = es.Caveman()
             cost -= 1
         num -= 1
-        monsters.append(monster)
+        if monster is not None:
+            monsters.append(monster)
     print("Random enemy maker:")
     fight(monsters)
 
@@ -107,13 +106,13 @@ def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=False):
 def fight(monster_l:list[es.Entity]|None=None):
     player = SAVE_DATA.player
     if monster_l is None:
-        monster_l = [es.Test()]
+        monster_l = [es.Caveman()]
     # variables
     szum = 0
     for m in monster_l:
         szum += 1
         if m is None:
-            monster_l = [es.Test()]
+            monster_l = [es.Caveman()]
             break
     attacking_m = ""
     # enemys
@@ -304,7 +303,7 @@ def game_loop():
         # ENDING
     GLOBALS.exiting = False
     GLOBALS.in_game_loop = False
-    ts.press_key("Exiting...Press keys!")
+    press_key("Exiting...Press keys!")
     ts.logger("Game loop ended")
 
 
@@ -347,7 +346,9 @@ def regenerate_save_file(save_name:str, is_file=False, make_backup=True):
 def main_menu():
     # action functions
     def other_options():
+        # auto save
         auto_save = sfm.Toggle(SETTINGS.auto_save, "Auto save: ")
+        # logging
         logging_values = [-1, 4, 3, 2, 1, 0]
         logging_value = len(logging_values)
         for x in range(len(logging_values)):
@@ -357,9 +358,11 @@ def main_menu():
         logging_level_names = ["MINIMAL", Log_type.FATAL.name, Log_type.ERROR.name, Log_type.WARN.name, Log_type.INFO.name, "ALL"]
         logging = sfm.Choice(logging_level_names, logging_value, "Logging: ")
         other_settings = [auto_save, logging, None, sfm.UI_list(["Done"])]
+        # response
         response = sfm.options_ui(other_settings, " Other options", key_mapping=SETTINGS.keybind_mapping)
         if response is not None:
-            SETTINGS.change_others(bool(auto_save.value), logging_values[logging.value])
+            SETTINGS.update_auto_save(bool(auto_save.value))
+            SETTINGS.update_logging_level(logging_values[logging.value])
 
     def set_keybind(name:str):
         print("\n\nPress any key\n\n", end="")
@@ -388,15 +391,11 @@ def main_menu():
             ], " Keybinds", False, True).display(SETTINGS.keybind_mapping)
             # exit
             if ans == -1:
-                keybinds:dict[str, list[list[bytes]]] = ts.settings_manager("keybinds")
-                new_keybinds:dict[str, dm.Key] = {}
-                for x in keybinds:
-                    new_keybinds[x] = dm.Key(keybinds[x])
-                SETTINGS.keybinds = new_keybinds
+                SETTINGS.keybinds = SETTINGS.get_keybins()
                 break
             # done
             elif ans > 5:
-                SETTINGS.save_keybind_mapping()
+                SETTINGS.update_keybinds()
                 break
             else:
                 set_keybind(list(SETTINGS.keybinds)[ans])
@@ -472,12 +471,12 @@ def main_menu():
         # action
         # new save
         if status[0] == 1:
-            ts.press_key(f"\nCreating new save!\n")
+            press_key(f"\nCreating new save!\n")
             new_save()
             files_data = sm.get_saves_data()
         # load
         elif status[0] == 0:
-            ts.press_key(f"\nLoading save: {status[1]}!")
+            press_key(f"\nLoading save: {status[1]}!")
             load_save(status[1], status[2])
             files_data = sm.get_saves_data()
 # REWORK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -4,7 +4,11 @@ from typing import Any
 from tools import logger, Log_type
 
 
-class Weapon_items(Enum):
+class Base_items(Enum):
+    pass
+
+
+class Weapon_items(Base_items):
     WOODEN_SWORD = auto()
     STONE_SWORD = auto()
     STEEL_SWORD = auto()
@@ -13,14 +17,14 @@ class Weapon_items(Enum):
     WOODEN_CLUB = auto()
     CLUB_WITH_TEETH = auto()
 
-class Armour_items(Enum):
+class Armour_items(Base_items):
     WOODEN_SHIELD = auto()
     LEATHER_CAP = auto()
     LEATHER_TUNIC = auto()
     LEATHER_PANTS = auto()
     LEATHER_BOOTS = auto()
 
-class Material_items(Enum):
+class Material_items(Base_items):
     BOTTLE = auto()
     WOOL = auto()
     CLOTH = auto()
@@ -30,14 +34,14 @@ class Material_items(Enum):
     GOLD = auto()
     TEETH = auto()
 
-class Misc_items(Enum):
+class Misc_items(Base_items):
     HEALTH_POTION = auto()
     GOLD_COIN = auto()
     SILVER_COIN = auto()
     COPPER_COIN = auto()
     ROTTEN_FLESH = auto()
 
-class Item_categories(Enum):
+class All_items(Enum):
     WEAPONS = Weapon_items
     ARMOUR = Armour_items
     MATERIALS = Material_items
@@ -45,7 +49,7 @@ class Item_categories(Enum):
 
 
 class Item:
-    def __init__(self, name:Item_categories, amount=1):
+    def __init__(self, name:Base_items, amount=1):
         self.name = name
         self.amount = int(amount)
         self.make_item()
@@ -64,11 +68,13 @@ class Item:
 
 
 class Inventory:
-    def __init__(self):
-        self.items:list[Item] = []
+    def __init__(self, items:list[Item]|None=None):
+        if items is None:
+            items = []
+        self.items:list[Item] = items
 
 
-    def add(self, name:Item_categories, amount=1):
+    def add(self, name:Base_items, amount=1):
         for item in self.items:
             if item.name == name:
                 item.amount += amount
@@ -76,7 +82,7 @@ class Inventory:
         self.items.append(Item(name, amount))
 
 
-    def remove(self, name:Item_categories, amount=1):
+    def remove(self, name:Base_items, amount=1):
         for item in self.items:
             if item.name == name:
                 if item.amount >= amount:
@@ -86,12 +92,12 @@ class Inventory:
         return False
 
 
-    def loot(self, loot:list[tuple[Item_categories, int]]):
+    def loot(self, loot:list[tuple[Base_items, int]]):
         for item in loot:
             self.add(item[0], item[1])
 
 
-    def use(self, name:Item_categories):
+    def use(self, name:Base_items):
         for x in range(len(self.items)):
             if self.items[x].name == name:
                 if self.items[x].use():
@@ -120,12 +126,12 @@ class Inventory:
         return txt
 
 
-def item_finder(name:str) -> Item_categories|None:
+def item_finder(name:str) -> Base_items|None:
     """
     Gives back the item, from the item's enum name.\n
     Returns `None` if it doesn't exist.
     """
-    for enum in Item_categories._value2member_map_:
+    for enum in All_items._value2member_map_:
         try: return enum._member_map_[name]
         except KeyError: pass
     logger("Unknown item type", f"item type: {name}", Log_type.WARN)

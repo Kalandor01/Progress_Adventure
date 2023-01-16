@@ -6,7 +6,7 @@ from typing import Any
 from utils import vector_add, vector_multiply
 from tools import main_seed, logger, Log_type
 
-from inventory import Inventory, Item_categories
+from inventory import Inventory, Base_items, Weapon_items, Armour_items, Material_items, Misc_items
 
 
 class Rotation(Enum):
@@ -87,7 +87,7 @@ def _movement_vector_to_facing(vector:tuple[int, int]):
 
 
 class Loot_controller:
-    def __init__(self, item:Item_categories, chance=1.0, item_num:int|range=1, rolls=1):
+    def __init__(self, item:Base_items, chance=1.0, item_num:int|range=1, rolls=1):
         self.item = item
         self.chance = float(chance)
         if isinstance(item_num, int):
@@ -98,7 +98,7 @@ class Loot_controller:
 
 def loot_manager(drops:list[Loot_controller]|None=None):
     """Converts a list of `Loot_manager`s into a list of `Item`s an their amounts."""
-    loot:list[tuple[Item_categories, int]] = []
+    loot:list[tuple[Base_items, int]] = []
     if drops is not None:
         for drop in drops:
             num = 0
@@ -110,7 +110,7 @@ def loot_manager(drops:list[Loot_controller]|None=None):
 
 
 class Entity:
-    def __init__(self, name:str, base_hp:int, base_attack:int, base_defence:int, base_speed:int, team:int=0, switched:bool=False, attributes:list[Attributes]|None=None, drops:list|None=None):
+    def __init__(self, name:str, base_hp:int, base_attack:int, base_defence:int, base_speed:int, team:int=0, switched:bool=False, attributes:list[Attributes]|None=None, drops:list[tuple[Base_items, int]]|None=None):
         if attributes is None:
             attributes = []
         if drops is None:
@@ -123,7 +123,7 @@ class Entity:
         self.team = int(team)
         self.switched = bool(switched)
         self.attributes:list[Attributes] = attributes
-        self.drops:list[tuple[Item_categories, int]] = drops
+        self.drops:list[tuple[Base_items, int]] = drops
         # adjust properties
         self._apply_attributes()
         self.full_name = ""
@@ -188,13 +188,25 @@ class Entity:
 
 
 class Player(Entity):
-    def __init__(self, name=""):
+    def __init__(self, name="", base_hp:int|None=None, base_attack:int|None=None, base_defence:int|None=None, base_speed:int|None=None, inventory:Inventory|None=None, position:tuple[int, int]|None=None, rotation:Rotation|None=None):
+        """
+        If any argument other than `name`, `inventory`, `position` or `rotation` is `None`, it will treat it as a new player, and generate new stats.
+        """
         if name == "":
             name = "You"
-        super().__init__(*entity_master(range(14, 26), range(7, 13), range(7, 13), range(1, 20), 0, 0, 0, 0, 0, name))
-        self.inventory = Inventory()
-        self.pos:tuple[int, int] = (0, 0)
-        self.rotation:Rotation = Rotation.NORTH
+        if base_hp is None or base_attack is None or base_defence is None or base_speed is None:
+            super().__init__(*entity_master(range(14, 26), range(7, 13), range(7, 13), range(1, 20), 0, 0, 0, 0, 0, name))
+        else:
+            super().__init__(name, base_hp, base_attack, base_defence, base_speed)
+        if inventory is None:
+            inventory = Inventory()
+        if position is None:
+            position = (0, 0)
+        if rotation is None:
+            rotation = Rotation.NORTH
+        self.inventory = inventory
+        self.pos:tuple[int, int] = (int(position[0]), int(position[1]))
+        self.rotation:Rotation = rotation
         self.update_full_name()
 
 
@@ -250,23 +262,23 @@ class Player(Entity):
 class Caveman(Entity):
     def __init__(self):
         super().__init__(*entity_master(7, 7, 7, 7), loot_manager(
-            [Loot_controller(Item_categories.WEAPONS.value.WOODEN_CLUB, 0.3),
-            Loot_controller(Item_categories.MATERIALS.value.CLOTH, 0.15, range(0, 1), 3),
-            Loot_controller(Item_categories.MISC.value.COPPER_COIN, 0.35, range(0, 4), 3)]))
+            [Loot_controller(Weapon_items.WOODEN_CLUB, 0.3),
+            Loot_controller(Material_items.CLOTH, 0.15, range(0, 1), 3),
+            Loot_controller(Misc_items.COPPER_COIN, 0.35, range(0, 4), 3)]))
 
 
 class Ghoul(Entity):
     def __init__(self):
         super().__init__(*entity_master(11, 9, 9, 9), loot_manager(
-            [Loot_controller(Item_categories.WEAPONS.value.STONE_SWORD, 0.2),
-            Loot_controller(Item_categories.MISC.value.ROTTEN_FLESH, 0.55, range(0, 3)),
-            Loot_controller(Item_categories.MISC.value.COPPER_COIN, 0.40, range(0, 5), 4)]))
+            [Loot_controller(Weapon_items.STONE_SWORD, 0.2),
+            Loot_controller(Misc_items.ROTTEN_FLESH, 0.55, range(0, 3)),
+            Loot_controller(Misc_items.COPPER_COIN, 0.40, range(0, 5), 4)]))
 
 
 class Troll(Entity):
     def __init__(self):
         super().__init__(*entity_master(13, 11, 11, 5), loot_manager(
-            [Loot_controller(Item_categories.WEAPONS.value.CLUB_WITH_TEETH, 0.25),
-            Loot_controller(Item_categories.MATERIALS.value.CLOTH, 0.25, range(1, 3), 2),
-            Loot_controller(Item_categories.MATERIALS.value.TEETH, 0.35, range(1, 5), 2),
-            Loot_controller(Item_categories.MISC.value.SILVER_COIN, 0.30, range(1, 3), 3)]))
+            [Loot_controller(Weapon_items.CLUB_WITH_TEETH, 0.25),
+            Loot_controller(Material_items.CLOTH, 0.25, range(1, 3), 2),
+            Loot_controller(Material_items.TEETH, 0.35, range(1, 5), 2),
+            Loot_controller(Misc_items.SILVER_COIN, 0.30, range(1, 3), 3)]))

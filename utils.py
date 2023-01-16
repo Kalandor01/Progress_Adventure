@@ -1,5 +1,8 @@
 from datetime import datetime as dtime
 from enum import Enum, EnumType
+from msvcrt import getch, kbhit
+
+from constants import DOUBLE_KEYS
 
 
 class Color(Enum):
@@ -138,3 +141,17 @@ def vector_multiply(vector:tuple[float, float], multiplier:tuple[float, float], 
     if round:
         y = int(y)
     return (x, y)
+
+
+def press_key(text="", allow_buffered_inputs=False):
+    """
+    Writes out text, and then stalls until the user presses any key.\n
+    If `allow_buffered_inputs` is `False`, if the user pressed some buttons before this function was called the function will not register those button presses.
+    """
+    if not allow_buffered_inputs:
+        while kbhit():
+            getch()
+    print(text, end="", flush=True)
+    if getch() in DOUBLE_KEYS:
+        getch()
+    print()

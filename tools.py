@@ -4,7 +4,6 @@ import os
 from shutil import copyfile, rmtree
 import threading
 from datetime import datetime as dtime
-from msvcrt import getch
 from typing import Any
 import numpy as np
 import colorama as col
@@ -25,8 +24,7 @@ from constants import                                                   \
     BACKUPS_FOLDER, BACKUPS_FOLDER_PATH, OLD_BACKUP_EXT, BACKUP_EXT,    \
     SAVE_SEED, SETTINGS_SEED,                                           \
     LOG_MS,                                                             \
-    FILE_ENCODING_VERSION,                                              \
-    DOUBLE_KEYS
+    FILE_ENCODING_VERSION
 
 
 # random
@@ -73,17 +71,6 @@ class Log_type(Enum):
     PASS    = 5
     FAIL    = 6
     OTHER   = 7
-
-
-def press_key(text=""):
-    """
-    Writes out text, and then stalls until the user presses any key.
-    """
-
-    print(text, end="", flush=True)
-    if getch() in DOUBLE_KEYS:
-        getch()
-    print()
 
 
 def encode_save_s(data:list[dict[str, Any]]|dict[str, Any], file_path:str, seed=SAVE_SEED, extension=SAVE_EXT):
@@ -317,7 +304,7 @@ def settings_manager(line_name:str, write_value:Any=None):
         settings["keybinds"] = decode_keybinds(settings["keybinds"])
     except (ValueError, TypeError):
         logger("Decode error", "settings", Log_type.ERROR)
-        press_key("The settings file is corrupted, and will now be recreated!")
+        u.press_key("The settings file is corrupted, and will now be recreated!")
         settings = recreate_settings()
     except FileNotFoundError:
         settings = recreate_settings()

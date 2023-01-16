@@ -17,69 +17,88 @@ from constants import                                                           
     SAVE_SEED, SAVE_VERSION
 
 
-def _save_display_json(data:Save_data):
-    """Converts the display data to json format."""
-    display_data:dict[str, Any] = {}
-    display_data["save_version"] = SAVE_VERSION
-    display_data["display_name"] = data.display_save_name
-    now = dtime.now()
-    last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
-    display_data["last_access"] = last_access
-    display_data["player_name"] = data.player.name
-    return display_data
-
-
 def _load_inventory_json(inventory_json:list[dict[str, Any]]):
     """Converts the inventory json to object format."""
-    items = []
+    items:list[iy.Item] = []
     for item in inventory_json:
         item_type = iy.item_finder(item["type"])
         if item_type is not None:
             items.append(iy.Item(item_type, item["amount"]))
-    return items
+    inventory = iy.Inventory(items)
+    return inventory
 
 
 def _load_player_json(player_json:dict[str, Any]):
     """Converts the player json to object format."""
-    player = es.Player(player_json["name"])
-    player.base_hp = int(player_json["base_hp"])
-    player.base_attack = int(player_json["base_attack"])
-    player.base_defence = int(player_json["base_defence"])
-    player.base_speed = int(player_json["base_speed"])
-    player.inventory.items = list(_load_inventory_json(player_json["inventory"]))
-    player.pos = (int(player_json["x_pos"]), int(player_json["y_pos"]))
-    player.rotation = es.Rotation(es.Rotation._value2member_map_[int(player_json["rotation"])])
+    name = player_json["name"]
+    base_hp = int(player_json["base_hp"])
+    base_attack = int(player_json["base_attack"])
+    base_defence = int(player_json["base_defence"])
+    base_speed = int(player_json["base_speed"])
+    inventory = _load_inventory_json(player_json["inventory"])
+    position = (int(player_json["x_pos"]), int(player_json["y_pos"]))
+    rotation = es.Rotation(es.Rotation._value2member_map_[int(player_json["rotation"])])
+
+    player = es.Player(name, base_hp, base_attack, base_defence, base_speed, inventory, position, rotation)
     player._apply_attributes()
     player.update_full_name()
     return player
 
 
+def _save_display_json(data:Save_data):
+    """Converts the display data to json format."""
+    now = dtime.now()
+    display_data:dict[str, Any] = {
+        "save_version": SAVE_VERSION,
+        "display_name": data.display_save_name,
+        "last_access":  [now.year, now.month, now.day, now.hour, now.minute, now.second],
+        "player_name":  data.player.name
+    }
+    return display_data
+
+
+def _save_seeds_json(data:Save_data):
+    """Converts the seeds data to json format."""
+    seeds_json:dict[str, Any] = {
+        "main_seed":                ts.random_state_to_json(data.main_seed),
+        "world_seed":               ts.random_state_to_json(data.world_seed),
+        "tile_type_noise_seeds":    data.tile_type_noise_seeds
+    }
+    return seeds_json
+
+
 def _save_data_json(data:Save_data):
     """Converts the miscellaneous data to json format."""
-    save_data_json:dict[str, Any] = {}
-    # save_version
-    save_data_json["save_version"] = SAVE_VERSION
-    # display_name
-    save_data_json["display_name"] = data.display_save_name
-    # last_access
     now = dtime.now()
-    last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
-    save_data_json["last_access"] = last_access
-    # player
-    save_data_json["player"] = data.player.to_json()
-    # randomstate
-    save_data_json["seeds"] = {
-        "main_seed": ts.random_state_to_json(data.main_seed),
-        "world_seed": ts.random_state_to_json(data.world_seed),
-        "tile_type_noise_seeds": data.tile_type_noise_seeds
+    save_data_json:dict[str, Any] = {
+        "save_version": SAVE_VERSION,
+        "display_name": data.display_save_name,
+        "last_access":  [now.year, now.month, now.day, now.hour, now.minute, now.second],
+        "player":       data.player.to_json(),
+        "seeds":        _save_seeds_json(data),
     }
     return save_data_json
+
+
+def _save_data_file(data:Save_data):
+    """
+    Creates the data file part of a save file from the save data.
+    """
+    # FOLDER
+    ts.recreate_folder(data.save_name, SAVES_FOLDER_PATH, "save file")
+    save_folder_path = os.path.join(SAVES_FOLDER_PATH, data.save_name)
+    # DATA FILE
+    display_data = _save_display_json(data)
+    save_data = _save_data_json(data)
+    # create new save
+    ts.encode_save_s([display_data, save_data], os.path.join(save_folder_path, SAVE_FILE_NAME_DATA))
 
 
 def make_save(data:Save_data, actual_data:Save_data|None=None, clear_chunks=True, show_progress_text: str | None = None):
     """
     Creates a save file from the save data.\n
     Makes a temporary backup.\n
+    If `actual_data` is not `None`, `clear_chunks` has no effect.\n
     If `show_progress_text` is not None, it writes out a progress percentage while saving.
     """
     # make backup
@@ -88,11 +107,7 @@ def make_save(data:Save_data, actual_data:Save_data|None=None, clear_chunks=True
     ts.recreate_folder(data.save_name, SAVES_FOLDER_PATH, "save file")
     save_folder_path = os.path.join(SAVES_FOLDER_PATH, data.save_name)
     # DATA FILE
-    # display data
-    display_data = _save_display_json(data)
-    save_data = _save_data_json(data)
-    # create new save
-    ts.encode_save_s([display_data, save_data], os.path.join(save_folder_path, SAVE_FILE_NAME_DATA))
+    _save_data_file(data)
     # CHUNKS/WORLD
     ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder_path)
     # WORKING WITH ACTUAL DATA
@@ -108,7 +123,7 @@ def make_save(data:Save_data, actual_data:Save_data|None=None, clear_chunks=True
 
 def load_all_chunks(save_data:Save_data, show_progress_text:str|None=None):
     """
-    Loads all chunks into the save data from a save file.\n
+    Loads all chunks into the `save_data` from a save file.\n
     If `show_progress_text` is not None, it writes out a progress percentage while loading.
     """
     # read from file (old)
@@ -235,11 +250,13 @@ def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str
         data["seeds"]["world_seed"] = ts.random_state_to_json(ts.world_seed)
         save_version = "1.5.1"
         ts.logger("Corrected save data", "1.5 -> 1.5.1", Log_type.DEBUG)
+    # 1.5.1 -> 1.5.2
     if save_version == "1.5.1":
         # ttn_seeds: danger -> hostility
         data["seeds"]["tile_type_noise_seeds"]["hostility"] = data["seeds"]["tile_type_noise_seeds"]["danger"]
         save_version = "1.5.2"
         ts.logger("Corrected save data", "1.5.1 -> 1.5.2", Log_type.DEBUG)
+    # 1.5.2 -> 1.5.3
     if save_version == "1.5.2":
         # entity properties updated + inventory to dict
         player = data["player"]
@@ -346,7 +363,7 @@ def _process_save_display_data(data:tuple[str, dict[str, Any] | Literal[-1]]):
             raise IndexError
     except (TypeError, IndexError, KeyError):
         ts.logger("Parse error", f"Save name: {data[0]}", Log_type.ERROR)
-        ts.press_key(f"\"{data[0]}\" could not be parsed!")
+        u.press_key(f"\"{data[0]}\" could not be parsed!")
         return None
 
 def _get_save_folders() -> list[str]:
@@ -412,7 +429,7 @@ def get_saves_data():
     for data in datas:
         if data[1] == -1:
             ts.logger("Decode error", f"save name: {data[0]}(.{SAVE_EXT})", Log_type.ERROR)
-            ts.press_key(f"\"{data[0]}\" is corrupted!")
+            u.press_key(f"\"{data[0]}\" is corrupted!")
         else:
             processed_data = _process_save_display_data(data)
             if processed_data is not None:

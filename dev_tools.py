@@ -9,7 +9,7 @@ from zipfile import ZipFile
 from datetime import datetime
 from PIL import Image, ImageDraw
 
-from utils import Color, make_date, make_time, stylized_text
+from utils import Color, make_date, make_time, stylized_text, press_key
 from constants import                                                                   \
     ENCODING,                                                                           \
     MAIN_THREAD_NAME, TEST_THREAD_NAME, VISUALIZER_THREAD_NAME,                         \
@@ -19,7 +19,7 @@ from constants import                                                           
     SAVE_FILE_NAME_DATA,                                                                \
     SAVE_SEED,                                                                          \
     FILE_ENCODING_VERSION, CHUNK_SIZE,                                                  \
-    SAVE_VERSION, TILE_NOISE_RESOLUTION
+    SAVE_VERSION, TILE_NOISE_RESOLUTION, DOUBLE_KEYS
 import tools as ts
 from tools import sfm
 
@@ -102,12 +102,12 @@ def _old_file_reader(save_name:str="save*", save_ext:str=OLD_BACKUP_EXT, dir_nam
     for files in existing_files:
         try:
             try:
-                data = sfm.decode_save(files[1], path.join(dir_name, files[0]), "", decode_until=decode_until)
+                data = sfm.decode_save(int(files[1]), path.join(dir_name, str(files[0])), "", decode_until=decode_until)
             except ValueError:
                 data = -1
         except FileNotFoundError: print("not found " + str(files))
         else:
-            file_data.append([files[0].replace("." + OLD_BACKUP_EXT, ""), data])
+            file_data.append([str(files[0]).replace("." + OLD_BACKUP_EXT, ""), data])
     return file_data
 
 def _get_saves_data():
@@ -138,7 +138,7 @@ def _get_saves_data():
                     file_number = SAVE_SEED
                 datas_processed.append([data[0], data_processed, file_number])
             except (TypeError, IndexError):
-                ts.press_key(f"\"{data[0]}\" could not be parsed!")
+                press_key(f"\"{data[0]}\" could not be parsed!")
 
     ts.recreate_backups_folder()
     ts.recreate_saves_folder()
@@ -154,7 +154,7 @@ def _get_saves_data():
     for file_data in datas_old:
         _process_file(file_data, True)
     for wrong in errored_both:
-        ts.press_key(f"\"{wrong[0]}\" is corrupted!")
+        press_key(f"\"{wrong[0]}\" is corrupted!")
     return datas_processed
 
 def load_backup_menu():
@@ -177,9 +177,9 @@ def load_backup_menu():
                 file_name = str(files_data[int(option)][0])
                 save_num = files_data[int(option)][2]
                 if recompile_save_file(file_name, file_name, BACKUPS_FOLDER_PATH, SAVES_FOLDER_PATH, OLD_BACKUP_EXT, SAVE_EXT, save_num):
-                    ts.press_key("\n" + file_name + " loaded!")
+                    press_key("\n" + file_name + " loaded!")
     else:
-        ts.press_key("No backups found!")
+        press_key("No backups found!")
 
 
 # thread_1 = threading.Thread(target="function", name="Thread name", args=["argument list"])
@@ -227,11 +227,8 @@ class Self_Checks:
 
         # GLOBAL VARIABLES
         GOOD_PACKAGES = True
-        SETTINGS = dm.Settings(
-            ts.settings_manager("auto_save"),
-            ts.settings_manager("logging_level"),
-            ts.settings_manager("keybinds"))
-        SETTINGS.save_keybind_mapping()
+        SETTINGS = dm.Settings()
+        SETTINGS.update_keybinds()
         SAVE_DATA = dm.Save_data
         GLOBALS = dm.Globals(False, False, False, False)
         
@@ -240,14 +237,11 @@ class Self_Checks:
 
     def settings_checks(self, check_name:str):
         good = False
-        settings = dm.Settings(
-                ts.settings_manager("auto_save"),
-                ts.settings_manager("logging_level"),
-                ts.settings_manager("keybinds"))
-        settings.save_keybind_mapping()
+        settings = dm.Settings()
+        settings.update_keybinds()
         
         if settings.auto_save == True or settings.auto_save == False:
-            if settings.DOUBLE_KEYS == ts.DOUBLE_KEYS and type(settings.keybinds) is dict:
+            if settings.DOUBLE_KEYS == DOUBLE_KEYS and type(settings.keybinds) is dict:
                 self._give_result(check_name, ts.Log_type.PASS)
                 good = True
         if not good:
@@ -613,7 +607,7 @@ def fill_world_segmented(world:cm.World, save_folder_path:str, corners:tuple[int
 #     if isdir(join(SAVES_FOLDER_PATH, folder)):
 #         save_visualizer(folder)
 
-save_visualizer("new sav")
+save_visualizer("journeyman")
 
 
 # import entities as es

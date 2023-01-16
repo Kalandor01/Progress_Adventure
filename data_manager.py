@@ -1,9 +1,9 @@
 from copy import deepcopy
 from typing import Any
 
-from utils import Double_Keys
+from utils import Double_Keys, getch
 from constants import ENCODING, DOUBLE_KEYS
-from tools import np, Log_type, getch, logger, settings_manager, change_logging_level
+from tools import np, Log_type, logger, settings_manager, change_logging_level
 
 from entities import Player
 
@@ -124,31 +124,66 @@ class Settings:
     DOUBLE_KEYS = DOUBLE_KEYS
 
 
-    def __init__(self, auto_save:bool, logging_level:int, keybinds:dict[str, list[list[bytes]]]):
+    def __init__(self, auto_save:bool|None=None, logging_level:int|None=None, keybinds:dict[str, list[list[bytes]]]|None=None,
+                ask_package_check_fail:bool|None=None, ask_delete_save:bool|None=None, ask_regenerate_save:bool|None=None, def_backup_action:int|None=None):
+        if auto_save is None:
+            auto_save = self.get_auto_save()
+        if logging_level is None:
+            logging_level = self.get_logging_level()
+        if keybinds is None:
+            keybind_obj = self.get_keybins()
+        else:
+            keybind_obj = {}
+            for key in keybinds:
+                keybind_obj[key] = Key(keybinds[key])
+        if ask_package_check_fail is None:
+            ask_package_check_fail = self.get_ask_package_check_fail()
         self.auto_save = bool(auto_save)
         self.logging = (int(logging_level) != -1)
         self.logging_level = int(logging_level)
-        obj_kebinds = {}
+        self.keybinds = dict[str, Key](keybind_obj)
+        self.ask_package_check_fail = bool(ask_package_check_fail)
+        self.ask_delete_save = bool(ask_delete_save)
+        self.ask_regenerate_save = bool(ask_regenerate_save)
+        self.def_backup_action = int(def_backup_action)
+        self.update_keybinds()
+    
+
+    def get_auto_save(self):
+        """Returns the value of the `auto_save` from the setting file."""
+        return bool(settings_manager("auto_save"))
+    
+
+    def get_logging_level(self):
+        """Returns the value of the `logging_level` from the setting file."""
+        return int(settings_manager("logging_level"))
+    
+
+    def get_keybins(self):
+        """Returns the value of the `keybinds` from the setting file."""
+        keybinds:dict[str, list[list[bytes]]] = settings_manager("keybinds")
+        keybind_obj:dict[str, Key] = {}
         for key in keybinds:
-            obj_kebinds[key] = Key(keybinds[key])
-        self.keybinds = dict[str, Key](obj_kebinds)
-        self.save_keybind_mapping()
+            keybind_obj[key] = Key(keybinds[key])
+        return keybind_obj
 
 
-    def change_others(self, auto_save:bool|None=None, logging_level:int|None=None):
-        # auto save
-        if auto_save is not None:
-            self.auto_save = bool(auto_save)
-            settings_manager("auto_save", self.auto_save)
-        # logging
-        if logging_level is not None:
-            self.logging = (int(logging_level) != -1)
-            self.logging_level = int(logging_level)
-            settings_manager("logging_level", self.logging_level)
-            change_logging_level(self.logging_level)
+    def update_logging_level(self, logging_level:int):
+        """Updates the value of the `logging_level` in the program and in the setting file."""
+        self.logging = (int(logging_level) != -1)
+        self.logging_level = int(logging_level)
+        settings_manager("logging_level", self.logging_level)
+        change_logging_level(self.logging_level)
 
 
-    def encode_keybinds(self):
+    def update_auto_save(self, auto_save:bool):
+        """Updates the value of the `auto_save` in the program and in the setting file."""
+        self.auto_save = bool(auto_save)
+        settings_manager("auto_save", self.auto_save)
+
+
+    def _encode_keybinds(self):
+        """Returns a json formated deepcopy of the `keybinds`."""
         return {"esc": deepcopy(self.keybinds["esc"].value),
         "up": deepcopy(self.keybinds["up"].value),
         "down": deepcopy(self.keybinds["down"].value),
@@ -157,7 +192,8 @@ class Settings:
         "enter": deepcopy(self.keybinds["enter"].value)}
 
 
-    def save_keybind_mapping(self):
+    def update_keybinds(self):
+        """Updates the value of the `keybind_mapping` in the program and in the setting file, with the `keybinds`."""
         # ([keybinds["esc"], keybinds["up"], keybinds["down"], keybinds["left"], keybinds["right"], keybinds["enter"]], [b"\xe0", b"\x00"])
         # ([[[b"\x1b"]],     [[], [b"H"]],   [[], [b"P"]],     [[], [b"K"]],     [[], [b"M"]],      [[b"\r"]]],         [b"\xe0", b"\x00"])
         self.keybind_mapping:tuple[list[list[list[bytes]]], list[bytes]] = ([
@@ -167,7 +203,7 @@ class Settings:
             self.keybinds["left"].value,
             self.keybinds["right"].value,
             self.keybinds["enter"].value], self.DOUBLE_KEYS)
-        settings_manager("keybinds", self.encode_keybinds())
+        settings_manager("keybinds", self._encode_keybinds())
 
 
     def check_keybind_conflicts(self):

@@ -751,8 +751,12 @@ class World:
             population = tile["population"]
         except KeyError:
             terrain = tile["content"]
-            try: terrain["subtype"] = terrain["type"]
-            except KeyError: terrain = None
+            if terrain is not None:
+                try: terrain["subtype"] = terrain["type"]
+                except KeyError:
+                    terrain = None
+            else:
+                terrain = None
             structure = None
             population = None
         tile_name = f"{x}_{y}"
@@ -770,6 +774,8 @@ class World:
         If `show_progress_text` is not None, it writes out a progress percentage while saving.
         """
         if remove_chunks:
+            if show_progress_text is not None:
+                print(f"{show_progress_text}COPYING...", end="", flush=True)
             chunk_data = deepcopy(self.chunks)
             self.chunks.clear()
         else:

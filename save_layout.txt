@@ -20,7 +20,7 @@ data.sav
             ]
             - inventory: [
                 [
-                    - type: str(Item_categories(Enum))
+                    - type: str(Base_items(Enum))
                     - amount: int
                 ]
             ]
