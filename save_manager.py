@@ -1,6 +1,5 @@
 import json
 import os
-from datetime import datetime as dtime
 from typing import Any, Literal
 
 import utils as u
@@ -11,9 +10,9 @@ import inventory as iy
 
 from utils import Color
 from tools import sfm, Log_type
-from constants import                                                                 \
-    CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, SAVES_FOLDER_PATH, OLD_SAVE_NAME, SAVE_EXT, \
-    SAVE_FILE_NAME_DATA, SAVE_FOLDER_NAME_CHUNKS,                                     \
+from constants import                             \
+    SAVES_FOLDER_PATH, OLD_SAVE_NAME, SAVE_EXT,   \
+    SAVE_FILE_NAME_DATA, SAVE_FOLDER_NAME_CHUNKS, \
     SAVE_SEED, SAVE_VERSION
 
 
@@ -45,41 +44,6 @@ def _load_player_json(player_json:dict[str, Any]):
     return player
 
 
-def _save_display_json(data:Save_data):
-    """Converts the display data to json format."""
-    now = dtime.now()
-    display_data:dict[str, Any] = {
-        "save_version": SAVE_VERSION,
-        "display_name": data.display_save_name,
-        "last_access":  [now.year, now.month, now.day, now.hour, now.minute, now.second],
-        "player_name":  data.player.name
-    }
-    return display_data
-
-
-def _save_seeds_json(data:Save_data):
-    """Converts the seeds data to json format."""
-    seeds_json:dict[str, Any] = {
-        "main_seed":                ts.random_state_to_json(data.main_seed),
-        "world_seed":               ts.random_state_to_json(data.world_seed),
-        "tile_type_noise_seeds":    data.tile_type_noise_seeds
-    }
-    return seeds_json
-
-
-def _save_data_json(data:Save_data):
-    """Converts the miscellaneous data to json format."""
-    now = dtime.now()
-    save_data_json:dict[str, Any] = {
-        "save_version": SAVE_VERSION,
-        "display_name": data.display_save_name,
-        "last_access":  [now.year, now.month, now.day, now.hour, now.minute, now.second],
-        "player":       data.player.to_json(),
-        "seeds":        _save_seeds_json(data),
-    }
-    return save_data_json
-
-
 def _save_data_file(data:Save_data):
     """
     Creates the data file part of a save file from the save data.
@@ -88,8 +52,8 @@ def _save_data_file(data:Save_data):
     ts.recreate_folder(data.save_name, SAVES_FOLDER_PATH, "save file")
     save_folder_path = os.path.join(SAVES_FOLDER_PATH, data.save_name)
     # DATA FILE
-    display_data = _save_display_json(data)
-    save_data = _save_data_json(data)
+    display_data = data.display_data_to_json()
+    save_data = data.main_data_to_json()
     # create new save
     ts.encode_save_s([display_data, save_data], os.path.join(save_folder_path, SAVE_FILE_NAME_DATA))
 
@@ -121,36 +85,6 @@ def make_save(data:Save_data, actual_data:Save_data|None=None, clear_chunks=True
         ts.logger("Removed temporary backup", backup_status[1], Log_type.DEBUG)
 
 
-def load_all_chunks(save_data:Save_data, show_progress_text:str|None=None):
-    """
-    Loads all chunks into the `save_data` from a save file.\n
-    If `show_progress_text` is not None, it writes out a progress percentage while loading.
-    """
-    # read from file (old)
-    save_folder_path = os.path.join(SAVES_FOLDER_PATH, save_data.save_name)
-    chunks_folder = os.path.join(save_folder_path, SAVE_FOLDER_NAME_CHUNKS)
-    ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder_path)
-    # get existing file numbers
-    chunk_names = os.listdir(chunks_folder)
-    existing_chunks:list[tuple[int, int]] = []
-    for name in chunk_names:
-        # get valid files
-        if os.path.isfile(os.path.join(chunks_folder, name)) and name.startswith(f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}") and name.endswith(f".{SAVE_EXT}"):
-            file_numbers = name.replace(f".{SAVE_EXT}", "").replace(f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}", "").split(CHUNK_FILE_NAME_SEP)
-            try: existing_chunks.append((int(file_numbers[0]), int(file_numbers[1])))
-            except (ValueError, IndexError): continue
-    if show_progress_text is not None:
-        ecl = len(existing_chunks)
-        print(show_progress_text, end="", flush=True)
-        for x, chunk in enumerate(existing_chunks):
-            save_data.world.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
-            print(f"\r{show_progress_text}{round((x + 1) / ecl * 100, 1)}%", end="", flush=True)
-        print(f"\r{show_progress_text}DONE!             ")
-    else:
-        for chunk in existing_chunks:
-            save_data.world.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
-
-
 def create_save_data():
     """Creates the data for a new save file."""
     ts.logger("Preparing game data")
@@ -161,20 +95,13 @@ def create_save_data():
     save_name = ts.correct_save_name(display_save_name)
     # make player
     player = es.Player(input("What is your name?: "))
-    # last_access
-    now = dtime.now()
-    last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
-    # seeds
-    ts.main_seed = ts.np.random.RandomState()
-    ts.world_seed = ts.make_random_seed(ts.main_seed)
-    ts.tile_type_noise_seeds = ts.recalculate_tile_type_noise_seeds(ts.world_seed)
     # load to class
-    save_data = Save_data(save_name, display_save_name, last_access, player, ts.main_seed, ts.world_seed, ts.tile_type_noise_seeds)
+    save_data = Save_data(save_name, display_save_name, player=player)
     save_data.world.gen_tile(save_data.player.pos[0], save_data.player.pos[1])
     return save_data
 
 
-def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str, Any]):
+def correct_save_data(json_data:dict[str, Any], save_version:str, extra_data:dict[str, Any]):
     """Modifys the save data, to make it up to date, with the newest save file data structure."""
     ts.logger("Correcting save data")
     # 0.0 -> 1.0
@@ -185,13 +112,13 @@ def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str
     # 1.0 -> 1.1
     if save_version == "1.0":
         # added player inventory
-        data["player"]["inventory"] = []
+        json_data["player"]["inventory"] = []
         save_version = "1.1"
         ts.logger("Corrected save data", "1.0 -> 1.1", Log_type.DEBUG)
     # 1.1 -> 1.2
     if save_version == "1.1":
         # added display save name
-        data["display_name"] = extra_data["save_name"]
+        json_data["display_name"] = extra_data["save_name"]
         save_version = "1.2"
         ts.logger("Corrected save data", "1.1 -> 1.2", Log_type.DEBUG)
     # 1.2 -> 1.3
@@ -202,29 +129,29 @@ def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str
     # 1.3 -> 1.4
     if save_version == "1.3":
         # added chunks + player position/rotation
-        data["player"]["x_pos"] = 0
-        data["player"]["y_pos"] = 0
-        data["player"]["rotation"] = "UP"
+        json_data["player"]["x_pos"] = 0
+        json_data["player"]["y_pos"] = 0
+        json_data["player"]["rotation"] = "UP"
         save_version = "1.4"
         ts.logger("Corrected save data", "1.3 -> 1.4", Log_type.DEBUG)
     # 1.4 -> 1.4.1
     if save_version == "1.4":
         # renamed facings up, down... to 0, 1..
-        p_rot:str = data["player"]["rotation"]
+        p_rot:str = json_data["player"]["rotation"]
         if p_rot == "DOWN":
-            data["player"]["rotation"] = 1
+            json_data["player"]["rotation"] = 1
         elif p_rot == "LEFT":
-            data["player"]["rotation"] = 2
+            json_data["player"]["rotation"] = 2
         elif p_rot == "RIGHT":
-            data["player"]["rotation"] = 3
+            json_data["player"]["rotation"] = 3
         else:
-            data["player"]["rotation"] = 0
+            json_data["player"]["rotation"] = 0
         save_version = "1.4.1"
         ts.logger("Corrected save data", "1.4 -> 1.4.1", Log_type.DEBUG)
     # 1.4.1 -> 1.5
     if save_version == "1.4.1":
         # multiple seeds
-        ts.main_seed.set_state(ts.json_to_random_state(data["seed"]))
+        ts.main_seed.set_state(ts.json_to_random_state(json_data["seed"]))
         ts.world_seed = ts.make_random_seed(ts.main_seed)
         ttn_seeds = {
             "danger": ts.make_perlin_noise_seed(ts.world_seed),
@@ -235,7 +162,7 @@ def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str
         m_seed = ts.random_state_to_json(ts.main_seed)
         w_seed = ts.random_state_to_json(ts.world_seed)
         
-        data["seeds"] = {
+        json_data["seeds"] = {
             "main_seed": m_seed,
             "world_seed": w_seed,
             "tile_type_noise_seeds": ttn_seeds
@@ -245,21 +172,21 @@ def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str
     # 1.5 -> 1.5.1
     if save_version == "1.5":
         # ttn_seeds: population
-        ts.world_seed.set_state(ts.json_to_random_state(data["seeds"]["world_seed"]))
-        ttn_seeds = data["seeds"]["tile_type_noise_seeds"]["population"] = ts.make_perlin_noise_seed(ts.world_seed)
-        data["seeds"]["world_seed"] = ts.random_state_to_json(ts.world_seed)
+        ts.world_seed.set_state(ts.json_to_random_state(json_data["seeds"]["world_seed"]))
+        ttn_seeds = json_data["seeds"]["tile_type_noise_seeds"]["population"] = ts.make_perlin_noise_seed(ts.world_seed)
+        json_data["seeds"]["world_seed"] = ts.random_state_to_json(ts.world_seed)
         save_version = "1.5.1"
         ts.logger("Corrected save data", "1.5 -> 1.5.1", Log_type.DEBUG)
     # 1.5.1 -> 1.5.2
     if save_version == "1.5.1":
         # ttn_seeds: danger -> hostility
-        data["seeds"]["tile_type_noise_seeds"]["hostility"] = data["seeds"]["tile_type_noise_seeds"]["danger"]
+        json_data["seeds"]["tile_type_noise_seeds"]["hostility"] = json_data["seeds"]["tile_type_noise_seeds"]["danger"]
         save_version = "1.5.2"
         ts.logger("Corrected save data", "1.5.1 -> 1.5.2", Log_type.DEBUG)
     # 1.5.2 -> 1.5.3
     if save_version == "1.5.2":
         # entity properties updated + inventory to dict
-        player = data["player"]
+        player = json_data["player"]
         player["base_hp"] = player["hp"]
         player["base_attack"] = player["attack"]
         player["base_defence"] = player["defence"]
@@ -273,7 +200,7 @@ def correct_save_data(data:dict[str, Any], save_version:str, extra_data:dict[str
         player["inventory"] = inventory
         save_version = "1.5.3"
         ts.logger("Corrected save data", "1.5.2 -> 1.5.3", Log_type.DEBUG)
-    return data
+    return json_data
 
 
 def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list[bytes]], is_file=False, backup_choice=True, automatic_backup=True):

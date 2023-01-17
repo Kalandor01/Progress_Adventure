@@ -2,12 +2,11 @@ from enum import Enum
 from os.path import join
 from typing import Any
 from copy import deepcopy
-from perlin_noise import PerlinNoise
 
 from constants import                                           \
     SAVE_EXT, SAVE_FOLDER_NAME_CHUNKS, CHUNK_SIZE,              \
     CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, TILE_NOISE_RESOLUTION
-from tools import world_seed, tile_type_noise_seeds, logger, decode_save_s, encode_save_s, Log_type
+from tools import world_seed, noise_generators, logger, decode_save_s, encode_save_s, Log_type
 from data_manager import Save_data
 
 
@@ -468,42 +467,10 @@ tile_type_noise_offsets:dict[str, float] = {
 }
 
 
-def recalculate_noise_generators(ttn_seeds:dict[str, int]):
-    """Recalculate perlin noise generators for tile generation."""
-    height1 = PerlinNoise(octaves=2**35, seed=ttn_seeds["height"])
-    height2 = PerlinNoise(octaves=2**36, seed=ttn_seeds["height"])
-    height3 = PerlinNoise(octaves=2**37, seed=ttn_seeds["height"])
-    temperature1 = PerlinNoise(octaves=2**34, seed=ttn_seeds["temperature"])
-    temperature2 = PerlinNoise(octaves=2**35, seed=ttn_seeds["temperature"])
-    temperature3 = PerlinNoise(octaves=2**36, seed=ttn_seeds["temperature"])
-    humidity1 = PerlinNoise(octaves=2**34, seed=ttn_seeds["humidity"])
-    humidity2 = PerlinNoise(octaves=2**35, seed=ttn_seeds["humidity"])
-    humidity3 = PerlinNoise(octaves=2**36, seed=ttn_seeds["humidity"])
-    hostility1 = PerlinNoise(octaves=2**36, seed=ttn_seeds["hostility"])
-    hostility2 = PerlinNoise(octaves=2**37, seed=ttn_seeds["hostility"])
-    hostility3 = PerlinNoise(octaves=2**38, seed=ttn_seeds["hostility"])
-    population1 = PerlinNoise(octaves=2**36, seed=ttn_seeds["population"])
-    population2 = PerlinNoise(octaves=2**37, seed=ttn_seeds["population"])
-    population3 = PerlinNoise(octaves=2**38, seed=ttn_seeds["population"])
-    
-    tile_type_noises = {
-        "height": (height1, height2, height3),
-        "temperature": (temperature1, temperature2, temperature3),
-        "humidity": (humidity1, humidity2, humidity3),
-        "hostility": (hostility1, hostility2, hostility3),
-        "population": (population1, population2, population3)
-    }
-    return tile_type_noises
-
-
-# noise generators for tile generation
-_tile_type_noises = recalculate_noise_generators(tile_type_noise_seeds)
-
-
 def _get_nose_values(absolute_x:int, absoulte_y:int):
     """Gets the noise values for each perlin noise generator at a specific point, and normalises it between 0 and 1."""
     noise_values:dict[str, float] = {}
-    for name, noises in _tile_type_noises.items():
+    for name, noises in noise_generators.items():
         noise_values[name] = (noises[0]([(absolute_x + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION,
                                     (absoulte_y + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION])
                                     )
@@ -572,7 +539,8 @@ class Tile:
         if terrain is None or structure is None or population is None:
             noise_values = _get_nose_values(absolute_x, absoulte_y)
             if terrain is None:
-                terrain:Terrain_content = _calculate_closest(noise_values, _terrain_properties)
+                gen_terrain:Terrain_content = _calculate_closest(noise_values, _terrain_properties)
+                terrain = gen_terrain
             if structure is None:
                 # less structures on water
                 generate = True
@@ -583,7 +551,8 @@ class Tile:
                     # if world_seed.rand() > 0.25:
                         generate = False
                 if generate:
-                    structure:Structure_content = _calculate_closest(noise_values, _structure_properties)
+                    gen_structure:Structure_content = _calculate_closest(noise_values, _structure_properties)
+                    structure = gen_structure
                 else: structure = No_structure()
             if population is None:
                 # less population on not structures
@@ -592,7 +561,8 @@ class Tile:
                     # if world_seed.rand() > 0.10:
                         generate = False
                 if generate:
-                    population:Population_content = _calculate_closest(noise_values, _population_properties)
+                    gen_population:Population_content = _calculate_closest(noise_values, _population_properties)
+                    population = gen_population
                 else:
                     population = No_population()
         self.terrain = terrain
@@ -878,7 +848,7 @@ class World:
         return tile
     
     
-    def fill_all_chunks(self, show_progress_text:str|None=None, save_num:int|None=None):
+    def fill_all_chunks(self, show_progress_text:str|None=None):
         """
         Generates ALL not yet generated tiles in ALL chunks.\n
         If `show_progress_text` is not None, it writes out a progress percentage while generating.

@@ -292,7 +292,9 @@ def game_loop():
             sleep(0.1)
             SAVE_DATA.player.weighted_turn()
             SAVE_DATA.player.move()
-            tile = SAVE_DATA.world.get_tile(SAVE_DATA.player.pos[0], SAVE_DATA.player.pos[1], SAVE_DATA.save_name)
+            pos = SAVE_DATA.player.pos
+            tile = SAVE_DATA.world.get_tile(pos[0], pos[1], SAVE_DATA.save_name)
+            SAVE_DATA.world.get_chunk(pos[0], pos[1]).fill_chunk()
             tile.visit(SAVE_DATA)
     if not GLOBALS.exiting:
         sleep(5)
@@ -332,7 +334,7 @@ def regenerate_save_file(save_name:str, is_file=False, make_backup=True):
     print(f"DONE!")
     if not is_file:
         ts.logger("Loading all chunks from file", f"save_name: {save_name}")
-        sm.load_all_chunks(SAVE_DATA, "\tLoading world...")
+        SAVE_DATA.load_all_chunks("\tLoading world...")
         print(f"\tDeleting...", end="", flush=True)
         ts.remove_save(save_name, is_file)
         print(f"DONE!")

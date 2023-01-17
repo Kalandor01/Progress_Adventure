@@ -1,9 +1,16 @@
 from copy import deepcopy
 from typing import Any
+from os.path import join, isfile
+from os import listdir
 
 from utils import Double_Keys, getch
-from constants import ENCODING, DOUBLE_KEYS
-from tools import np, Log_type, logger, settings_manager, change_logging_level
+from constants import                     \
+    ENCODING,                             \
+    SAVES_FOLDER_PATH, SAVE_EXT,          \
+    SAVE_FOLDER_NAME_CHUNKS,              \
+    CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, \
+    DOUBLE_KEYS, SAVE_VERSION
+import tools as ts
 
 from entities import Player
 
@@ -104,7 +111,7 @@ class Key:
             else:
                 raise KeyError
         except UnicodeDecodeError:
-            logger("Unknown key", "cannot decode key", Log_type.ERROR)
+            ts.logger("Unknown key", "cannot decode key", ts.Log_type.ERROR)
             raise
         else:
             self.value = key_value
@@ -157,17 +164,17 @@ class Settings:
 
     def get_auto_save(self):
         """Returns the value of the `auto_save` from the setting file."""
-        return bool(settings_manager("auto_save"))
+        return bool(ts.settings_manager("auto_save"))
     
 
     def get_logging_level(self):
         """Returns the value of the `logging_level` from the setting file."""
-        return int(settings_manager("logging_level"))
+        return int(ts.settings_manager("logging_level"))
     
 
     def get_keybins(self):
         """Returns the value of the `keybinds` from the setting file."""
-        keybinds:dict[str, list[list[bytes]]] = settings_manager("keybinds")
+        keybinds:dict[str, list[list[bytes]]] = ts.settings_manager("keybinds")
         keybind_obj:dict[str, Key] = {}
         for key in keybinds:
             keybind_obj[key] = Key(keybinds[key])
@@ -176,36 +183,36 @@ class Settings:
     
     def get_ask_package_check_fail(self):
         """Returns the value of the `ask_package_check_fail` from the setting file."""
-        return bool(settings_manager("ask_package_check_fail"))
+        return bool(ts.settings_manager("ask_package_check_fail"))
     
     
     def get_ask_delete_save(self):
         """Returns the value of the `ask_delete_save` from the setting file."""
-        return bool(settings_manager("ask_delete_save"))
+        return bool(ts.settings_manager("ask_delete_save"))
     
     
     def get_ask_regenerate_save(self):
         """Returns the value of the `ask_regenerate_save` from the setting file."""
-        return bool(settings_manager("ask_regenerate_save"))
+        return bool(ts.settings_manager("ask_regenerate_save"))
     
     
     def get_def_backup_action(self):
         """Returns the value of the `def_backup_action` from the setting file."""
-        return int(settings_manager("def_backup_action"))
+        return int(ts.settings_manager("def_backup_action"))
 
 
     def update_logging_level(self, logging_level:int):
         """Updates the value of the `logging_level` in the program and in the setting file."""
         self.logging = (int(logging_level) != -1)
         self.logging_level = int(logging_level)
-        settings_manager("logging_level", self.logging_level)
-        change_logging_level(self.logging_level)
+        ts.settings_manager("logging_level", self.logging_level)
+        ts.change_logging_level(self.logging_level)
 
 
     def update_auto_save(self, auto_save:bool):
         """Updates the value of the `auto_save` in the program and in the setting file."""
         self.auto_save = bool(auto_save)
-        settings_manager("auto_save", self.auto_save)
+        ts.settings_manager("auto_save", self.auto_save)
 
 
     def _encode_keybinds(self):
@@ -229,7 +236,7 @@ class Settings:
             self.keybinds["left"].value,
             self.keybinds["right"].value,
             self.keybinds["enter"].value], self.DOUBLE_KEYS)
-        settings_manager("keybinds", self._encode_keybinds())
+        ts.settings_manager("keybinds", self._encode_keybinds())
 
 
     def check_keybind_conflicts(self):
@@ -246,51 +253,136 @@ class Settings:
     def update_ask_package_check_fail(self, ask_package_check_fail:bool):
         """Updates the value of `ask_package_check_fail` in the program and in the setting file."""
         self.ask_package_check_fail = bool(ask_package_check_fail)
-        settings_manager("ask_package_check_fail", self.ask_package_check_fail)
+        ts.settings_manager("ask_package_check_fail", self.ask_package_check_fail)
 
 
     def update_ask_delete_save(self, ask_delete_save:bool):
         """Updates the value of `ask_delete_save` in the program and in the setting file."""
         self.ask_delete_save = bool(ask_delete_save)
-        settings_manager("ask_delete_save", self.ask_delete_save)
+        ts.settings_manager("ask_delete_save", self.ask_delete_save)
 
 
     def update_ask_regenerate_save(self, ask_regenerate_save:bool):
         """Updates the value of `ask_regenerate_save` in the program and in the setting file."""
         self.ask_regenerate_save = bool(ask_regenerate_save)
-        settings_manager("ask_regenerate_save", self.ask_regenerate_save)
+        ts.settings_manager("ask_regenerate_save", self.ask_regenerate_save)
 
 
     def update_def_backup_action(self, def_backup_action:int):
         """Updates the value of `def_backup_action` in the program and in the setting file."""
         self.def_backup_action = int(def_backup_action)
-        settings_manager("def_backup_action", self.def_backup_action)
+        ts.settings_manager("def_backup_action", self.def_backup_action)
 
 
 class Save_data:
-    def __init__(self, save_name:str, display_save_name:str, last_access:list[int], player:Player,
-                 main_seed:np.random.RandomState, world_seed:np.random.RandomState, tile_type_noise_seeds:dict[str, int],
+    def __init__(self, save_name:str, display_save_name:str|None=None, last_access:list[int]|None=None, player:Player|None=None,
+                 main_seed:ts.np.random.RandomState|None=None, world_seed:ts.np.random.RandomState|None=None, tile_type_noise_seeds:dict[str, int]|None=None,
                  world:Any|None=None):
         self.save_name = str(save_name)
+        if display_save_name is None:
+            display_save_name = self.save_name
         self.display_save_name = str(display_save_name)
+        if last_access is None:
+            now = ts.dtime.now()
+            last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
         self.last_access = list[int](last_access)
-        self.player = deepcopy(player)
+        if player is None:
+            player = Player()
+        self.player = player
+        if main_seed is None:
+            main_seed = ts.np.random.RandomState()
         self.main_seed = main_seed
+        if world_seed is None:
+            world_seed = ts.make_random_seed(self.main_seed)
         self.world_seed = world_seed
+        if tile_type_noise_seeds is None:
+            tile_type_noise_seeds = ts.recalculate_tile_type_noise_seeds(world_seed)
         self.tile_type_noise_seeds = tile_type_noise_seeds
-        
+        self._update_seed_values()
+
         from chunk_manager import World
         if world is not None:
             new_world:World = world
         else:
             new_world = World()
         self.world = new_world
+    
+
+    def _update_seed_values(self):
+        ts.main_seed = self.main_seed
+        ts.world_seed = self.world_seed
+        ts.tile_type_noise_seeds = self.tile_type_noise_seeds
+        ts.recalculate_noise_generators(self.tile_type_noise_seeds)
+    
+
+    def load_all_chunks(self, show_progress_text:str|None=None):
+        """
+        Loads all chunks into the `Save_data` from a save file.\n
+        If `show_progress_text` is not None, it writes out a progress percentage while loading.
+        """
+        # read from file (old)
+        save_folder_path = join(SAVES_FOLDER_PATH, self.save_name)
+        chunks_folder = join(save_folder_path, SAVE_FOLDER_NAME_CHUNKS)
+        ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder_path)
+        # get existing file numbers
+        chunk_names = listdir(chunks_folder)
+        existing_chunks:list[tuple[int, int]] = []
+        for name in chunk_names:
+            # get valid files
+            if isfile(join(chunks_folder, name)) and name.startswith(f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}") and name.endswith(f".{SAVE_EXT}"):
+                file_numbers = name.replace(f".{SAVE_EXT}", "").replace(f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}", "").split(CHUNK_FILE_NAME_SEP)
+                try: existing_chunks.append((int(file_numbers[0]), int(file_numbers[1])))
+                except (ValueError, IndexError): continue
+        if show_progress_text is not None:
+            ecl = len(existing_chunks)
+            print(show_progress_text, end="", flush=True)
+            for x, chunk in enumerate(existing_chunks):
+                self.world.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
+                print(f"\r{show_progress_text}{round((x + 1) / ecl * 100, 1)}%", end="", flush=True)
+            print(f"\r{show_progress_text}DONE!             ")
+        else:
+            for chunk in existing_chunks:
+                self.world.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
+    
+
+    def display_data_to_json(self):
+        """Converts the data for the display part of the data file to a json format."""
+        now = ts.dtime.now()
+        display_data_json:dict[str, Any] = {
+            "save_version": SAVE_VERSION,
+            "display_name": self.display_save_name,
+            "last_access":  [now.year, now.month, now.day, now.hour, now.minute, now.second],
+            "player_name":  self.player.name
+        }
+        return display_data_json
+
+
+    def seeds_to_json(self):
+        """Converts the seeds data to json format."""
+        seeds_json:dict[str, Any] = {
+            "main_seed":                ts.random_state_to_json(self.main_seed),
+            "world_seed":               ts.random_state_to_json(self.world_seed),
+            "tile_type_noise_seeds":    self.tile_type_noise_seeds
+        }
+        return seeds_json
+
+
+    def main_data_to_json(self):
+        """Converts the data for the main part of the data file to a json format."""
+        now = ts.dtime.now()
+        save_data_json:dict[str, Any] = {
+            "save_version": SAVE_VERSION,
+            "display_name": self.display_save_name,
+            "last_access":  [now.year, now.month, now.day, now.hour, now.minute, now.second],
+            "player":       self.player.to_json(),
+            "seeds":        self.seeds_to_json()
+        }
+        return save_data_json
 
 
 def is_key(key:Key) -> bool:
     """
-    Waits for a specific key.\n
-    key should be a Key object.
+    Waits for a specific key.
     """
 
     key_in = getch()

@@ -85,5 +85,5 @@ TILE_NOISE_RESOLUTION = 1000000000000
 #     STANDARD_CURSOR_ICONS, DELETE_CURSOR_ICONS,                             \
 #     ERROR_HANDLING, LOG_MS,                                                 \
 #     AUTO_SAVE_INTERVAL, AUTO_SAVE_DELAY, FILE_ENCODING_VERSION, CHUNK_SIZE, \
-#     CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP                                    \
+#     CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP,                                   \
 #     SAVE_VERSION, DOUBLE_KEYS, TILE_NOISE_RESOLUTION

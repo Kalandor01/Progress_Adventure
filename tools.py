@@ -9,6 +9,7 @@ import numpy as np
 import colorama as col
 from zipfile import ZipFile
 from copy import deepcopy
+from perlin_noise import PerlinNoise
 
 import save_file_manager as sfm
 import utils as u
@@ -59,7 +60,37 @@ def recalculate_tile_type_noise_seeds(parrent_seed:np.random.RandomState=world_s
     return ttn_seeds
 
 
+def recalculate_noise_generators(ttn_seeds:dict[str, int]):
+    """Recalculate perlin noise generators for `tile_type_noise_seeds`."""
+    height1 = PerlinNoise(octaves=2**35, seed=ttn_seeds["height"])
+    height2 = PerlinNoise(octaves=2**36, seed=ttn_seeds["height"])
+    height3 = PerlinNoise(octaves=2**37, seed=ttn_seeds["height"])
+    temperature1 = PerlinNoise(octaves=2**34, seed=ttn_seeds["temperature"])
+    temperature2 = PerlinNoise(octaves=2**35, seed=ttn_seeds["temperature"])
+    temperature3 = PerlinNoise(octaves=2**36, seed=ttn_seeds["temperature"])
+    humidity1 = PerlinNoise(octaves=2**34, seed=ttn_seeds["humidity"])
+    humidity2 = PerlinNoise(octaves=2**35, seed=ttn_seeds["humidity"])
+    humidity3 = PerlinNoise(octaves=2**36, seed=ttn_seeds["humidity"])
+    hostility1 = PerlinNoise(octaves=2**36, seed=ttn_seeds["hostility"])
+    hostility2 = PerlinNoise(octaves=2**37, seed=ttn_seeds["hostility"])
+    hostility3 = PerlinNoise(octaves=2**38, seed=ttn_seeds["hostility"])
+    population1 = PerlinNoise(octaves=2**36, seed=ttn_seeds["population"])
+    population2 = PerlinNoise(octaves=2**37, seed=ttn_seeds["population"])
+    population3 = PerlinNoise(octaves=2**38, seed=ttn_seeds["population"])
+    
+    tile_type_noises = {
+        "height": (height1, height2, height3),
+        "temperature": (temperature1, temperature2, temperature3),
+        "humidity": (humidity1, humidity2, humidity3),
+        "hostility": (hostility1, hostility2, hostility3),
+        "population": (population1, population2, population3)
+    }
+    return tile_type_noises
+
+
+# perlin noise variables
 tile_type_noise_seeds:dict[str, int] = recalculate_tile_type_noise_seeds(world_seed)
+noise_generators = recalculate_noise_generators(tile_type_noise_seeds)
 
 
 class Log_type(Enum):

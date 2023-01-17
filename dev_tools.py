@@ -25,7 +25,7 @@ from tools import sfm
 
 import data_manager as dm
 import chunk_manager as cm
-from save_manager import _load_player_json, load_all_chunks
+from save_manager import _load_player_json
 
 def decode_save_file(save_name:str, save_name_pre=SAVES_FOLDER_PATH, save_num=SAVE_SEED, save_ext=SAVE_EXT):
     """
@@ -548,7 +548,7 @@ def save_visualizer(save_name:str):
                 ts.recreate_folder(EXPORT_FOLDER)
                 ts.recreate_folder(visualized_save_name, join(ROOT_FOLDER, EXPORT_FOLDER))
                 # get chunks data
-                load_all_chunks(save_data, "Getting chunk data...")
+                save_data.load_all_chunks("Getting chunk data...")
                 # fill
                 ans = sfm.UI_list(["No", "Yes"], f"Do you want to fill in ALL tiles in ALL generated chunks?").display()
                 if ans == 1:
@@ -587,6 +587,7 @@ def fill_world_segmented(world:cm.World, save_folder_path:str, corners:tuple[int
     """
     Generates chunks in a way that makes the world rectangle shaped.\n
     If `save_folder_path` is not None, it will try to load the chunks from the save folder first (calls `load_chunk_from_folder`).\n
+    While generating, saves the world `save_num` times.
     HELL!!!
     """
     cl = (((corners[2] + 1) - corners[0]) // CHUNK_SIZE) * (((corners[3] + 1) - corners[1]) // CHUNK_SIZE)
@@ -601,26 +602,51 @@ def fill_world_segmented(world:cm.World, save_folder_path:str, corners:tuple[int
     print("DONE!")
 
 
+def fill_world_simple(world:cm.World, corners:tuple[int, int, int, int], save_name:str|None=None):
+    """
+    Generates chunks in a way that makes the world rectangle shaped.\n
+    If `save_folder_path` is not None, it will try to load the chunks from the save folder first (calls `load_chunk_from_folder`).
+    """
+    save_folder_path = None
+    if save_name is not None:
+        save_folder_path = join(SAVES_FOLDER_PATH, save_name)
+    world.get_tile(corners[0], corners[2], save_folder_path)
+    world.get_tile(corners[1], corners[3], save_folder_path)
+    print("Generating chunks...", end="", flush=True)
+    world.make_rectangle(save_folder_path)
+    print("DONE!")
+    world.fill_all_chunks("Filling chunks...")
+
+
 # Self_Checks().run_all_tests()
 
 # for folder in listdir(SAVES_FOLDER_PATH):
 #     if isdir(join(SAVES_FOLDER_PATH, folder)):
 #         save_visualizer(folder)
 
-save_visualizer("journeyman")
+# save_visualizer("travel")
 
 
-# import entities as es
 # import save_manager as sm
-# mseed = ts.np.random.RandomState()
-# wseed = ts.make_random_seed(mseed)
 # test_save_name = "ttest"
-# sd = dm.Save_data(test_save_name, "test save", [0, 0, 0, 0, 0, 0], es.Player(), mseed, wseed, ts.recalculate_tile_type_noise_seeds(wseed))
+# sd = dm.Save_data(test_save_name, "test save")
 # ts.remove_save(test_save_name, False)
+# fill_world_simple(sd.world, (-100, -100, 99, 99), sd.save_name)
+# # fill_world_segmented(sd.world, join(SAVES_FOLDER_PATH, sd.save_name), (-100, -100, 99, 99), 10)
 # sm.make_save(sd, show_progress_text="Saving...")
-# fill_world_segmented(sd.world, join(SAVES_FOLDER_PATH, sd.save_name), (-100, -100, 99, 99), 10)
 # save_visualizer(test_save_name)
 
+
+import save_manager as sm
+test_save_name_2 = "travel"
+test_save_name_mod_2 = "travel_2"
+sd = sm.load_save(test_save_name_2, dm.Settings().keybind_mapping)
+sd.load_all_chunks("Loading chunks...")
+ts.remove_save(test_save_name_mod_2, False)
+fill_world_simple(sd.world, (-100, -100, 99, 99), sd.save_name)
+sd.save_name = test_save_name_mod_2
+sm.make_save(sd, show_progress_text="Saving...")
+save_visualizer(test_save_name_mod_2)
 
 
 
