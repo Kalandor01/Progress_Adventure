@@ -43,6 +43,7 @@ OLD_BACKUP_EXT = SAVE_EXT + ".bak"
 BACKUP_EXT = "zip"
     # save folder structure
 SAVE_FILE_NAME_DATA = "data"
+SAVE_FILE_NAME_POIS = "POIs"
 SAVE_FOLDER_NAME_CHUNKS = "chunks"
 
 # seeds
