@@ -419,10 +419,10 @@ _population_properties:dict[type[Population_content], dict[str, float]] = {
                                             },
                                             Human_population:
                                             {
-                                                "height": 0.5,
-                                                "temperature": 0.5,
-                                                "humidity": 0.5,
-                                                "hostility": 0.5,
+                                                "height": 0.6,
+                                                "temperature": 0.6,
+                                                "humidity": 0.4,
+                                                "hostility": 0.3,
                                             },
                                             Elf_population:
                                             {
@@ -433,29 +433,32 @@ _population_properties:dict[type[Population_content], dict[str, float]] = {
                                             },
                                             Dwarf_population:
                                             {
-                                                "height": 0.0,
+                                                "height": 0.1,
                                                 "temperature": 0.6,
                                                 "humidity": 0.3,
                                                 "hostility": 0.6,
                                             },
                                             Demon_population:
                                             {
-                                                "height": 0.0,
-                                                "temperature": 1.0,
-                                                "humidity": 0.0,
-                                                "hostility": 1.0,
+                                                "height": 0.1,
+                                                "temperature": 0.9,
+                                                "humidity": 0.1,
+                                                "hostility": 0.9,
                                             },
                                         }
 
 
 # Offsets for the calculated noise value in `_get_nose_values()`.
-tile_type_noise_offsets:dict[str, float] = {
+_tile_type_noise_offsets:dict[str, float] = {
     "height": 0,
     "temperature": 0,
     "humidity": 0,
     "hostility": -0.1,
     "population": -0.1
 }
+# If difference is larger than this the structure/poupation will not generate. Used in `calculate_closest()`
+_no_structure_difference_limit = 0.3
+_no_population_difference_limit = 0.2
 
 
 def _get_nose_values(absolute_x:int, absoulte_y:int):
@@ -471,7 +474,7 @@ def _get_nose_values(absolute_x:int, absoulte_y:int):
         noise_values[name] += (noises[2]([(absolute_x + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION,
                                     (absoulte_y + TILE_NOISE_RESOLUTION / 2) / TILE_NOISE_RESOLUTION])
                                     * 0.25)
-        noise_values[name] = (noise_values[name] + 0.875 + tile_type_noise_offsets[name]) / 1.75
+        noise_values[name] = (noise_values[name] + 0.875 + _tile_type_noise_offsets[name]) / 1.75
     return noise_values
 
 
@@ -492,6 +495,11 @@ def _calculate_closest(noise_values:dict[str, float], content_properties:dict[ty
         if prop_dif < min_diff:
             min_diff = prop_dif
             min_diff_content = content_type
+    # no content if difference is too big
+    if content_properties == _structure_properties and min_diff >= _no_structure_difference_limit:
+        min_diff_content = No_structure
+    elif content_properties == _population_properties and min_diff >= _no_population_difference_limit:
+        min_diff_content = No_population
     return min_diff_content()
 
 
@@ -523,6 +531,8 @@ def _gen_content_name(content:Base_content):
 
 class Tile:
     def __init__(self, absolute_x:int, absoulte_y:int, visited:int|None=None, terrain:Terrain_content|None=None, structure:Structure_content|None=None, population:Population_content|None=None):
+        global _no_structure_difference_limit
+        global _no_population_difference_limit
         """
         If `content` is None, the x and y must be absolute coordinates.
         """
@@ -538,28 +548,22 @@ class Tile:
                 terrain = gen_terrain
             if structure is None:
                 # less structures on water
-                generate = True
+                reset_no_sdl = _no_structure_difference_limit
                 if terrain.subtype == Terrain_types.OCEAN:
-                    # if world_seed.rand() > 0.10:
-                        generate = False
+                    _no_structure_difference_limit -= 0.1
                 elif terrain.subtype == Terrain_types.SHORE:
-                    # if world_seed.rand() > 0.25:
-                        generate = False
-                if generate:
-                    gen_structure:Structure_content = _calculate_closest(noise_values, _structure_properties)
-                    structure = gen_structure
-                else: structure = No_structure()
+                    _no_structure_difference_limit -= 0.05
+                gen_structure:Structure_content = _calculate_closest(noise_values, _structure_properties)
+                structure = gen_structure
+                _no_structure_difference_limit = reset_no_sdl
             if population is None:
                 # less population on not structures
-                generate = True
+                reset_no_pdl = _no_population_difference_limit
                 if structure.subtype == Structure_types.NONE:
-                    # if world_seed.rand() > 0.10:
-                        generate = False
-                if generate:
-                    gen_population:Population_content = _calculate_closest(noise_values, _population_properties)
-                    population = gen_population
-                else:
-                    population = No_population()
+                    _no_population_difference_limit -= 0.1
+                gen_population:Population_content = _calculate_closest(noise_values, _population_properties)
+                population = gen_population
+                _no_population_difference_limit = reset_no_pdl
         self.terrain = terrain
         self.structure = structure
         self.population = population

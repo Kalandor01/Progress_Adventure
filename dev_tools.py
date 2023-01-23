@@ -338,7 +338,7 @@ def get_tile_color(tile:cm.Tile, tile_type_counts:dict[str, int], type_colors_ma
 
 def draw_world_tiles(world:cm.World, type_colors="terrain", image_path="world.png"):
     """
-    Genarates an image, representing the diferent types of tiles, and their placements in the world.\n
+    Genarates an image, representing the different types of tiles, and their placements in the world.\n
     Also returns the tile count for all tile types.\n
     `type_colors` sets witch map to export (terrain, structure, population).
     """
@@ -374,7 +374,7 @@ def draw_world_tiles(world:cm.World, type_colors="terrain", image_path="world.pn
 
 def draw_combined_img(world:cm.World, image_path="combined.png"):
     """
-    Genarates an image, representing the diferent types of tiles with the layers overlayed, and their placements in the world.\n
+    Genarates an image, representing the different types of tiles with the layers overlayed, and their placements in the world.\n
     Also returns the tile count for all tile types.
     """
     tile_size = (1, 1)
@@ -745,15 +745,26 @@ def gen_named_area(world:cm.World, corners:tuple[int, int, int, int], save_name:
 # save_visualizer("travel")
 
 
+import save_manager as sm
+test_save_name = "ttest"
+sd = dm.Save_data(test_save_name, "test save")
+ts.remove_save(test_save_name, False)
+fill_world_simple(sd.world, (-100, -100, 99, 99), sd.save_name)
+# fill_world_segmented(sd.world, join(SAVES_FOLDER_PATH, sd.save_name), (-100, -100, 99, 99), 10)
+sm.make_save(sd, show_progress_text="Saving...")
+save_visualizer(test_save_name)
+
+
 # import save_manager as sm
-# test_save_name = "ttest"
-# sd = dm.Save_data(test_save_name, "test save")
-# ts.remove_save(test_save_name, False)
+# test_save_name_2 = "travel"
+# test_save_name_mod_2 = "travel_2"
+# sd = sm.load_save(test_save_name_2, dm.Settings().keybind_mapping)
+# sd.load_all_chunks("Loading chunks...")
+# ts.remove_save(test_save_name_mod_2, False)
 # fill_world_simple(sd.world, (-100, -100, 99, 99), sd.save_name)
 # # fill_world_segmented(sd.world, join(SAVES_FOLDER_PATH, sd.save_name), (-100, -100, 99, 99), 10)
 # sm.make_save(sd, show_progress_text="Saving...")
 # save_visualizer(test_save_name)
-
 
 
 import save_manager as sm
@@ -766,17 +777,6 @@ fill_world_simple(sd.world, (-100, -100, 99, 99), sd.save_name)
 sd.save_name = test_save_name_mod_2
 sm.make_save(sd, show_progress_text="Saving...")
 save_visualizer(test_save_name_mod_2)
-
-
-# import save_manager as sm
-# test_save_name_names = "names_test"
-# sd = dm.Save_data(test_save_name_names)
-# ts.remove_save(test_save_name_names, False)
-# gen_named_area(sd.world, (-100, -100, 99, 99), sd.save_name, "Generating named area")
-# sm.make_save(sd, show_progress_text="Saving...")
-# save_visualizer(test_save_name_names)
-
-
 
 
 
