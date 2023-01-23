@@ -618,6 +618,124 @@ def fill_world_simple(world:cm.World, corners:tuple[int, int, int, int], save_na
     world.fill_all_chunks("Filling chunks...")
 
 
+"""
+def gen_named_area(world:cm.World, corners:tuple[int, int, int, int], save_name:str|None=None, show_progress_text:str|None=None):
+
+    Gets all chunks in the specified area and generates a name for the contents.\n
+    (as long as the content type is neighbouring the same content type they will have the same name)\n
+    Can load chunks from save file if `save_name` is not None.\n
+    If `show_progress_text` is not None, it writes out a how many tiles have been name out of the total.
+   
+    total = (corners[2] - corners[0] + 1) * (corners[3] - corners[1] + 1)
+    generated = 0
+    save_folder_path = None
+    if save_name is not None:
+        save_folder_path = join(SAVES_FOLDER_PATH, save_name)
+    
+    def name_terrain(content:cm.Terrain_content, pos:tuple[int, int]):
+        if corners[0] <= pos[0] <= corners[2] and corners[1] <= pos[1] <= corners[3]:
+            terrain = world.get_tile(pos[0], pos[1], save_folder_path).terrain
+            if terrain.name is None:
+                c_type = content.subtype
+                c_name = content.name
+                content_list = []
+                content_list.append(content)
+                while len(content_list) != 0:
+                    content = content_list.pop(0)
+                    if content.subtype == c_type:
+                        content.name = c_name
+                        
+                        
+                        
+                        if corners[0] <= pos[0] + 1 <= corners[2] and corners[1] <= pos[1] <= corners[3]:
+                            name_terrain(terrain, (pos[0] + 1, pos[1]))
+                        if corners[0] <= pos[0] - 1 <= corners[2] and corners[1] <= pos[1] <= corners[3]:
+                            name_terrain(terrain, (pos[0] - 1, pos[1]))
+                        if corners[0] <= pos[0] <= corners[2] and corners[1] <= pos[1] + 1 <= corners[3]:
+                            name_terrain(terrain, (pos[0], pos[1] + 1))
+                        if corners[0] <= pos[0] <= corners[2] and corners[1] <= pos[1] - 1 <= corners[3]:
+                            name_terrain(terrain, (pos[0], pos[1] - 1))
+                    else:
+                        cm._gen_content_name(terrain)
+                        name_terrain(terrain, pos)
+                    if show_progress_text is not None:
+                        gen = generated
+                        gen += 1
+                        print(f"\r{show_progress_text}:terrain...{gen}/{total}", end="", flush=True)
+    
+    1. Set Q to the empty queue or stack.
+  2. Add node to the end of Q.
+  3. While Q is not empty:
+  4.   Set n equal to the first element of Q.
+  5.   Remove first element from Q.
+  6.   If n is Inside:
+         Set the n
+         Add the node to the west of n to the end of Q.
+         Add the node to the east of n to the end of Q.
+         Add the node to the north of n to the end of Q.
+         Add the node to the south of n to the end of Q.
+  7. Continue looping until Q is exhausted.
+  8. Return.
+    
+    
+    def name_structure(content:cm.Structure_content, pos:tuple[int, int]):
+        if corners[0] <= pos[0] <= corners[2] and corners[1] <= pos[1] <= corners[3]:
+            structure = world.get_tile(pos[0], pos[1], save_folder_path).structure
+            if structure.name is None:
+                if structure.subtype == content.subtype:
+                    structure.subtype = content.subtype
+                else:
+                    cm._gen_content_name(structure)
+                if show_progress_text is not None:
+                    gen = generated
+                    gen += 1
+                    print(f"\r{show_progress_text}:structure...{gen}/{total}", end="", flush=True)
+                
+                name_structure(structure, (pos[0] + 1, pos[1]))
+                name_structure(structure, (pos[0] - 1, pos[1]))
+                name_structure(structure, (pos[0], pos[1] + 1))
+                name_structure(structure, (pos[0], pos[1] - 1))
+    
+    
+    def name_population(content:cm.Population_content, pos:tuple[int, int]):
+        if corners[0] <= pos[0] <= corners[2] and corners[1] <= pos[1] <= corners[3]:
+            population = world.get_tile(pos[0], pos[1], save_folder_path).population
+            if population.name is None:
+                if population.subtype == content.subtype:
+                    population.subtype = content.subtype
+                else:
+                    cm._gen_content_name(population)
+                if show_progress_text is not None:
+                    gen = generated
+                    gen += 1
+                    print(f"\r{show_progress_text}:population...{gen}/{total}", end="", flush=True)
+                
+                name_population(population, (pos[0] + 1, pos[1]))
+                name_population(population, (pos[0] - 1, pos[1]))
+                name_population(population, (pos[0], pos[1] + 1))
+                name_population(population, (pos[0], pos[1] - 1))
+    
+    starting_pos = (corners[0], corners[2])
+    tile = world.get_tile(starting_pos[0], starting_pos[1], save_folder_path)
+    # terrain
+    print(f"{show_progress_text}:terrain...0/{total}", end="", flush=True)
+    name_terrain(tile.terrain, starting_pos)
+    print(f"\r{show_progress_text}:terrain...DONE!           ")
+    # structure
+    print(f"{show_progress_text}:structure...0/{total}", end="", flush=True)
+    name_structure(tile.structure, starting_pos)
+    print(f"\r{show_progress_text}:structure...DONE!           ")
+    # population
+    print(f"{show_progress_text}:population...0/{total}", end="", flush=True)
+    name_population(tile.population, starting_pos)
+    print(f"\r{show_progress_text}:population...DONE!           ")
+    # li = [1, 2, 3]
+    # print(li.pop(0))
+    # print(li.pop(0))
+    # print(li.pop(0))
+"""
+
+
 # Self_Checks().run_all_tests()
 
 # for folder in listdir(SAVES_FOLDER_PATH):
@@ -637,6 +755,7 @@ def fill_world_simple(world:cm.World, corners:tuple[int, int, int, int], save_na
 # save_visualizer(test_save_name)
 
 
+
 import save_manager as sm
 test_save_name_2 = "travel"
 test_save_name_mod_2 = "travel_2"
@@ -647,6 +766,17 @@ fill_world_simple(sd.world, (-100, -100, 99, 99), sd.save_name)
 sd.save_name = test_save_name_mod_2
 sm.make_save(sd, show_progress_text="Saving...")
 save_visualizer(test_save_name_mod_2)
+
+
+# import save_manager as sm
+# test_save_name_names = "names_test"
+# sd = dm.Save_data(test_save_name_names)
+# ts.remove_save(test_save_name_names, False)
+# gen_named_area(sd.world, (-100, -100, 99, 99), sd.save_name, "Generating named area")
+# sm.make_save(sd, show_progress_text="Saving...")
+# save_visualizer(test_save_name_names)
+
+
 
 
 

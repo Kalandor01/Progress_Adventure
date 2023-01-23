@@ -2,6 +2,7 @@ from enum import Enum
 from os.path import join
 from typing import Any
 from copy import deepcopy
+import random
 
 from constants import                                           \
     SAVE_EXT, SAVE_FOLDER_NAME_CHUNKS, CHUNK_SIZE,              \
@@ -17,7 +18,11 @@ class Content_types(Enum):
     POPULATION =    "population"
 
 
-class Terrain_types(Enum):
+class Content_type_types(Enum):
+    pass
+
+
+class Terrain_types(Content_type_types):
     NONE =      "none"
     FIELD =     "field"
     MOUNTAIN =  "mountain"
@@ -25,14 +30,14 @@ class Terrain_types(Enum):
     SHORE =     "shore"
 
 
-class Structure_types(Enum):
+class Structure_types(Content_type_types):
     NONE =          "none"
     VILLAGE =       "village"
     KINGDOM =       "kingdom"
     BANDIT_CAMP =   "bandit_camp"
 
 
-class Population_types(Enum):
+class Population_types(Content_type_types):
     NONE =      "none"
     HUMAN =     "human"
     DWARF =     "dwarf"
@@ -40,21 +45,30 @@ class Population_types(Enum):
     DEMON =     "demon"
 
 
-class Base_content:
+class Base_content:    
     def __init__(self, data:dict[str, Any]|None=None):
         self.type = Content_types.NONE
+        self.subtype:Content_type_types
+        self.name:str|None = None
+        if data is not None:
+            try: self.name = str(data["name"])
+            except KeyError: pass
 
 
     def _visit(self, tile:'Tile', save_data:Save_data):
-        logger(f"Player visited \"{self.type}\"", f"x: {tile.x}, y: {tile.y}, visits: {tile.visited}")
+        logger(f'Player visited "{self.type}": "{self.subtype}"{f" ({self.name})" if self.name is not None else ""}', f"x: {tile.x}, y: {tile.y}, visits: {tile.visited}")
 
 
     def to_json(self):
         """Returns a json representation of the `Content`."""
-        content_json:dict[str, Any] = {"type": self.type.value}
+        content_json:dict[str, Any] = {
+            "type": self.type.value,
+            "subtype": self.subtype.value,
+            "name": self.name
+        }
         return content_json
-    
-    
+
+
 class Terrain_content(Base_content):
     def __init__(self, data:dict[str, Any]|None=None):
         super().__init__(data)
@@ -62,33 +76,11 @@ class Terrain_content(Base_content):
         self.subtype = Terrain_types.NONE
 
 
-    def _visit(self, tile:'Tile', save_data:Save_data):
-        logger(f"Player visited \"{self.type}\": \"{self.subtype}\"", f"x: {tile.x}, y: {tile.y}, visits: {tile.visited}")
-
-
-    def to_json(self):
-        """Returns a json representation of the `Terrain`."""
-        terrain_json = super().to_json()
-        terrain_json["subtype"] = self.subtype.value
-        return terrain_json
-
-
 class Structure_content(Base_content):
     def __init__(self, data:dict[str, Any]|None=None):
         super().__init__(data)
         self.type = Content_types.STRUCTURE
         self.subtype = Structure_types.NONE
-
-
-    def _visit(self, tile:'Tile', save_data:Save_data):
-        logger(f"Player visited \"{self.type}\": \"{self.subtype}\"", f"x: {tile.x}, y: {tile.y}, visits: {tile.visited}")
-
-
-    def to_json(self):
-        """Returns a json representation of the `Structure`."""
-        structure_json = super().to_json()
-        structure_json["subtype"] = self.subtype.value
-        return structure_json
 
 
 class Population_content(Base_content):
@@ -113,7 +105,7 @@ class Population_content(Base_content):
 
 
     def _visit(self, tile:'Tile', save_data:Save_data):
-        logger(f"Player visited \"{self.type}\": \"{self.subtype}\"", f"x: {tile.x}, y: {tile.y}, visits: {tile.visited}")
+        super()._visit(tile, save_data)
         if self.subtype != Population_types.NONE and self.amount > 0:
             print(f"There {'is' if self.amount == 1 else 'are'} {self.amount} {self.subtype.value}{'' if self.amount == 1 else 's'} here.")
         if self.subtype != Population_types.NONE and tile.structure.subtype != Structure_types.NONE:
@@ -128,7 +120,6 @@ class Population_content(Base_content):
     def to_json(self):
         """Returns a json representation of the `Population`."""
         population_json = super().to_json()
-        population_json["subtype"] = self.subtype.value
         population_json["amount"] = self.amount
         return population_json
 
@@ -524,6 +515,10 @@ def _load_content(content_json:dict[str, Any]|None, type_map:dict[str, type[Base
     # get content
     content_class = _get_content(content_type, type_map)
     return content_class(content_json)
+
+
+def _gen_content_name(content:Base_content):
+    content.name = content.subtype.value + " " + str(int(random.random() * 100000))
 
 
 class Tile:
