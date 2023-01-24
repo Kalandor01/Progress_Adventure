@@ -6,6 +6,7 @@ logs
 saves
 tests
 output
+visualised_saves
 
 *.log
 *.sav
