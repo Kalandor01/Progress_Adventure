@@ -2,6 +2,7 @@ from enum import Enum
 from os.path import join
 from typing import Any
 from copy import deepcopy
+from abc import ABC
 import random
 
 from constants import                                           \
@@ -45,7 +46,7 @@ class Population_types(Content_type_types):
     DEMON =     "demon"
 
 
-class Base_content:    
+class Base_content(ABC):
     def __init__(self, data:dict[str, Any]|None=None):
         self.type = Content_types.NONE
         self.subtype:Content_type_types
