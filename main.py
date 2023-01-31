@@ -285,22 +285,30 @@ def game_loop():
         thread_save = Thread(target=auto_saver, name=AUTO_SAVE_THREAD_NAME, daemon=True)
         thread_save.start()
     # GAME
-    stats(-1)
-    print("Wandering...")
-    for _ in range(200):
-        if not GLOBALS.exiting:
-            sleep(0.1)
-            SAVE_DATA.player.weighted_turn()
-            SAVE_DATA.player.move()
-            pos = SAVE_DATA.player.pos
-            tile = SAVE_DATA.world.get_tile(pos[0], pos[1], SAVE_DATA.save_name)
-            SAVE_DATA.world.get_chunk(pos[0], pos[1]).fill_chunk()
-            tile.visit(SAVE_DATA)
-    if not GLOBALS.exiting:
-        sleep(5)
-    if not GLOBALS.exiting:
-        prepair_fight()
+    if sfm.UI_list(["NO", "YES"], "FILL?").display():
+        from constants import SAVES_FOLDER_PATH
+        from os.path import join
+        SAVE_DATA.load_all_chunks()
+        SAVE_DATA.world.make_rectangle(join(SAVES_FOLDER_PATH, "jh"))
+        SAVE_DATA.world.fill_all_chunks("fill...")
         save_game()
+    else:
+        stats(-1)
+        print("Wandering...")
+        for _ in range(200):
+            if not GLOBALS.exiting:
+                sleep(0.1)
+                SAVE_DATA.player.weighted_turn()
+                SAVE_DATA.player.move()
+                pos = SAVE_DATA.player.pos
+                tile = SAVE_DATA.world.get_tile(pos[0], pos[1], SAVE_DATA.save_name)
+                SAVE_DATA.world.get_chunk(pos[0], pos[1]).fill_chunk()
+                tile.visit(SAVE_DATA)
+        if not GLOBALS.exiting:
+            sleep(5)
+        if not GLOBALS.exiting:
+            prepair_fight()
+            save_game()
         # save_game() maybe instead of the auto save
         # ENDING
     GLOBALS.exiting = False

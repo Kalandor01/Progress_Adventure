@@ -1,5 +1,6 @@
 from enum import Enum
-from os.path import join
+from os.path import join, isfile
+from os import listdir
 from typing import Any
 from copy import deepcopy
 from abc import ABC
@@ -8,7 +9,7 @@ import random
 from constants import                                           \
     SAVE_EXT, SAVE_FOLDER_NAME_CHUNKS, CHUNK_SIZE,              \
     CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, TILE_NOISE_RESOLUTION
-from tools import world_seed, noise_generators, logger, decode_save_s, encode_save_s, Log_type
+from tools import world_seed, noise_generators, logger, decode_save_s, encode_save_s, Log_type, recreate_folder
 from data_manager import Save_data
 
 
@@ -807,6 +808,35 @@ class World:
         else:
             chunk = self.gen_chunk(x, y)
         return chunk
+    
+
+    def load_all_chunks_from_folder(self, save_folder_path:str, show_progress_text:str|None=None):
+        """
+        Loads all chunks from a save file.\n
+        If `show_progress_text` is not None, it writes out a progress percentage while loading.
+        """
+        chunks_folder = join(save_folder_path, SAVE_FOLDER_NAME_CHUNKS)
+        recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder_path)
+        # get existing files
+        chunk_names = listdir(chunks_folder)
+        existing_chunks:list[tuple[int, int]] = []
+        for name in chunk_names:
+            # get valid files
+            if isfile(join(chunks_folder, name)) and name.startswith(f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}") and name.endswith(f".{SAVE_EXT}"):
+                file_numbers = name.replace(f".{SAVE_EXT}", "").replace(f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}", "").split(CHUNK_FILE_NAME_SEP)
+                try: existing_chunks.append((int(file_numbers[0]), int(file_numbers[1])))
+                except (ValueError, IndexError): continue
+        # load chunks
+        if show_progress_text is not None:
+            ecl = len(existing_chunks)
+            print(show_progress_text, end="", flush=True)
+            for x, chunk in enumerate(existing_chunks):
+                self.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
+                print(f"\r{show_progress_text}{round((x + 1) / ecl * 100, 1)}%", end="", flush=True)
+            print(f"\r{show_progress_text}DONE!             ")
+        else:
+            for chunk in existing_chunks:
+                self.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
 
 
     def find_tile(self, x:int, y:int):

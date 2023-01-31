@@ -322,27 +322,7 @@ class Save_data:
         """
         # read from file (old)
         save_folder_path = join(SAVES_FOLDER_PATH, self.save_name)
-        chunks_folder = join(save_folder_path, SAVE_FOLDER_NAME_CHUNKS)
-        ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder_path)
-        # get existing file numbers
-        chunk_names = listdir(chunks_folder)
-        existing_chunks:list[tuple[int, int]] = []
-        for name in chunk_names:
-            # get valid files
-            if isfile(join(chunks_folder, name)) and name.startswith(f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}") and name.endswith(f".{SAVE_EXT}"):
-                file_numbers = name.replace(f".{SAVE_EXT}", "").replace(f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}", "").split(CHUNK_FILE_NAME_SEP)
-                try: existing_chunks.append((int(file_numbers[0]), int(file_numbers[1])))
-                except (ValueError, IndexError): continue
-        if show_progress_text is not None:
-            ecl = len(existing_chunks)
-            print(show_progress_text, end="", flush=True)
-            for x, chunk in enumerate(existing_chunks):
-                self.world.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
-                print(f"\r{show_progress_text}{round((x + 1) / ecl * 100, 1)}%", end="", flush=True)
-            print(f"\r{show_progress_text}DONE!             ")
-        else:
-            for chunk in existing_chunks:
-                self.world.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
+        self.world.load_all_chunks_from_folder(save_folder_path, show_progress_text)
     
 
     def display_data_to_json(self):
