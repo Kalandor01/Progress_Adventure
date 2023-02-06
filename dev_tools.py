@@ -24,7 +24,7 @@ import tools as ts
 from tools import sfm
 
 import data_manager as dm
-import chunk_manager as cm
+from chunk_manager import World, Save_data, Terrain_types, Structure_types, Population_types, Tile
 from save_manager import _load_player_json
 
 def decode_save_file(save_name:str, save_name_pre=SAVES_FOLDER_PATH, save_num=SAVE_SEED, save_ext=SAVE_EXT):
@@ -226,22 +226,20 @@ class Self_Checks:
         ts.check_package_versions()
 
         # GLOBAL VARIABLES
-        GOOD_PACKAGES = True
-        SETTINGS = dm.Settings()
-        SETTINGS.update_keybinds()
-        SAVE_DATA = dm.Save_data
-        GLOBALS = dm.Globals(False, False, False, False)
+        dm.Settings()
+        dm.Settings.update_keybinds()
+        dm.Globals(False, False, False, False)
         
         self._give_result(check_name, ts.Log_type.PASS)
 
 
     def settings_checks(self, check_name:str):
         good = False
-        settings = dm.Settings()
-        settings.update_keybinds()
+        dm.Settings()
+        dm.Settings.update_keybinds()
         
-        if settings.auto_save == True or settings.auto_save == False:
-            if settings.DOUBLE_KEYS == DOUBLE_KEYS and type(settings.keybinds) is dict:
+        if dm.Settings.auto_save == True or dm.Settings.auto_save == False:
+            if dm.Settings.DOUBLE_KEYS == DOUBLE_KEYS and type(dm.Settings.keybinds) is dict:
                 self._give_result(check_name, ts.Log_type.PASS)
                 good = True
         if not good:
@@ -292,30 +290,30 @@ class Population_colors(Enum):
 
 
 terrain_type_colors = {
-                    cm.Terrain_types.NONE: Terrain_colors.EMPTY,
-                    cm.Terrain_types.FIELD: Terrain_colors.FIELD,
-                    cm.Terrain_types.MOUNTAIN: Terrain_colors.MOUNTAIN,
-                    cm.Terrain_types.OCEAN: Terrain_colors.OCEAN,
-                    cm.Terrain_types.SHORE: Terrain_colors.SHORE
+                    Terrain_types.NONE: Terrain_colors.EMPTY,
+                    Terrain_types.FIELD: Terrain_colors.FIELD,
+                    Terrain_types.MOUNTAIN: Terrain_colors.MOUNTAIN,
+                    Terrain_types.OCEAN: Terrain_colors.OCEAN,
+                    Terrain_types.SHORE: Terrain_colors.SHORE
                     }
     
 structure_type_colors = {
-                    cm.Structure_types.NONE: Structure_colors.EMPTY,
-                    cm.Structure_types.BANDIT_CAMP: Structure_colors.BANDIT_CAMP,
-                    cm.Structure_types.VILLAGE: Structure_colors.VILLAGE,
-                    cm.Structure_types.KINGDOM: Structure_colors.KINGDOM
+                    Structure_types.NONE: Structure_colors.EMPTY,
+                    Structure_types.BANDIT_CAMP: Structure_colors.BANDIT_CAMP,
+                    Structure_types.VILLAGE: Structure_colors.VILLAGE,
+                    Structure_types.KINGDOM: Structure_colors.KINGDOM
                     }
     
 population_type_colors = {
-                    cm.Population_types.NONE: Population_colors.EMPTY,
-                    cm.Population_types.HUMAN: Population_colors.HUMAN,
-                    cm.Population_types.ELF: Population_colors.ELF,
-                    cm.Population_types.DWARF: Population_colors.DWARF,
-                    cm.Population_types.DEMON: Population_colors.DEMON
+                    Population_types.NONE: Population_colors.EMPTY,
+                    Population_types.HUMAN: Population_colors.HUMAN,
+                    Population_types.ELF: Population_colors.ELF,
+                    Population_types.DWARF: Population_colors.DWARF,
+                    Population_types.DEMON: Population_colors.DEMON
                     }
 
 
-def get_tile_color(tile:cm.Tile, tile_type_counts:dict[str, int], type_colors_map="terrain", opacity_multi=None) -> tuple[dict[str, int], tuple[int, int, int, int]]:
+def get_tile_color(tile:Tile, tile_type_counts:dict[str, int], type_colors_map="terrain", opacity_multi=None) -> tuple[dict[str, int], tuple[int, int, int, int]]:
     if type_colors_map == "structure":
         tcm = structure_type_colors
         subtype = tile.structure.subtype
@@ -336,7 +334,7 @@ def get_tile_color(tile:cm.Tile, tile_type_counts:dict[str, int], type_colors_ma
         return (tile_type_counts, (t_color[0], t_color[1], t_color[2], int(t_color[3] * opacity_multi)))
 
 
-def draw_world_tiles(world:cm.World, type_colors="terrain", image_path="world.png"):
+def draw_world_tiles(type_colors="terrain", image_path="world.png"):
     """
     Genarates an image, representing the different types of tiles, and their placements in the world.\n
     Also returns the tile count for all tile types.\n
@@ -346,12 +344,12 @@ def draw_world_tiles(world:cm.World, type_colors="terrain", image_path="world.pn
     
     tile_type_counts = {"TOTAL": 0}
     
-    corners = world._get_corners()
+    corners = World._get_corners()
     size = ((corners[2] - corners[0] + 1) * tile_size[0], (corners[3] - corners[1] + 1) * tile_size[1])
 
     im = Image.new("RGBA", size, Content_colors.EMPTY.value)
     draw = ImageDraw.Draw(im, "RGBA")
-    for chunk in world.chunks.values():
+    for chunk in World.chunks.values():
         for tile in chunk.tiles.values():
             x = (chunk.base_x - corners[0]) + tile.x
             y = (chunk.base_y - corners[1]) + tile.y
@@ -372,7 +370,7 @@ def draw_world_tiles(world:cm.World, type_colors="terrain", image_path="world.pn
 
 
 
-def draw_combined_img(world:cm.World, image_path="combined.png"):
+def draw_combined_img(image_path="combined.png"):
     """
     Genarates an image, representing the different types of tiles with the layers overlayed, and their placements in the world.\n
     Also returns the tile count for all tile types.
@@ -381,13 +379,13 @@ def draw_combined_img(world:cm.World, image_path="combined.png"):
     
     tile_type_counts = {"TOTAL": 0}
 
-    corners = world._get_corners()
+    corners = World._get_corners()
     size = ((corners[2] - corners[0] + 1) * tile_size[0], (corners[3] - corners[1] + 1) * tile_size[1])
     
-    def make_transparrent_img(world:cm.World, ttc:dict[str, int], type_colors="terrain", opacity=1/3):
+    def make_transparrent_img(ttc:dict[str, int], type_colors="terrain", opacity=1/3):
         im = Image.new("RGBA", size, Content_colors.EMPTY.value)
         draw = ImageDraw.Draw(im, "RGBA")
-        for chunk in world.chunks.values():
+        for chunk in World.chunks.values():
             for tile in chunk.tiles.values():
                 x = (chunk.base_x - corners[0]) + tile.x
                 y = (chunk.base_y - corners[1]) + tile.y
@@ -403,9 +401,9 @@ def draw_combined_img(world:cm.World, image_path="combined.png"):
         return im
     
 
-    terrain_img = make_transparrent_img(world, tile_type_counts, "terrain", 1)
-    structure_img = make_transparrent_img(world, tile_type_counts, "structure", 1/2)
-    population_img = make_transparrent_img(world, tile_type_counts, "population")
+    terrain_img = make_transparrent_img(tile_type_counts, "terrain", 1)
+    structure_img = make_transparrent_img(tile_type_counts, "structure", 1/2)
+    population_img = make_transparrent_img(tile_type_counts, "population")
     terrain_img.paste(structure_img, (0, 0), structure_img)
     terrain_img.paste(population_img, (0, 0), population_img)
 
@@ -469,7 +467,7 @@ def save_visualizer(save_name:str):
     def make_img(type_colors:str, export_file:str):
         """`type_colors`: terrain, structure or population"""
         print("Generating image...", end="", flush=True)
-        tile_type_counts = draw_world_tiles(save_data.world, type_colors, join(visualized_save_path, export_file))
+        tile_type_counts = draw_world_tiles(type_colors, join(visualized_save_path, export_file))
         print("DONE!")
         text =  f"\nTile types:\n"
         for tt, count in tile_type_counts.items():
@@ -478,7 +476,7 @@ def save_visualizer(save_name:str):
     
     def make_combined_img(export_file:str):
         print("Generating image...", end="", flush=True)
-        tile_type_counts = draw_combined_img(save_data.world, join(visualized_save_path, export_file))
+        tile_type_counts = draw_combined_img(join(visualized_save_path, export_file))
         print("DONE!")
         text =  f"\nTile types:\n"
         for tt, count in tile_type_counts.items():
@@ -520,19 +518,20 @@ def save_visualizer(save_name:str):
             main_seed.set_state(ts.json_to_random_state(seeds["main_seed"]))
             world_seed.set_state(ts.json_to_random_state(seeds["world_seed"]))
             tile_type_noise_seeds = seeds["tile_type_noise_seeds"]
-            save_data = dm.Save_data(save_name, display_name, last_access, player, main_seed, world_seed, tile_type_noise_seeds)
+            Save_data(save_name, display_name, last_access, player, main_seed, world_seed, tile_type_noise_seeds)
+            World()
             
             # display
-            ttn_seed_txt = str(save_data.tile_type_noise_seeds).replace(",", ",\n")
+            ttn_seed_txt = str(Save_data.tile_type_noise_seeds).replace(",", ",\n")
             text =  f"---------------------------------------------------------------------------------------------------------------\n"\
                     f"EXPORTED DATA FROM \"{save_name}\"\n"\
                     f"Loaded {SAVE_FILE_NAME_DATA}.{SAVE_EXT}:\n"\
-                    f"Save name: {save_data.save_name}\n"\
-                    f"Display save name: {save_data.display_save_name}\n"\
-                    f"Last saved: {make_date(save_data.last_access, '.')} {make_time(save_data.last_access[3:])}\n"\
-                    f"\nPlayer:\n{save_data.player}\n"\
-                    f"\nMain seed:\n{ts.random_state_to_json(save_data.main_seed)}\n"\
-                    f"\nWorld seed:\n{ts.random_state_to_json(save_data.world_seed)}\n"\
+                    f"Save name: {Save_data.save_name}\n"\
+                    f"Display save name: {Save_data.display_save_name}\n"\
+                    f"Last saved: {make_date(Save_data.last_access, '.')} {make_time(Save_data.last_access[3:])}\n"\
+                    f"\nPlayer:\n{Save_data.player}\n"\
+                    f"\nMain seed:\n{ts.random_state_to_json(Save_data.main_seed)}\n"\
+                    f"\nWorld seed:\n{ts.random_state_to_json(Save_data.world_seed)}\n"\
                     f"\nTile type noise seeds:\n{ttn_seed_txt}"\
                     f"\n---------------------------------------------------------------------------------------------------------------"
             input(text)
@@ -548,16 +547,16 @@ def save_visualizer(save_name:str):
                 ts.recreate_folder(EXPORT_FOLDER)
                 ts.recreate_folder(visualized_save_name, join(ROOT_FOLDER, EXPORT_FOLDER))
                 # get chunks data
-                save_data.load_all_chunks("Getting chunk data...")
+                World.load_all_chunks_from_folder(show_progress_text="Getting chunk data...")
                 # fill
                 ans = sfm.UI_list(["No", "Yes"], f"Do you want to fill in ALL tiles in ALL generated chunks?").display()
                 if ans == 1:
                     ans = sfm.UI_list(["No", "Yes"], f"Do you want to generates the rest of the chunks in a way that makes the world rectangle shaped?").display()
                     if ans == 1:
                         print("Generating chunks...", end="", flush=True)
-                        save_data.world.make_rectangle()
+                        World.make_rectangle()
                         print("DONE!")
-                    save_data.world.fill_all_chunks("Filling chunks...")
+                    World.fill_all_chunks("Filling chunks...")
                 # generate images
                 # terrain
                 ans = sfm.UI_list(["Yes", "No"], f"Do you want export the terrain data into \"{EXPORT_TERRAIN_FILE}\"?").display()
@@ -583,7 +582,7 @@ def save_visualizer(save_name:str):
     ts.threading.current_thread().name = MAIN_THREAD_NAME
 
 
-def fill_world_segmented(world:cm.World, save_folder_path:str, corners:tuple[int, int, int, int], save_num:int):
+def fill_world_segmented(save_folder_path:str, corners:tuple[int, int, int, int], save_num:int):
     """
     Generates chunks in a way that makes the world rectangle shaped.\n
     If `save_folder_path` is not None, it will try to load the chunks from the save folder first (calls `load_chunk_from_folder`).\n
@@ -593,29 +592,28 @@ def fill_world_segmented(world:cm.World, save_folder_path:str, corners:tuple[int
     cl = (((corners[2] + 1) - corners[0]) // CHUNK_SIZE) * (((corners[3] + 1) - corners[1]) // CHUNK_SIZE)
     for x in range(corners[0], corners[2] + 1, CHUNK_SIZE):
         for y in range(corners[1], corners[3] + 1, CHUNK_SIZE):
-            world.get_chunk(x, y).fill_chunk()
+            World.get_chunk(x, y).fill_chunk()
             print(f"\r({int((cl / save_num) / ((x+1) * (y+1)))}/{save_num})Filling chunks...{round((((x+1) * (y+1)) / save_num + 1) / (cl / save_num) * 100, 1)}%", end="", flush=True)
             if ((x+1) * (y+1)) % int(cl / save_num) == 0:
                 print(f"\r({int((cl / save_num) / ((x+1) * (y+1)))}/{save_num})Filling chunks...DONE!           ")
-                world.save_all_chunks_to_files(save_folder_path, True, f"({int((cl / save_num) / ((x+1) * (y+1)))}/{save_num})Saving...")
-    world.save_all_chunks_to_files(save_folder_path, True, f"(FINAL)Saving...")
+                World.save_all_chunks_to_files(save_folder_path, True, f"({int((cl / save_num) / ((x+1) * (y+1)))}/{save_num})Saving...")
+    World.save_all_chunks_to_files(save_folder_path, True, f"(FINAL)Saving...")
     print("DONE!")
 
 
-def fill_world_simple(world:cm.World, corners:tuple[int, int, int, int], save_name:str|None=None):
+def fill_world_simple(corners:tuple[int, int, int, int], save_name:str|None=None):
     """
-    Generates chunks in a way that makes the world rectangle shaped.\n
-    If `save_folder_path` is not None, it will try to load the chunks from the save folder first (calls `load_chunk_from_folder`).
+    Fills all chunks in the world.
     """
-    save_folder_path = None
-    if save_name is not None:
-        save_folder_path = join(SAVES_FOLDER_PATH, save_name)
-    world.get_tile(corners[0], corners[2], save_folder_path)
-    world.get_tile(corners[1], corners[3], save_folder_path)
+    if save_name is None:
+        save_name = Save_data.save_name
+    save_folder_path = join(SAVES_FOLDER_PATH, save_name)
+    World.get_tile(corners[0], corners[2], False, save_folder_path)
+    World.get_tile(corners[1], corners[3], False, save_folder_path)
     print("Generating chunks...", end="", flush=True)
-    world.make_rectangle(save_folder_path)
+    World.make_rectangle(False, save_folder_path)
     print("DONE!")
-    world.fill_all_chunks("Filling chunks...")
+    World.fill_all_chunks("Filling chunks...")
 
 
 """
@@ -758,12 +756,12 @@ def gen_named_area(world:cm.World, corners:tuple[int, int, int, int], save_name:
 import save_manager as sm
 test_save_name_2 = "travel"
 test_save_name_mod_2 = "travel_2"
-sd = sm.load_save(test_save_name_2, dm.Settings().keybind_mapping)
-sd.load_all_chunks("Loading chunks...")
+sm.load_save(test_save_name_2, dm.Settings().keybind_mapping)
+World.load_all_chunks_from_folder(show_progress_text="Loading chunks...")
 ts.remove_save(test_save_name_mod_2, False)
-fill_world_simple(sd.world, (-100, -100, 99, 99), sd.save_name)
-sd.save_name = test_save_name_mod_2
-sm.make_save(sd, show_progress_text="Saving...")
+fill_world_simple((-100, -100, 99, 99), Save_data.save_name)
+Save_data.save_name = test_save_name_mod_2
+sm.make_save(show_progress_text="Saving...")
 save_visualizer(test_save_name_mod_2)
 
 

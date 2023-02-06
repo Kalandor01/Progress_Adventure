@@ -12,6 +12,7 @@ from copy import deepcopy
 from perlin_noise import PerlinNoise
 
 import save_file_manager as sfm
+
 import utils as u
 from constants import                                                   \
     PYTHON_MIN_VERSION,                                                 \

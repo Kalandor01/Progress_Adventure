@@ -8,7 +8,8 @@ from typing import Literal
 try:
     from utils import Color, stylized_text, getch, press_key
     import tools as ts
-    import data_manager as dm
+    from data_manager import Settings, Globals, Save_data, is_key
+    from chunk_manager import World
     import entities as es
     import save_manager as sm
 
@@ -37,11 +38,10 @@ if __name__ == "__main__":
 
             # GLOBAL VARIABLES
             GOOD_PACKAGES = True
-            SETTINGS = dm.Settings()
-            ts.change_logging_level(SETTINGS.logging_level)
-            SETTINGS.update_keybinds()
-            SAVE_DATA:dm.Save_data
-            GLOBALS = dm.Globals(False, False, False, False)
+            Settings()
+            ts.change_logging_level(Settings.logging_level)
+            Settings.update_keybinds()
+            Globals(False, False, False, False)
             
             col.init()
         else:
@@ -104,7 +104,7 @@ def fight_ran(num=1, cost=1, power_min=1, power_max=-1, round_up=False):
 
 # attacking with oop functions
 def fight(monster_l:list[es.Entity]|None=None):
-    player = SAVE_DATA.player
+    player = Save_data.player
     if monster_l is None:
         monster_l = [es.Caveman()]
     # variables
@@ -196,7 +196,7 @@ def fight(monster_l:list[es.Entity]|None=None):
 
 # stats
 def stats(won=0):
-    player = SAVE_DATA.player
+    player = Save_data.player
     if won == 1:
         print("\nYou Win!!!")
     elif won == 0:
@@ -213,20 +213,19 @@ def stats(won=0):
 
 
 def prepair_fight():
-    GLOBALS.in_fight = True
+    Globals.in_fight = True
     ts.logger("Fight started")
     fight_ran(3, 5)
     stats(1)
     ts.logger("Fight ended")
-    GLOBALS.in_fight = False
+    Globals.in_fight = False
 
 
 def save_game():
-    GLOBALS.saving = True
-    frozen_data = deepcopy(SAVE_DATA)
-    sm.make_save(frozen_data, SAVE_DATA)
-    ts.logger("Game saved", f'save name: {frozen_data.save_name}, player name: "{frozen_data.player.full_name}"')
-    GLOBALS.saving = False
+    Globals.saving = True
+    sm.make_save()
+    ts.logger("Game saved", f'save name: {Save_data.save_name}, player name: "{Save_data.player.full_name}"')
+    Globals.saving = False
 
 
 # Auto save thread
@@ -234,18 +233,18 @@ def auto_saver():
     try:
         while True:
             sleep(AUTO_SAVE_INTERVAL)
-            if GLOBALS.in_game_loop:
+            if Globals.in_game_loop:
                 saved = False
                 while not saved:
-                    if GLOBALS.in_game_loop and not GLOBALS.saving and not GLOBALS.in_fight:
-                        ts.logger("Beginning auto save", f"save name: {SAVE_DATA.save_name}")
+                    if Globals.in_game_loop and not Globals.saving and not Globals.in_fight:
+                        ts.logger("Beginning auto save", f"save name: {Save_data.save_name}")
                         save_game()
                         saved = True
-                    elif GLOBALS.in_game_loop:
+                    elif Globals.in_game_loop:
                         sleep(AUTO_SAVE_DELAY)
                     else:
                         break
-            if not GLOBALS.in_game_loop:
+            if not Globals.in_game_loop:
                 break
     except:
         ts.logger("Thread crashed", str(exc_info()), Log_type.FATAL)
@@ -256,11 +255,11 @@ def auto_saver():
 def quit_game():
     try:
         while True:
-            if GLOBALS.in_game_loop:
-                if dm.is_key(SETTINGS.keybinds["esc"]):
-                    if not GLOBALS.in_fight and not GLOBALS.saving:
-                        ts.logger("Beginning manual save", f"save name: {SAVE_DATA.save_name}")
-                        GLOBALS.exiting = True
+            if Globals.in_game_loop:
+                if is_key(Settings.keybinds["esc"]):
+                    if not Globals.in_fight and not Globals.saving:
+                        ts.logger("Beginning manual save", f"save name: {Save_data.save_name}")
+                        Globals.exiting = True
                         save_game()
                         break
                     else:
@@ -273,7 +272,7 @@ def quit_game():
 
 
 def game_loop():
-    GLOBALS.in_game_loop = True
+    Globals.in_game_loop = True
     # GAME LOOP
     ts.logger("Game loop started")
     # TRHEADS
@@ -281,75 +280,72 @@ def game_loop():
     thread_quit = Thread(target=quit_game, name=MANUAL_SAVE_THREAD_NAME, daemon=True)
     thread_quit.start()
     # auto saver
-    if SETTINGS.auto_save:
+    if Settings.auto_save:
         thread_save = Thread(target=auto_saver, name=AUTO_SAVE_THREAD_NAME, daemon=True)
         thread_save.start()
     # GAME
     if sfm.UI_list(["NO", "YES"], "FILL?").display():
         from constants import SAVES_FOLDER_PATH
         from os.path import join
-        SAVE_DATA.load_all_chunks()
-        SAVE_DATA.world.make_rectangle(join(SAVES_FOLDER_PATH, "jh"))
-        SAVE_DATA.world.fill_all_chunks("fill...")
+        World.load_all_chunks_from_folder()
+        World.make_rectangle(False, join(SAVES_FOLDER_PATH, "jh"))
+        World.fill_all_chunks("fill...")
         save_game()
     else:
         stats(-1)
         print("Wandering...")
         for _ in range(200):
-            if not GLOBALS.exiting:
+            if not Globals.exiting:
                 sleep(0.1)
-                SAVE_DATA.player.weighted_turn()
-                SAVE_DATA.player.move()
-                pos = SAVE_DATA.player.pos
-                tile = SAVE_DATA.world.get_tile(pos[0], pos[1], SAVE_DATA.save_name)
-                SAVE_DATA.world.get_chunk(pos[0], pos[1]).fill_chunk()
-                tile.visit(SAVE_DATA)
-        if not GLOBALS.exiting:
+                Save_data.player.weighted_turn()
+                Save_data.player.move()
+                pos = Save_data.player.pos
+                tile = World.get_tile(pos[0], pos[1], True, Save_data.save_name)
+                World.get_chunk(pos[0], pos[1]).fill_chunk()
+                tile.visit()
+        if not Globals.exiting:
             sleep(5)
-        if not GLOBALS.exiting:
+        if not Globals.exiting:
             prepair_fight()
             save_game()
         # save_game() maybe instead of the auto save
         # ENDING
-    GLOBALS.exiting = False
-    GLOBALS.in_game_loop = False
+    Globals.exiting = False
+    Globals.in_game_loop = False
     press_key("Exiting...Press keys!")
     ts.logger("Game loop ended")
 
 
 def new_save():
-    global SAVE_DATA
-    SAVE_DATA = sm.create_save_data()
-    sm.make_save(SAVE_DATA)
-    ts.logger("Created save", f'save_name: {SAVE_DATA.save_name}, player name: "{SAVE_DATA.player.full_name}"')
+    sm.create_save_data()
+    sm.make_save()
+    ts.logger("Created save", f'save_name: {Save_data.save_name}, player name: "{Save_data.player.full_name}"')
     game_loop()
 
 
 def load_save(save_name:str, is_file=False):
-    global SAVE_DATA
-    backup_choice = SETTINGS.def_backup_action == -1
-    automatic_backup = bool(SETTINGS.def_backup_action)
-    SAVE_DATA = sm.load_save(save_name, SETTINGS.keybind_mapping, is_file, backup_choice, automatic_backup)
+    backup_choice = Settings.def_backup_action == -1
+    automatic_backup = bool(Settings.def_backup_action)
+    sm.load_save(save_name, Settings.keybind_mapping, is_file, backup_choice, automatic_backup)
     game_loop()
 
 
 def regenerate_save_file(save_name:str, is_file=False, make_backup=True):
-    global SAVE_DATA
     print(f'Regenerating "{save_name}":')
     ts.logger("Regenerating save file", f"save_name: {save_name}")
     print(f"\tLoading...", end="", flush=True)
-    SAVE_DATA = sm.load_save(save_name, SETTINGS.keybind_mapping, is_file, False, make_backup)
+    sm.load_save(save_name, Settings.keybind_mapping, is_file, False, make_backup)
     print(f"DONE!")
     if not is_file:
         ts.logger("Loading all chunks from file", f"save_name: {save_name}")
-        SAVE_DATA.load_all_chunks("\tLoading world...")
+        World.load_all_chunks_from_folder(show_progress_text="\tLoading world...")
         print(f"\tDeleting...", end="", flush=True)
         ts.remove_save(save_name, is_file)
         print(f"DONE!")
     else:
         print(f"\tAlready deleted because it was a file.")
     print("\tSaving...\r", end="", flush=True)
-    sm.make_save(SAVE_DATA, show_progress_text="\tSaving...")
+    sm.make_save(show_progress_text="\tSaving...")
     ts.logger("Save file regenerated", f"save_name: {save_name}")
 
 
@@ -359,44 +355,44 @@ def main_menu():
     # action functions
     def other_options():
         # auto save
-        auto_save = sfm.Toggle(SETTINGS.auto_save, "Auto save: ")
+        auto_save = sfm.Toggle(Settings.auto_save, "Auto save: ")
         # logging
         logging_values = [-1, 4, 3, 2, 1, 0]
         logging_value = len(logging_values)
         for x in range(len(logging_values)):
-            if logging_values[x] == SETTINGS.logging_level:
+            if logging_values[x] == Settings.logging_level:
                 logging_value = x
                 break
         logging_level_names = ["MINIMAL", Log_type.FATAL.name, Log_type.ERROR.name, Log_type.WARN.name, Log_type.INFO.name, "ALL"]
         logging = ts.sfm_choice_s(logging_level_names, logging_value, "Logging: ")
         other_settings = [auto_save, logging, None, sfm.UI_list(["Done"])]
         # response
-        response = sfm.options_ui(other_settings, " Other options", key_mapping=SETTINGS.keybind_mapping)
+        response = sfm.options_ui(other_settings, " Other options", key_mapping=Settings.keybind_mapping)
         if response is not None:
-            SETTINGS.update_auto_save(bool(auto_save.value))
-            SETTINGS.update_logging_level(logging_values[logging.value])
+            Settings.update_auto_save(bool(auto_save.value))
+            Settings.update_logging_level(logging_values[logging.value])
 
     def ask_options():
-        ask_package_check_fail = sfm.Toggle(SETTINGS.ask_package_check_fail, "!!!Ask on package check fail!!!: ", "YES", "no")
-        ask_delete_save = sfm.Toggle(SETTINGS.ask_delete_save, "Ask on save folder delete: ", "yes", "no")
-        ask_regenerate_save = sfm.Toggle(SETTINGS.ask_regenerate_save, "Ask on save folders regeneration: ", "yes", "no")
+        ask_package_check_fail = sfm.Toggle(Settings.ask_package_check_fail, "!!!Ask on package check fail!!!: ", "YES", "no")
+        ask_delete_save = sfm.Toggle(Settings.ask_delete_save, "Ask on save folder delete: ", "yes", "no")
+        ask_regenerate_save = sfm.Toggle(Settings.ask_regenerate_save, "Ask on save folders regeneration: ", "yes", "no")
         # def_backup_action
         backup_action_values = [-1, 0, 1]
         backup_action_value = backup_action_values[0]
         for x in range(len(backup_action_values)):
-            if backup_action_values[x] == SETTINGS.def_backup_action:
+            if backup_action_values[x] == Settings.def_backup_action:
                 backup_action_value = x
                 break
         backup_action__names = ["ask", "don't backup", "backup"]
         def_backup_action = ts.sfm_choice_s(backup_action__names, backup_action_value, "On save folder backup prompt: ")
         ask_settings = [ask_package_check_fail, ask_delete_save, ask_regenerate_save, def_backup_action, None, sfm.UI_list(["Done"])]
         # response
-        response = sfm.options_ui(ask_settings, " Question popups", key_mapping=SETTINGS.keybind_mapping)
+        response = sfm.options_ui(ask_settings, " Question popups", key_mapping=Settings.keybind_mapping)
         if response is not None:
-            SETTINGS.update_ask_package_check_fail(bool(ask_package_check_fail.value))
-            SETTINGS.update_ask_delete_save(bool(ask_delete_save.value))
-            SETTINGS.update_ask_regenerate_save(bool(ask_regenerate_save.value))
-            SETTINGS.update_def_backup_action(backup_action_values[def_backup_action.value])
+            Settings.update_ask_package_check_fail(bool(ask_package_check_fail.value))
+            Settings.update_ask_delete_save(bool(ask_delete_save.value))
+            Settings.update_ask_regenerate_save(bool(ask_regenerate_save.value))
+            Settings.update_def_backup_action(backup_action_values[def_backup_action.value])
 
     def set_keybind(name:str):
         print("\n\nPress any key\n\n", end="")
@@ -406,11 +402,11 @@ def main_menu():
             key = [[], [key]]
         else:
             key = [[key], []]
-        SETTINGS.keybinds[name].change(key)
-        SETTINGS.check_keybind_conflicts()
+        Settings.keybinds[name].change(key)
+        Settings.check_keybind_conflicts()
 
     def get_keybind_name(key_name:str):
-        return stylized_text(SETTINGS.keybinds[key_name].name, (Color.RED if SETTINGS.keybinds[key_name].conflict else Color.RESET))
+        return stylized_text(Settings.keybinds[key_name].name, (Color.RED if Settings.keybinds[key_name].conflict else Color.RESET))
 
     def keybind_setting():
         while True:
@@ -422,17 +418,17 @@ def main_menu():
             f"Right: {get_keybind_name('right')}",
             f"Enter: {get_keybind_name('enter')}",
             None, "Done"
-            ], " Keybinds", False, True).display(SETTINGS.keybind_mapping)
+            ], " Keybinds", False, True).display(Settings.keybind_mapping)
             # exit
             if ans == -1:
-                SETTINGS.keybinds = SETTINGS.get_keybins()
+                Settings.keybinds = Settings.get_keybins()
                 break
             # done
             elif ans > 5:
-                SETTINGS.update_keybinds()
+                Settings.update_keybinds()
                 break
             else:
-                set_keybind(list(SETTINGS.keybinds)[ans])
+                set_keybind(list(Settings.keybinds)[ans])
 
     files_data = sm.get_saves_data()
     in_main_menu = True
@@ -444,7 +440,7 @@ def main_menu():
                 mm_list = ["New save", "Load/Delete save", "Options"]
             else:
                 mm_list = ["New save", "Options"]
-            option = sfm.UI_list_s(mm_list, " Main menu", can_esc=True).display(SETTINGS.keybind_mapping)
+            option = sfm.UI_list_s(mm_list, " Main menu", can_esc=True).display(Settings.keybind_mapping)
         elif len(files_data):
             option = 1
         else:
@@ -465,17 +461,17 @@ def main_menu():
             list_data.append("Regenerate all save files")
             list_data.append("Delete file")
             list_data.append("Back")
-            option = sfm.UI_list_s(list_data, " Level select", True, True, exclude_nones=True).display(SETTINGS.keybind_mapping)
+            option = sfm.UI_list_s(list_data, " Level select", True, True, exclude_nones=True).display(Settings.keybind_mapping)
             # load
             if option != -1 and option < len(files_data):
                 status = (0, files_data[int(option)][0], files_data[int(option)][2])
             # regenerate
             elif option == len(files_data):
-                if not SETTINGS.ask_regenerate_save or sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to regenerate ALL save files? This will load, delete then resave EVERY save file!", can_esc=True).display(SETTINGS.keybind_mapping) == 1:
-                    if SETTINGS.def_backup_action == -1:
-                        backup_saves = bool(sfm.UI_list_s(["Yes", "No"], f" Do you want to backup your save files before regenerating them?", can_esc=True).display(SETTINGS.keybind_mapping) == 0)
+                if not Settings.ask_regenerate_save or sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to regenerate ALL save files? This will load, delete then resave EVERY save file!", can_esc=True).display(Settings.keybind_mapping) == 1:
+                    if Settings.def_backup_action == -1:
+                        backup_saves = bool(sfm.UI_list_s(["Yes", "No"], f" Do you want to backup your save files before regenerating them?", can_esc=True).display(Settings.keybind_mapping) == 0)
                     else:
-                        backup_saves = bool(SETTINGS.def_backup_action)
+                        backup_saves = bool(Settings.def_backup_action)
                     print("Regenerating save files...\n")
                     for save in files_data:
                         regenerate_save_file(save[0], save[2], backup_saves)
@@ -487,9 +483,9 @@ def main_menu():
                 list_data.pop(len(list_data) - 2)
                 list_data.pop(len(list_data) - 2)
                 while len(files_data) > 0:
-                    option = sfm.UI_list(list_data, " Delete mode!", DELETE_CURSOR_ICONS, True, True, exclude_nones=True).display(SETTINGS.keybind_mapping)
+                    option = sfm.UI_list(list_data, " Delete mode!", DELETE_CURSOR_ICONS, True, True, exclude_nones=True).display(Settings.keybind_mapping)
                     if option != -1 and option < (len(list_data) - 1) / 2:
-                        if not SETTINGS.ask_delete_save or sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(SETTINGS.keybind_mapping):
+                        if not Settings.ask_delete_save or sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(Settings.keybind_mapping):
                             ts.remove_save(files_data[option][0], files_data[option][2])
                             list_data.pop(option * 2)
                             list_data.pop(option * 2)
@@ -502,7 +498,7 @@ def main_menu():
             else:
                 in_main_menu = True
         elif (option == 2 and len(files_data)) or (option == 1 and not len(files_data)):
-            sfm.UI_list(["Keybinds", "Question popups", "Other", None, "Back"], " Options", None, False, True, [keybind_setting, ask_options, other_options], True).display(SETTINGS.keybind_mapping)
+            sfm.UI_list(["Keybinds", "Question popups", "Other", None, "Back"], " Options", None, False, True, [keybind_setting, ask_options, other_options], True).display(Settings.keybind_mapping)
             in_main_menu = True
 
         # action

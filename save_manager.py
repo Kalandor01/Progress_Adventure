@@ -5,6 +5,7 @@ from typing import Any, Literal
 import utils as u
 import tools as ts
 from data_manager import Save_data
+from chunk_manager import World
 import entities as es
 import inventory as iy
 
@@ -44,41 +45,37 @@ def _load_player_json(player_json:dict[str, Any]):
     return player
 
 
-def _save_data_file(data:Save_data):
+def _save_data_file():
     """
     Creates the data file part of a save file from the save data.
     """
     # FOLDER
-    ts.recreate_folder(data.save_name, SAVES_FOLDER_PATH, "save file")
-    save_folder_path = os.path.join(SAVES_FOLDER_PATH, data.save_name)
+    ts.recreate_folder(Save_data.save_name, SAVES_FOLDER_PATH, "save file")
+    save_folder_path = os.path.join(SAVES_FOLDER_PATH, Save_data.save_name)
     # DATA FILE
-    display_data = data.display_data_to_json()
-    save_data = data.main_data_to_json()
+    display_data_json = Save_data.display_data_to_json()
+    save_data_json = Save_data.main_data_to_json()
     # create new save
-    ts.encode_save_s([display_data, save_data], os.path.join(save_folder_path, SAVE_FILE_NAME_DATA))
+    ts.encode_save_s([display_data_json, save_data_json], os.path.join(save_folder_path, SAVE_FILE_NAME_DATA))
 
 
-def make_save(data:Save_data, actual_data:Save_data|None=None, clear_chunks=True, show_progress_text: str | None = None):
+def make_save(clear_chunks=True, show_progress_text: str | None = None):
     """
     Creates a save file from the save data.\n
     Makes a temporary backup.\n
-    If `actual_data` is not `None`, `clear_chunks` has no effect.\n
     If `show_progress_text` is not None, it writes out a progress percentage while saving.
     """
     # make backup
-    backup_status = ts.make_backup(data.save_name, True)
+    backup_status = ts.make_backup(Save_data.save_name, True)
     # FOLDER
-    ts.recreate_folder(data.save_name, SAVES_FOLDER_PATH, "save file")
-    save_folder_path = os.path.join(SAVES_FOLDER_PATH, data.save_name)
+    ts.recreate_folder(Save_data.save_name, SAVES_FOLDER_PATH, "save file")
+    save_folder_path = os.path.join(SAVES_FOLDER_PATH, Save_data.save_name)
     # DATA FILE
-    _save_data_file(data)
+    _save_data_file()
     # CHUNKS/WORLD
     ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder_path)
-    # WORKING WITH ACTUAL DATA
-    if actual_data is None:
-        actual_data = data
     ts.logger("Saving chunks")
-    actual_data.world.save_all_chunks_to_files(save_folder_path, clear_chunks, show_progress_text)
+    World.save_all_chunks_to_files(save_folder_path, clear_chunks, show_progress_text)
     # remove backup
     if backup_status != False:
         os.remove(backup_status[0])
@@ -96,9 +93,9 @@ def create_save_data():
     # make player
     player = es.Player(input("What is your name?: "))
     # load to class
-    save_data = Save_data(save_name, display_save_name, player=player)
-    save_data.world.gen_tile(save_data.player.pos[0], save_data.player.pos[1])
-    return save_data
+    Save_data(save_name, display_save_name, player=player)
+    World()
+    World.gen_tile(Save_data.player.pos[0], Save_data.player.pos[1])
 
 
 def correct_save_data(json_data:dict[str, Any], save_version:str, extra_data:dict[str, Any]):
@@ -205,7 +202,7 @@ def correct_save_data(json_data:dict[str, Any], save_version:str, extra_data:dic
 
 def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list[bytes]], is_file=False, backup_choice=True, automatic_backup=True):
     """
-    Loads a save file into a `Save_data` object.\n
+    Loads a save file into the `Save_data` object.\n
     If `backup_choice` is False the user can't choose wether or not to backup the save before loading it, or not, depending on `automatic_backup`.
     """
     
@@ -260,10 +257,10 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
     ts.world_seed.set_state(ts.json_to_random_state(seeds["world_seed"]))
     ts.tile_type_noise_seeds = seeds["tile_type_noise_seeds"]
     # load to class
-    save_data = Save_data(save_name, display_name, last_access, player, ts.main_seed, ts.world_seed, ts.tile_type_noise_seeds)
+    Save_data(save_name, display_name, last_access, player, ts.main_seed, ts.world_seed, ts.tile_type_noise_seeds)
+    World()
     if is_file:
-        make_save(save_data, clear_chunks=False)
-    return save_data
+        make_save(clear_chunks=False)
 
 
 def _process_save_display_data(data:tuple[str, dict[str, Any] | Literal[-1]]):

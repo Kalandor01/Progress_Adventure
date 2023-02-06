@@ -6,9 +6,10 @@ from copy import deepcopy
 from abc import ABC
 import random
 
-from constants import                                           \
-    SAVE_EXT, SAVE_FOLDER_NAME_CHUNKS, CHUNK_SIZE,              \
-    CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, TILE_NOISE_RESOLUTION
+from constants import                                               \
+    SAVE_EXT, SAVE_FOLDER_NAME_CHUNKS, CHUNK_SIZE,                  \
+    CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, TILE_NOISE_RESOLUTION,    \
+    SAVES_FOLDER_PATH
 from tools import world_seed, noise_generators, logger, decode_save_s, encode_save_s, Log_type, recreate_folder
 from data_manager import Save_data
 
@@ -57,7 +58,7 @@ class Base_content(ABC):
             except KeyError: pass
 
 
-    def _visit(self, tile:'Tile', save_data:Save_data):
+    def _visit(self, tile:'Tile'):
         logger(f'Player visited "{self.type}": "{self.subtype}"{f" ({self.name})" if self.name is not None else ""}', f"x: {tile.x}, y: {tile.y}, visits: {tile.visited}")
 
 
@@ -106,16 +107,16 @@ class Population_content(Base_content):
             self.amount = world_seed.randint(1, 1000)
 
 
-    def _visit(self, tile:'Tile', save_data:Save_data):
-        super()._visit(tile, save_data)
+    def _visit(self, tile:'Tile'):
+        super()._visit(tile)
         if self.subtype != Population_types.NONE and self.amount > 0:
             print(f"There {'is' if self.amount == 1 else 'are'} {self.amount} {self.subtype.value}{'' if self.amount == 1 else 's'} here.")
         if self.subtype != Population_types.NONE and tile.structure.subtype != Structure_types.NONE:
             if tile.structure.subtype == Structure_types.BANDIT_CAMP:
-                if save_data.world_seed.rand() < 0.75:
+                if Save_data.world_seed.rand() < 0.75:
                     print("fight")
             elif tile.structure.subtype in [Structure_types.VILLAGE, Structure_types.KINGDOM]:
-                if save_data.world_seed.rand() < 0.01:
+                if Save_data.world_seed.rand() < 0.01:
                     print("fight")
 
 
@@ -132,9 +133,9 @@ class Field_terrain(Terrain_content):
         self.subtype = Terrain_types.FIELD
 
 
-    def _visit(self, tile:'Tile', save_data:Save_data):
-        super()._visit(tile, save_data)
-        print(f"{save_data.player.full_name} entered a field.")
+    def _visit(self, tile:'Tile'):
+        super()._visit(tile)
+        print(f"{Save_data.player.full_name} entered a field.")
 
 
 class Mountain_terrain(Terrain_content):
@@ -155,9 +156,9 @@ class Mountain_terrain(Terrain_content):
             self.height = int(height)
     
 
-    def _visit(self, tile:'Tile', save_data:Save_data):
-        super()._visit(tile, save_data)
-        print(f"{save_data.player.full_name} climbed a mountain.")
+    def _visit(self, tile:'Tile'):
+        super()._visit(tile)
+        print(f"{Save_data.player.full_name} climbed a mountain.")
         print(f"The mountain is {self.height}m tall.")
 
 
@@ -185,9 +186,9 @@ class Ocean_terrain(Terrain_content):
             self.depth = int(depth)
     
 
-    def _visit(self, tile:'Tile', save_data:Save_data):
-        super()._visit(tile, save_data)
-        print(f"{save_data.player.full_name} entered an ocean.")
+    def _visit(self, tile:'Tile'):
+        super()._visit(tile)
+        print(f"{Save_data.player.full_name} entered an ocean.")
         print(f"The ocean is {self.depth}m deep.")
 
 
@@ -215,9 +216,9 @@ class Shore_terrain(Terrain_content):
             self.depth = int(depth)
     
 
-    def _visit(self, tile:'Tile', save_data:Save_data):
-        super()._visit(tile, save_data)
-        print(f"{save_data.player.full_name} entered an shore.")
+    def _visit(self, tile:'Tile'):
+        super()._visit(tile)
+        print(f"{Save_data.player.full_name} entered an shore.")
         print(f"The shore is {self.depth}m deep.")
 
 
@@ -233,7 +234,7 @@ class No_structure(Structure_content):
         self.subtype = Structure_types.NONE
 
 
-    def _visit(self, tile:'Tile', save_data:Save_data):
+    def _visit(self, tile:'Tile'):
         pass
 
 
@@ -243,9 +244,9 @@ class Bandit_camp_structure(Structure_content):
         self.subtype = Structure_types.BANDIT_CAMP
 
 
-    def _visit(self, tile:'Tile', save_data:Save_data):
-        print(f"{save_data.player.full_name} entered a bandit camp.")
-        super()._visit(tile, save_data)
+    def _visit(self, tile:'Tile'):
+        print(f"{Save_data.player.full_name} entered a bandit camp.")
+        super()._visit(tile)
 
 
 class Village_structure(Structure_content):
@@ -266,9 +267,9 @@ class Village_structure(Structure_content):
             self.population = int(population)
 
 
-    def _visit(self, tile:'Tile', save_data:Save_data):
-        super()._visit(tile, save_data)
-        print(f"{save_data.player.full_name} entered a village.")
+    def _visit(self, tile:'Tile'):
+        super()._visit(tile)
+        print(f"{Save_data.player.full_name} entered a village.")
         print(f"The village has a population of {self.population} people.")
 
 
@@ -296,9 +297,9 @@ class Kingdom_structure(Structure_content):
             self.population = int(population)
 
 
-    def _visit(self, tile:'Tile', save_data:Save_data):
-        super()._visit(tile, save_data)
-        print(f"{save_data.player.full_name} entered a kingdom.")
+    def _visit(self, tile:'Tile'):
+        super()._visit(tile)
+        print(f"{Save_data.player.full_name} entered a kingdom.")
         print(f"The kingdom has a population of {self.population} people.")
 
 
@@ -315,7 +316,7 @@ class No_population(Population_content):
         self.amount = 0
     
     
-    def _visit(self, tile:'Tile', save_data:Save_data):
+    def _visit(self, tile:'Tile'):
         pass
 
 
@@ -571,11 +572,11 @@ class Tile:
         self.population = population
 
 
-    def visit(self, save_data:Save_data):
+    def visit(self):
         self.visited += 1
-        self.terrain._visit(self, save_data)
-        self.structure._visit(self, save_data)
-        self.population._visit(self, save_data)
+        self.terrain._visit(self)
+        self.structure._visit(self)
+        self.population._visit(self)
 
 
     def to_json(self):
@@ -650,8 +651,13 @@ class Chunk:
             return tile
 
 
-    def save_to_file(self, save_folder_path:str):
-        """Saves the chunk's data into a file in the save folder."""
+    def save_to_file(self, save_folder_path:str|None=None):
+        """
+        Saves the chunk's data into a file in the save folder.\n
+        If `save_folder_path` is None, it will make one using the `Save_data`'s `save_name`.
+        """
+        if save_folder_path is None:
+            save_folder_path = join(SAVES_FOLDER_PATH, Save_data.save_name)
         chunk_data = self.to_json()
         chunk_file_name = f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}{self.base_x}{CHUNK_FILE_NAME_SEP}{self.base_y}"
         encode_save_s(chunk_data, join(save_folder_path, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
@@ -668,14 +674,18 @@ class Chunk:
 
 
 class World:
+    chunks:dict[str, Chunk]
+
     def __init__(self, chunks:dict[str, Chunk]|None=None):
         logger("Generating World")
-        self.chunks:dict[str, Chunk] = {}
         if chunks is not None:
-            self.chunks = chunks
+            World.chunks = chunks
+        else:
+            World.chunks = {}
 
 
-    def find_chunk(self, x:int, y:int):
+    @staticmethod
+    def find_chunk(x:int, y:int):
         """
         Returns the `Chunk` if it exists.\n
         Otherwise it returns `None`.
@@ -683,34 +693,37 @@ class World:
         x_con = x // CHUNK_SIZE * CHUNK_SIZE
         y_con = y // CHUNK_SIZE * CHUNK_SIZE
         chunk_name = f"{x_con}_{y_con}"
-        if chunk_name in self.chunks.keys():
-            return self.chunks[chunk_name]
+        if chunk_name in World.chunks.keys():
+            return World.chunks[chunk_name]
         else:
             return None
 
 
-    def gen_chunk(self, x:int, y:int):
+    @staticmethod
+    def gen_chunk(x:int, y:int):
         """Generates a new `Chunk` in the specified location."""
         x_con = x // CHUNK_SIZE * CHUNK_SIZE
         y_con = y // CHUNK_SIZE * CHUNK_SIZE
         new_chunk_name = f"{x_con}_{y_con}"
         new_chunk = Chunk(x_con, y_con)
-        self.chunks[new_chunk_name] = new_chunk
+        World.chunks[new_chunk_name] = new_chunk
         return new_chunk
 
 
-    def get_chunk(self, x:int, y:int):
+    @staticmethod
+    def get_chunk(x:int, y:int):
         """
         Returns the `Chunk` if it exists.\n
         Otherwise it generates a new one.
         """
-        chunk = self.find_chunk(x, y)
+        chunk = World.find_chunk(x, y)
         if chunk is None:
-            chunk = self.gen_chunk(x, y)
+            chunk = World.gen_chunk(x, y)
         return chunk
 
 
-    def _load_tile_json(self, tile:dict[str, Any]):
+    @staticmethod
+    def _load_tile_json(tile:dict[str, Any]):
         """Converts the tile json to dict format."""
         x = int(tile["x"])
         y = int(tile["y"])
@@ -738,19 +751,21 @@ class World:
         return {tile_name: tile_obj}
 
 
-    def save_all_chunks_to_files(self, save_folder_path:str, remove_chunks=False, show_progress_text:str|None=None):
+    @staticmethod
+    def save_all_chunks_to_files(save_folder_path:str|None=None, remove_chunks=False, show_progress_text:str|None=None):
         """
         Saves all chunks to the save file.\n
+        If `save_folder_path` is None, it will make one using the `Save_data`'s `save_name`.\n
         If `remove_chunks` is True, it also removes the chunks from the chunks list.\n
         If `show_progress_text` is not None, it writes out a progress percentage while saving.
         """
         if remove_chunks:
             if show_progress_text is not None:
                 print(f"{show_progress_text}COPYING...\r", end="", flush=True)
-            chunk_data = deepcopy(self.chunks)
-            self.chunks.clear()
+            chunk_data = deepcopy(World.chunks)
+            World.chunks.clear()
         else:
-            chunk_data = self.chunks
+            chunk_data = World.chunks
         if show_progress_text is not None:
             cl = len(chunk_data)
             print(show_progress_text + "              ", end="", flush=True)
@@ -763,11 +778,15 @@ class World:
                 chunk.save_to_file(save_folder_path)
 
 
-    def find_chunk_in_folder(self, x:int, y:int, save_folder_path:str):
+    @staticmethod
+    def find_chunk_in_folder(x:int, y:int, save_folder_path:str|None=None):
         """
         Returns the `Chunk` if it exists in the chunks folder.\n
+        If `save_folder_path` is None, it will make one using the `Save_data`'s `save_name`.\n
         Otherwise it returns `None`.
         """
+        if save_folder_path is None:
+            save_folder_path = join(SAVES_FOLDER_PATH, Save_data.save_name)
         base_x = x // CHUNK_SIZE * CHUNK_SIZE
         base_y = y // CHUNK_SIZE * CHUNK_SIZE
         chunk_file_name = f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}{base_x}{CHUNK_FILE_NAME_SEP}{base_y}"
@@ -778,43 +797,49 @@ class World:
         else:
             tiles = {}
             for tile in chunk_data["tiles"]:
-                tiles.update(self._load_tile_json(tile))
+                tiles.update(World._load_tile_json(tile))
             chunk = Chunk(base_x, base_y, tiles)
             return chunk
 
 
-    def load_chunk_from_folder(self, x:int, y:int, save_folder_path:str, append_mode=True):
+    @staticmethod
+    def load_chunk_from_folder(x:int, y:int, save_folder_path:str|None=None, append_mode=True):
         """
         Returns the `Chunk` if it exists in the chunks folder, and adds it to the `chunks` dict.\n
         Otherwise it generates a new `Chunk` object.\n
+        If `save_folder_path` is None, it will make one using the `Save_data`'s `save_name`.\n
         If `append_mode` is True and the chunk already exists in the `chunks` dict, it appends the tiles from the loaded chunk to the one it the dict.
         """
-        chunk = self.find_chunk_in_folder(x, y, save_folder_path)
+        chunk = World.find_chunk_in_folder(x, y, save_folder_path)
         if chunk is not None:
             base_x = x // CHUNK_SIZE * CHUNK_SIZE
             base_y = y // CHUNK_SIZE * CHUNK_SIZE
             chunk_name = f"{base_x}_{base_y}"
             # append mode
             appended = False
-            existing_chunk = self.find_chunk(x, y)
+            existing_chunk = World.find_chunk(x, y)
             if append_mode and existing_chunk is not None:
                 appended = True
                 chunk.tiles.update(existing_chunk.tiles)
                 existing_chunk.tiles = chunk.tiles
                 chunk = existing_chunk
             else:
-                self.chunks[chunk_name] = chunk
+                World.chunks[chunk_name] = chunk
             logger(f"{'Appended' if appended else 'Loaded'} chunk from file", f"{chunk_name}.{SAVE_EXT}", Log_type.DEBUG)
         else:
-            chunk = self.gen_chunk(x, y)
+            chunk = World.gen_chunk(x, y)
         return chunk
     
 
-    def load_all_chunks_from_folder(self, save_folder_path:str, show_progress_text:str|None=None):
+    @staticmethod
+    def load_all_chunks_from_folder(save_folder_path:str|None=None, show_progress_text:str|None=None):
         """
         Loads all chunks from a save file.\n
+        If `save_folder_path` is None, it will make one using the `Save_data`'s `save_name`.\n
         If `show_progress_text` is not None, it writes out a progress percentage while loading.
         """
+        if save_folder_path is None:
+            save_folder_path = join(SAVES_FOLDER_PATH, Save_data.save_name)
         chunks_folder = join(save_folder_path, SAVE_FOLDER_NAME_CHUNKS)
         recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder_path)
         # get existing files
@@ -831,60 +856,66 @@ class World:
             ecl = len(existing_chunks)
             print(show_progress_text, end="", flush=True)
             for x, chunk in enumerate(existing_chunks):
-                self.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
+                World.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
                 print(f"\r{show_progress_text}{round((x + 1) / ecl * 100, 1)}%", end="", flush=True)
             print(f"\r{show_progress_text}DONE!             ")
         else:
             for chunk in existing_chunks:
-                self.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
+                World.load_chunk_from_folder(chunk[0], chunk[1], save_folder_path)
 
 
-    def find_tile(self, x:int, y:int):
+    @staticmethod
+    def find_tile(x:int, y:int):
         """
         Returns the `Tile` if it, and the `Chunk` it's suposed to be in, exists.\n
         Otherwise it returns `None`.
         """
-        chunk = self.find_chunk(x, y)
+        chunk = World.find_chunk(x, y)
         if chunk is not None:
             return chunk.find_tile(x, y)
         else:
             return None
 
 
-    def gen_tile(self, absolute_x:int, absolute_y:int):
+    @staticmethod
+    def gen_tile(absolute_x:int, absolute_y:int):
         """
         Generates a new `Tile`.\n
         Generates a new `Chunk` if that also doesn't exist.
         """
-        chunk = self.get_chunk(absolute_x, absolute_y)
+        chunk = World.get_chunk(absolute_x, absolute_y)
         new_tile = chunk.gen_tile(absolute_x, absolute_y)
         return new_tile
 
 
-    def get_tile(self, absolute_x:int, absolute_y:int, save_folder_path:str|None=None):
+    @staticmethod
+    def get_tile(absolute_x:int, absolute_y:int, search_folder=True, save_folder_path:str|None=None):
         """
         Returns the `Tile` if it exists in the `chunks` list or in the chunks folder.\n
-        Otherwise it generates a new `Tile` and a new `Chunk`, if that also doesn't exist.
+        Otherwise it generates a new `Tile` and a new `Chunk`, if that also doesn't exist.\n
+        If `search_folder` is True, it will try to load the chunks from the save folder first (calls `load_chunk_from_folder`).\n
+        If `save_folder_path` is None, it will make one using the `Save_data`'s `save_name`.
         """
-        chunk = self.find_chunk(absolute_x, absolute_y)
+        chunk = World.find_chunk(absolute_x, absolute_y)
         if chunk is None:
-            if save_folder_path is not None:
-                chunk = self.load_chunk_from_folder(absolute_x, absolute_y, save_folder_path)
+            if search_folder:
+                chunk = World.load_chunk_from_folder(absolute_x, absolute_y, save_folder_path)
                 tile = chunk.get_tile(absolute_x, absolute_y)
             else:
-                tile = self.gen_tile(absolute_x, absolute_y)
+                tile = World.gen_tile(absolute_x, absolute_y)
         else:
             tile = chunk.get_tile(absolute_x, absolute_y)
         return tile
     
     
-    def fill_all_chunks(self, show_progress_text:str|None=None):
+    @staticmethod
+    def fill_all_chunks(show_progress_text:str|None=None):
         """
         Generates ALL not yet generated tiles in ALL chunks.\n
         If `show_progress_text` is not None, it writes out a progress percentage while generating.
         """
         if show_progress_text is not None:
-            chunks = self.chunks.values()
+            chunks = World.chunks.values()
             cl = len(chunks)
             print(show_progress_text, end="", flush=True)
             for x, chunk in enumerate(chunks):
@@ -892,11 +923,12 @@ class World:
                 print(f"\r{show_progress_text}{round((x + 1) / cl * 100, 1)}%", end="", flush=True)
             print(f"\r{show_progress_text}DONE!             ")
         else:
-            for chunk in self.chunks.values():
+            for chunk in World.chunks.values():
                 chunk.fill_chunk()
 
 
-    def _get_corners(self):
+    @staticmethod
+    def _get_corners():
         """
         Returns the four corners of the world.\n
         (-x, -y, +x, +y)
@@ -905,7 +937,7 @@ class World:
         min_y = 0
         max_x = 0
         max_y = 0
-        for chunk in self.chunks.values():
+        for chunk in World.chunks.values():
             if chunk.base_x < min_x:
                 min_x = chunk.base_x
             if chunk.base_y < min_y:
@@ -919,16 +951,17 @@ class World:
         return (min_x, min_y, max_x, max_y)
     
     
-    def make_rectangle(self, save_folder_path:str|None=None, append_mode=True):
+    @staticmethod
+    def make_rectangle(search_folder=False, save_folder_path:str|None=None, append_mode=True):
         """
         Generates chunks in a way that makes the world rectangle shaped.\n
-        If `save_folder_path` is not None, it will try to load the chunks from the save folder first (calls `load_chunk_from_folder`).
+        If `search_folder` is True, it will try to load the chunks from the save folder first (calls `load_chunk_from_folder`).\n
+        If `save_folder_path` is None, it will make one using the `Save_data`'s `save_name`.
         """
-        corners = self._get_corners()
-        search_folder = save_folder_path is not None
+        corners = World._get_corners()
         for x in range(corners[0], corners[2] + 1, CHUNK_SIZE):
             for y in range(corners[1], corners[3] + 1, CHUNK_SIZE):
                 if search_folder:
-                    self.load_chunk_from_folder(x, y, save_folder_path, append_mode)
+                    World.load_chunk_from_folder(x, y, save_folder_path, append_mode)
                 else:
-                    self.get_chunk(x, y)
+                    World.get_chunk(x, y)

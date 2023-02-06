@@ -16,11 +16,17 @@ from entities import Player
 
 
 class Globals:
+    in_game_loop:bool
+    in_fight:bool
+    exiting:bool
+    saving:bool
+
+
     def __init__(self, in_game_loop:bool, in_fight:bool, exiting:bool, saving:bool):
-        self.in_game_loop = bool(in_game_loop)
-        self.in_fight = bool(in_fight)
-        self.exiting = bool(exiting)
-        self.saving = bool(saving)
+        Globals.in_game_loop = bool(in_game_loop)
+        Globals.in_fight = bool(in_fight)
+        Globals.exiting = bool(exiting)
+        Globals.saving = bool(saving)
 
 
 class Key:
@@ -129,50 +135,61 @@ class Key:
 
 class Settings:
     DOUBLE_KEYS = DOUBLE_KEYS
+    auto_save:bool
+    logging_level:int
+    keybinds:dict[str, Key]
+    ask_package_check_fail:bool
+    ask_delete_save:bool
+    ask_regenerate_save:bool
+    def_backup_action:int
+    keybind_mapping:tuple[list[list[list[bytes]]], list[bytes]]
 
 
     def __init__(self, auto_save:bool|None=None, logging_level:int|None=None, keybinds:dict[str, list[list[bytes]]]|None=None,
                 ask_package_check_fail:bool|None=None, ask_delete_save:bool|None=None, ask_regenerate_save:bool|None=None, def_backup_action:int|None=None):
         if auto_save is None:
-            auto_save = self.get_auto_save()
+            auto_save = Settings.get_auto_save()
         if logging_level is None:
-            logging_level = self.get_logging_level()
+            logging_level = Settings.get_logging_level()
         if keybinds is None:
-            keybind_obj = self.get_keybins()
+            keybind_obj = Settings.get_keybins()
         else:
             keybind_obj = {}
             for key in keybinds:
                 keybind_obj[key] = Key(keybinds[key])
         if ask_package_check_fail is None:
-            ask_package_check_fail = self.get_ask_package_check_fail()
+            ask_package_check_fail = Settings.get_ask_package_check_fail()
         if ask_delete_save is None:
-            ask_delete_save = self.get_ask_delete_save()
+            ask_delete_save = Settings.get_ask_delete_save()
         if ask_regenerate_save is None:
-            ask_regenerate_save = self.get_ask_regenerate_save()
+            ask_regenerate_save = Settings.get_ask_regenerate_save()
         if def_backup_action is None:
-            def_backup_action = self.get_def_backup_action()
-        self.auto_save = bool(auto_save)
-        self.logging = (int(logging_level) != -1)
-        self.logging_level = int(logging_level)
-        self.keybinds = dict[str, Key](keybind_obj)
-        self.ask_package_check_fail = bool(ask_package_check_fail)
-        self.ask_delete_save = bool(ask_delete_save)
-        self.ask_regenerate_save = bool(ask_regenerate_save)
-        self.def_backup_action = int(def_backup_action)
-        self.update_keybinds()
+            def_backup_action = Settings.get_def_backup_action()
+        Settings.auto_save = bool(auto_save)
+        Settings.logging = (int(logging_level) != -1)
+        Settings.logging_level = int(logging_level)
+        Settings.keybinds = dict[str, Key](keybind_obj)
+        Settings.ask_package_check_fail = bool(ask_package_check_fail)
+        Settings.ask_delete_save = bool(ask_delete_save)
+        Settings.ask_regenerate_save = bool(ask_regenerate_save)
+        Settings.def_backup_action = int(def_backup_action)
+        Settings.update_keybinds()
     
 
-    def get_auto_save(self):
+    @staticmethod
+    def get_auto_save():
         """Returns the value of the `auto_save` from the setting file."""
         return bool(ts.settings_manager("auto_save"))
     
 
-    def get_logging_level(self):
+    @staticmethod
+    def get_logging_level():
         """Returns the value of the `logging_level` from the setting file."""
         return int(ts.settings_manager("logging_level"))
     
 
-    def get_keybins(self):
+    @staticmethod
+    def get_keybins():
         """Returns the value of the `keybinds` from the setting file."""
         keybinds:dict[str, list[list[bytes]]] = ts.settings_manager("keybinds")
         keybind_obj:dict[str, Key] = {}
@@ -181,186 +198,193 @@ class Settings:
         return keybind_obj
     
     
-    def get_ask_package_check_fail(self):
+    @staticmethod
+    def get_ask_package_check_fail():
         """Returns the value of the `ask_package_check_fail` from the setting file."""
         return bool(ts.settings_manager("ask_package_check_fail"))
     
     
-    def get_ask_delete_save(self):
+    @staticmethod
+    def get_ask_delete_save():
         """Returns the value of the `ask_delete_save` from the setting file."""
         return bool(ts.settings_manager("ask_delete_save"))
     
     
-    def get_ask_regenerate_save(self):
+    @staticmethod
+    def get_ask_regenerate_save():
         """Returns the value of the `ask_regenerate_save` from the setting file."""
         return bool(ts.settings_manager("ask_regenerate_save"))
     
     
-    def get_def_backup_action(self):
+    @staticmethod
+    def get_def_backup_action():
         """Returns the value of the `def_backup_action` from the setting file."""
         return int(ts.settings_manager("def_backup_action"))
 
 
-    def update_logging_level(self, logging_level:int):
+    @staticmethod
+    def update_logging_level(logging_level:int):
         """Updates the value of the `logging_level` in the program and in the setting file."""
-        self.logging = (int(logging_level) != -1)
-        self.logging_level = int(logging_level)
-        ts.settings_manager("logging_level", self.logging_level)
-        ts.change_logging_level(self.logging_level)
+        Settings.logging = (int(logging_level) != -1)
+        Settings.logging_level = int(logging_level)
+        ts.settings_manager("logging_level", Settings.logging_level)
+        ts.change_logging_level(Settings.logging_level)
 
 
-    def update_auto_save(self, auto_save:bool):
+    @staticmethod
+    def update_auto_save(auto_save:bool):
         """Updates the value of the `auto_save` in the program and in the setting file."""
-        self.auto_save = bool(auto_save)
-        ts.settings_manager("auto_save", self.auto_save)
+        Settings.auto_save = bool(auto_save)
+        ts.settings_manager("auto_save", Settings.auto_save)
 
 
-    def _encode_keybinds(self):
+    @staticmethod
+    def _encode_keybinds():
         """Returns a json formated deepcopy of the `keybinds`."""
-        return {"esc": deepcopy(self.keybinds["esc"].value),
-        "up": deepcopy(self.keybinds["up"].value),
-        "down": deepcopy(self.keybinds["down"].value),
-        "left": deepcopy(self.keybinds["left"].value),
-        "right": deepcopy(self.keybinds["right"].value),
-        "enter": deepcopy(self.keybinds["enter"].value)}
+        return {"esc": deepcopy(Settings.keybinds["esc"].value),
+        "up": deepcopy(Settings.keybinds["up"].value),
+        "down": deepcopy(Settings.keybinds["down"].value),
+        "left": deepcopy(Settings.keybinds["left"].value),
+        "right": deepcopy(Settings.keybinds["right"].value),
+        "enter": deepcopy(Settings.keybinds["enter"].value)}
 
 
-    def update_keybinds(self):
+    @staticmethod
+    def update_keybinds():
         """Updates the value of the `keybind_mapping` in the program and in the setting file, with the `keybinds`."""
         # ([keybinds["esc"], keybinds["up"], keybinds["down"], keybinds["left"], keybinds["right"], keybinds["enter"]], [b"\xe0", b"\x00"])
         # ([[[b"\x1b"]],     [[], [b"H"]],   [[], [b"P"]],     [[], [b"K"]],     [[], [b"M"]],      [[b"\r"]]],         [b"\xe0", b"\x00"])
-        self.keybind_mapping:tuple[list[list[list[bytes]]], list[bytes]] = ([
-            self.keybinds["esc"].value,
-            self.keybinds["up"].value,
-            self.keybinds["down"].value,
-            self.keybinds["left"].value,
-            self.keybinds["right"].value,
-            self.keybinds["enter"].value], self.DOUBLE_KEYS)
-        ts.settings_manager("keybinds", self._encode_keybinds())
+        Settings.keybind_mapping = ([
+            Settings.keybinds["esc"].value,
+            Settings.keybinds["up"].value,
+            Settings.keybinds["down"].value,
+            Settings.keybinds["left"].value,
+            Settings.keybinds["right"].value,
+            Settings.keybinds["enter"].value], Settings.DOUBLE_KEYS)
+        ts.settings_manager("keybinds", Settings._encode_keybinds())
 
 
-    def check_keybind_conflicts(self):
-        for key in self.keybinds:
-            self.keybinds[key].conflict = False
-        for key1 in self.keybinds:
-            for key2 in self.keybinds:
+    @staticmethod
+    def check_keybind_conflicts():
+        for key in Settings.keybinds:
+            Settings.keybinds[key].conflict = False
+        for key1 in Settings.keybinds:
+            for key2 in Settings.keybinds:
                 if key1 != key2:
-                    if self.keybinds[key1].value == self.keybinds[key2].value:
-                        self.keybinds[key1].conflict = True
-                        self.keybinds[key2].conflict = True
+                    if Settings.keybinds[key1].value == Settings.keybinds[key2].value:
+                        Settings.keybinds[key1].conflict = True
+                        Settings.keybinds[key2].conflict = True
 
 
-    def update_ask_package_check_fail(self, ask_package_check_fail:bool):
+    @staticmethod
+    def update_ask_package_check_fail(ask_package_check_fail:bool):
         """Updates the value of `ask_package_check_fail` in the program and in the setting file."""
-        self.ask_package_check_fail = bool(ask_package_check_fail)
-        ts.settings_manager("ask_package_check_fail", self.ask_package_check_fail)
+        Settings.ask_package_check_fail = bool(ask_package_check_fail)
+        ts.settings_manager("ask_package_check_fail", Settings.ask_package_check_fail)
 
 
-    def update_ask_delete_save(self, ask_delete_save:bool):
+    @staticmethod
+    def update_ask_delete_save(ask_delete_save:bool):
         """Updates the value of `ask_delete_save` in the program and in the setting file."""
-        self.ask_delete_save = bool(ask_delete_save)
-        ts.settings_manager("ask_delete_save", self.ask_delete_save)
+        Settings.ask_delete_save = bool(ask_delete_save)
+        ts.settings_manager("ask_delete_save", Settings.ask_delete_save)
 
 
-    def update_ask_regenerate_save(self, ask_regenerate_save:bool):
+    @staticmethod
+    def update_ask_regenerate_save(ask_regenerate_save:bool):
         """Updates the value of `ask_regenerate_save` in the program and in the setting file."""
-        self.ask_regenerate_save = bool(ask_regenerate_save)
-        ts.settings_manager("ask_regenerate_save", self.ask_regenerate_save)
+        Settings.ask_regenerate_save = bool(ask_regenerate_save)
+        ts.settings_manager("ask_regenerate_save", Settings.ask_regenerate_save)
 
 
-    def update_def_backup_action(self, def_backup_action:int):
+    @staticmethod
+    def update_def_backup_action(def_backup_action:int):
         """Updates the value of `def_backup_action` in the program and in the setting file."""
-        self.def_backup_action = int(def_backup_action)
-        ts.settings_manager("def_backup_action", self.def_backup_action)
+        Settings.def_backup_action = int(def_backup_action)
+        ts.settings_manager("def_backup_action", Settings.def_backup_action)
 
 
 class Save_data:
+    save_name:str
+    display_save_name:str
+    last_access:list[int]
+    player:Player
+    main_seed:ts.np.random.RandomState
+    world_seed:ts.np.random.RandomState
+    tile_type_noise_seeds:dict[str, int]
+
     def __init__(self, save_name:str, display_save_name:str|None=None, last_access:list[int]|None=None, player:Player|None=None,
-                 main_seed:ts.np.random.RandomState|None=None, world_seed:ts.np.random.RandomState|None=None, tile_type_noise_seeds:dict[str, int]|None=None,
-                 world:Any|None=None):
-        self.save_name = str(save_name)
+                 main_seed:ts.np.random.RandomState|None=None, world_seed:ts.np.random.RandomState|None=None, tile_type_noise_seeds:dict[str, int]|None=None):
+        Save_data.save_name = str(save_name)
         if display_save_name is None:
-            display_save_name = self.save_name
-        self.display_save_name = str(display_save_name)
+            display_save_name = Save_data.save_name
+        Save_data.display_save_name = str(display_save_name)
         if last_access is None:
             now = ts.dtime.now()
             last_access = [now.year, now.month, now.day, now.hour, now.minute, now.second]
-        self.last_access = list[int](last_access)
+        Save_data.last_access = list[int](last_access)
         if player is None:
             player = Player()
-        self.player = player
+        Save_data.player = player
         if main_seed is None:
             main_seed = ts.np.random.RandomState()
-        self.main_seed = main_seed
+        Save_data.main_seed = main_seed
         if world_seed is None:
-            world_seed = ts.make_random_seed(self.main_seed)
-        self.world_seed = world_seed
+            world_seed = ts.make_random_seed(Save_data.main_seed)
+        Save_data.world_seed = world_seed
         if tile_type_noise_seeds is None:
             tile_type_noise_seeds = ts.recalculate_tile_type_noise_seeds(world_seed)
-        self.tile_type_noise_seeds = tile_type_noise_seeds
-        self._update_seed_values()
-
-        from chunk_manager import World
-        if world is not None:
-            new_world:World = world
-        else:
-            new_world = World()
-        self.world = new_world
+        Save_data.tile_type_noise_seeds = tile_type_noise_seeds
+        Save_data._update_seed_values()
     
 
-    def _update_seed_values(self):
-        ts.main_seed = self.main_seed
-        ts.world_seed = self.world_seed
-        ts.tile_type_noise_seeds = self.tile_type_noise_seeds
-        ts.recalculate_noise_generators(self.tile_type_noise_seeds)
+    @staticmethod
+    def _update_seed_values():
+        ts.main_seed = Save_data.main_seed
+        ts.world_seed = Save_data.world_seed
+        ts.tile_type_noise_seeds = Save_data.tile_type_noise_seeds
+        ts.recalculate_noise_generators(Save_data.tile_type_noise_seeds)
     
 
-    def load_all_chunks(self, show_progress_text:str|None=None):
-        """
-        Loads all chunks into the `Save_data` from a save file.\n
-        If `show_progress_text` is not None, it writes out a progress percentage while loading.
-        """
-        # read from file (old)
-        save_folder_path = join(SAVES_FOLDER_PATH, self.save_name)
-        self.world.load_all_chunks_from_folder(save_folder_path, show_progress_text)
-    
-
-    def display_data_to_json(self):
+    @staticmethod
+    def display_data_to_json():
         """Converts the data for the display part of the data file to a json format."""
         now = ts.dtime.now()
         display_data_json:dict[str, Any] = {
             "save_version": SAVE_VERSION,
-            "display_name": self.display_save_name,
+            "display_name": Save_data.display_save_name,
             "last_access":  [now.year, now.month, now.day, now.hour, now.minute, now.second],
-            "player_name":  self.player.name
+            "player_name":  Save_data.player.name
         }
         return display_data_json
 
 
-    def seeds_to_json(self):
+    @staticmethod
+    def seeds_to_json():
         """Converts the seeds data to json format."""
         seeds_json:dict[str, Any] = {
-            "main_seed":                ts.random_state_to_json(self.main_seed),
-            "world_seed":               ts.random_state_to_json(self.world_seed),
-            "tile_type_noise_seeds":    self.tile_type_noise_seeds
+            "main_seed":                ts.random_state_to_json(Save_data.main_seed),
+            "world_seed":               ts.random_state_to_json(Save_data.world_seed),
+            "tile_type_noise_seeds":    Save_data.tile_type_noise_seeds
         }
         return seeds_json
 
 
-    def main_data_to_json(self):
+    @staticmethod
+    def main_data_to_json():
         """Converts the data for the main part of the data file to a json format."""
         now = ts.dtime.now()
         save_data_json:dict[str, Any] = {
             "save_version": SAVE_VERSION,
-            "display_name": self.display_save_name,
+            "display_name": Save_data.display_save_name,
             "last_access":  [now.year, now.month, now.day, now.hour, now.minute, now.second],
-            "player":       self.player.to_json(),
-            "seeds":        self.seeds_to_json()
+            "player":       Save_data.player.to_json(),
+            "seeds":        Save_data.seeds_to_json()
         }
         return save_data_json
 
 
-def is_key(key:Key) -> bool:
+def is_key(key:Key):
     """
     Waits for a specific key.
     """
