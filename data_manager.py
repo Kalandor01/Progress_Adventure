@@ -1,4 +1,5 @@
 from copy import deepcopy
+from enum import Enum
 from typing import Any
 from os.path import join, isfile
 from os import listdir
@@ -11,7 +12,7 @@ from constants import                     \
     CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, \
     DOUBLE_KEYS, SAVE_VERSION
 import tools as ts
-
+from save_file_manager import Keybinds, Key_action, Keys, Get_key_modes
 from entities import Player
 
 
@@ -29,15 +30,46 @@ class Globals:
         Globals.saving = bool(saving)
 
 
-class Key:
-    def __init__(self, value:list[list[bytes]]):
-        self.set_value(value)
+class Action_types(Enum):
+    ESCAPE  = "esc",
+    UP      = "up",
+    DOWN    = "down",
+    LEFT    = "left",
+    RIGHT   = "right",
+    ENTER   = "enter"
+
+action_type_ignore_mapping:dict[Action_types, list[Get_key_modes]|tuple[list[Get_key_modes], list[Get_key_modes]]] = {
+    Action_types.ESCAPE:    [Get_key_modes.IGNORE_ESCAPE],
+    Action_types.UP:        [Get_key_modes.IGNORE_VERTICAL],
+    Action_types.DOWN:      [Get_key_modes.IGNORE_VERTICAL],
+    Action_types.LEFT:      [Get_key_modes.IGNORE_HORIZONTAL],
+    Action_types.RIGHT:     [Get_key_modes.IGNORE_HORIZONTAL],
+    Action_types.ENTER:     [Get_key_modes.IGNORE_ENTER]
+}
+
+action_type_response_mapping:dict[Action_types, Keys] = {
+    Action_types.ESCAPE:    Keys.ESCAPE,
+    Action_types.UP:        Keys.UP,
+    Action_types.DOWN:      Keys.DOWN,
+    Action_types.LEFT:      Keys.LEFT,
+    Action_types.RIGHT:     Keys.RIGHT,
+    Action_types.ENTER:     Keys.ENTER
+}
+
+
+class Action_key(Key_action):
+    def __init__(self, action_type:Action_types, normal_keys:list[bytes]|None=None, arrow_keys:list[bytes]|None=None):
+        self.action_type = action_type
+        response = action_type_response_mapping[self.action_type]
+        ignore_modes = action_type_ignore_mapping[self.action_type]
+        super().__init__(response, normal_keys, arrow_keys, ignore_modes)
+        self.set_keys(self.normal_keys, self.arrow_keys)
         self.conflict = False
 
 
     def set_name(self):
-        if len(self.value[0]) > 0:
-            match self.value[0][0]:
+        if len(self.normal_keys) > 0:
+            match self.normal_keys[0]:
                 case b"\r":
                     self.name = "enter"
                 case b"\x1b":
@@ -81,9 +113,9 @@ class Key:
                 case b"\x8a":
                     self.name = "Ő"
                 case _:
-                    self.name = self.value[0][0].decode(ENCODING)
+                    self.name = self.normal_keys[0].decode(ENCODING)
         else:
-            match self.value[1][0]:
+            match self.arrow_keys[0]:
                 case Double_Keys.ARROW_UP.value:
                     self.name = "up arrow"
                 case Double_Keys.ARROW_DOWN.value:
@@ -105,44 +137,49 @@ class Key:
                 case Double_Keys.DELETE.value:
                     self.name = "delete"
                 case _:
-                    self.name = self.value[1][0].decode(ENCODING)
+                    self.name = self.arrow_keys[0].decode(ENCODING)
 
 
-    def set_value(self, key_value:list[list[bytes]]):
+    def set_keys(self, normal_keys:list[bytes], arrow_keys:list[bytes]):
         try:
-            if len(key_value[0]) > 0:
-                key_value[0][0].decode(ENCODING)
-            elif len(key_value) > 1 and len(key_value) > 0:
-                key_value[1][0].decode(ENCODING)
+            if len(normal_keys) > 0:
+                normal_keys[0].decode(ENCODING)
+            elif len(arrow_keys) > 0:
+                arrow_keys[0].decode(ENCODING)
             else:
                 raise KeyError
         except UnicodeDecodeError:
             ts.logger("Unknown key", "cannot decode key", ts.Log_type.ERROR)
             raise
         else:
-            self.value = key_value
+            self.normal_keys = normal_keys
+            self.arrow_keys = arrow_keys
             self.set_name()
 
 
-    def change(self, key_value:list[list[bytes]]):
-        try: self.set_value(key_value)
+    def change(self, normal_keys:list[bytes], arrow_keys:list[bytes]):
+        try: self.set_keys(normal_keys, arrow_keys)
         except UnicodeDecodeError: pass
 
 
     def __str__(self):
-        return f"{self.name}: {self.value}"
+        return f"{self.name}: {self.normal_keys}, {self.arrow_keys}"
+
+
+class Action_keybinds(Keybinds):
+    def __init__(self, actions: list[Action_key]):
+        super().__init__(actions, DOUBLE_KEYS)
 
 
 class Settings:
-    DOUBLE_KEYS = DOUBLE_KEYS
     auto_save:bool
     logging_level:int
-    keybinds:dict[str, Key]
+    keybinds:Action_keybinds
     ask_package_check_fail:bool
     ask_delete_save:bool
     ask_regenerate_save:bool
     def_backup_action:int
-    keybind_mapping:tuple[list[list[list[bytes]]], list[bytes]]
+    keybinds_obj:tuple[list[list[list[bytes]]], list[bytes]]
 
 
     def __init__(self, auto_save:bool|None=None, logging_level:int|None=None, keybinds:dict[str, list[list[bytes]]]|None=None,
@@ -154,9 +191,7 @@ class Settings:
         if keybinds is None:
             keybind_obj = Settings.get_keybins()
         else:
-            keybind_obj = {}
-            for key in keybinds:
-                keybind_obj[key] = Key(keybinds[key])
+            keybind_obj = Settings.get_keybinds_from_list()
         if ask_package_check_fail is None:
             ask_package_check_fail = Settings.get_ask_package_check_fail()
         if ask_delete_save is None:
@@ -168,12 +203,12 @@ class Settings:
         Settings.auto_save = bool(auto_save)
         Settings.logging = (int(logging_level) != -1)
         Settings.logging_level = int(logging_level)
-        Settings.keybinds = dict[str, Key](keybind_obj)
+        Settings.keybinds = dict[str, Action_key](keybind_obj)
         Settings.ask_package_check_fail = bool(ask_package_check_fail)
         Settings.ask_delete_save = bool(ask_delete_save)
         Settings.ask_regenerate_save = bool(ask_regenerate_save)
         Settings.def_backup_action = int(def_backup_action)
-        Settings.update_keybinds()
+        Settings.update_keybinds_object()
     
 
     @staticmethod
@@ -192,9 +227,9 @@ class Settings:
     def get_keybins():
         """Returns the value of the `keybinds` from the setting file."""
         keybinds:dict[str, list[list[bytes]]] = ts.settings_manager("keybinds")
-        keybind_obj:dict[str, Key] = {}
+        keybind_obj:dict[str, Action_key] = {}
         for key in keybinds:
-            keybind_obj[key] = Key(keybinds[key])
+            keybind_obj[key] = Action_key(keybinds[key])
         return keybind_obj
     
     
@@ -250,17 +285,25 @@ class Settings:
 
 
     @staticmethod
-    def update_keybinds():
+    def update_keybinds_from_list():
+        """Updates the value of the `keybinds` in the program and in the setting file, with the `keybinds`."""
+
+
+    @staticmethod
+    def update_keybinds_object():
         """Updates the value of the `keybind_mapping` in the program and in the setting file, with the `keybinds`."""
         # ([keybinds["esc"], keybinds["up"], keybinds["down"], keybinds["left"], keybinds["right"], keybinds["enter"]], [b"\xe0", b"\x00"])
         # ([[[b"\x1b"]],     [[], [b"H"]],   [[], [b"P"]],     [[], [b"K"]],     [[], [b"M"]],      [[b"\r"]]],         [b"\xe0", b"\x00"])
-        Settings.keybind_mapping = ([
+        Keybinds([
+            Key_action(Keys.ESCAPE, [])
+        ], DOUBLE_KEYS)
+        Settings.keybinds_obj = ([
             Settings.keybinds["esc"].value,
             Settings.keybinds["up"].value,
             Settings.keybinds["down"].value,
             Settings.keybinds["left"].value,
             Settings.keybinds["right"].value,
-            Settings.keybinds["enter"].value], Settings.DOUBLE_KEYS)
+            Settings.keybinds["enter"].value], DOUBLE_KEYS)
         ts.settings_manager("keybinds", Settings._encode_keybinds())
 
 
@@ -384,7 +427,7 @@ class Save_data:
         return save_data_json
 
 
-def is_key(key:Key):
+def is_key(key:Action_key):
     """
     Waits for a specific key.
     """

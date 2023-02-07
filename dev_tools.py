@@ -227,7 +227,7 @@ class Self_Checks:
 
         # GLOBAL VARIABLES
         dm.Settings()
-        dm.Settings.update_keybinds()
+        dm.Settings.update_keybinds_object()
         dm.Globals(False, False, False, False)
         
         self._give_result(check_name, ts.Log_type.PASS)
@@ -236,10 +236,10 @@ class Self_Checks:
     def settings_checks(self, check_name:str):
         good = False
         dm.Settings()
-        dm.Settings.update_keybinds()
+        dm.Settings.update_keybinds_object()
         
         if dm.Settings.auto_save == True or dm.Settings.auto_save == False:
-            if dm.Settings.DOUBLE_KEYS == DOUBLE_KEYS and type(dm.Settings.keybinds) is dict:
+            if type(dm.Settings.keybinds) is dict:
                 self._give_result(check_name, ts.Log_type.PASS)
                 good = True
         if not good:
@@ -756,7 +756,7 @@ def gen_named_area(world:cm.World, corners:tuple[int, int, int, int], save_name:
 import save_manager as sm
 test_save_name_2 = "travel"
 test_save_name_mod_2 = "travel_2"
-sm.load_save(test_save_name_2, dm.Settings().keybind_mapping)
+sm.load_save(test_save_name_2, dm.Settings().keybinds_obj)
 World.load_all_chunks_from_folder(show_progress_text="Loading chunks...")
 ts.remove_save(test_save_name_mod_2, False)
 fill_world_simple((-100, -100, 99, 99), Save_data.save_name)
