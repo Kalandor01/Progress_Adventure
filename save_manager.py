@@ -4,7 +4,7 @@ from typing import Any, Literal
 
 import utils as u
 import tools as ts
-from data_manager import Save_data
+from data_manager import Save_data, Settings
 from chunk_manager import World
 import entities as es
 import inventory as iy
@@ -200,7 +200,7 @@ def correct_save_data(json_data:dict[str, Any], save_version:str, extra_data:dic
     return json_data
 
 
-def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list[bytes]], is_file=False, backup_choice=True, automatic_backup=True):
+def load_save(save_name:str, is_file=False, backup_choice=True, automatic_backup=True):
     """
     Loads a save file into the `Save_data` object.\n
     If `backup_choice` is False the user can't choose wether or not to backup the save before loading it, or not, depending on `automatic_backup`.
@@ -231,7 +231,7 @@ def load_save(save_name:str, keybind_mapping:tuple[list[list[list[bytes]]], list
         if backup_choice:
             is_older = ts.is_up_to_date(save_version, SAVE_VERSION)
             ts.logger("Trying to load save with an incorrect version", f"{save_version} -> {SAVE_VERSION}", Log_type.WARN)
-            ans = sfm.UI_list(["Yes", "No"], f"\"{save_name}\" is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to backup the save file before loading it?").display(keybind_mapping)
+            ans = sfm.UI_list(["Yes", "No"], f"\"{save_name}\" is {('an older version' if is_older else 'a newer version')} than what it should be! Do you want to backup the save file before loading it?").display(Settings.keybinds)
             if ans == 0:
                 ts.make_backup(save_name)
         # delete save file

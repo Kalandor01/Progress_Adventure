@@ -62,6 +62,7 @@ LOG_MS = False
 AUTO_SAVE_INTERVAL = 20
 AUTO_SAVE_DELAY = 5
 FILE_ENCODING_VERSION = 2
+SETTINGS_FILE_NAME = "settings"
 CHUNK_SIZE = 10
 CHUNK_FILE_NAME = "chunk"
 CHUNK_FILE_NAME_SEP = "_"
@@ -84,7 +85,7 @@ TILE_NOISE_RESOLUTION = 1000000000000
 #     SAVE_FILE_NAME_DATA, SAVE_FOLDER_NAME_CHUNKS,                           \
 #     SAVE_SEED, SETTINGS_SEED,                                               \
 #     STANDARD_CURSOR_ICONS, DELETE_CURSOR_ICONS,                             \
-#     ERROR_HANDLING, LOG_MS,                                                 \
+#     ERROR_HANDLING, LOG_MS, SETTINGS_FILE_NAME                              \
 #     AUTO_SAVE_INTERVAL, AUTO_SAVE_DELAY, FILE_ENCODING_VERSION, CHUNK_SIZE, \
 #     CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP,                                   \
 #     SAVE_VERSION, DOUBLE_KEYS, TILE_NOISE_RESOLUTION

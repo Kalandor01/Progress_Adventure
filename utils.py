@@ -1,6 +1,7 @@
 from datetime import datetime as dtime
 from enum import Enum, EnumType
 from msvcrt import getch, kbhit
+from typing import Any
 
 from constants import DOUBLE_KEYS
 
@@ -33,7 +34,31 @@ class Style(Enum):
     RESET_ALL = 0
 
 
-class Double_Keys(Enum):
+class Normal_keys(Enum):
+    ENTER       = b"\r"
+    ESCAPE      = b"\x1b"
+    SPACE       = b" "
+    LETTER_ö    = b"\x94"
+    LETTER_Ö    = b"\x99"
+    LETTER_ü    = b"\x81"
+    LETTER_Ü    = b"\x9a"
+    LETTER_ó    = b"\xa2"
+    # LETTER_Ó    = b"\xe0"
+    LETTER_ú    = b"\xa3"
+    LETTER_Ú    = b"\xe9"
+    LETTER_ű    = b"\xfb"
+    LETTER_Ű    = b"\xeb"
+    LETTER_á    = b"\xa0"
+    LETTER_Á    = b"\xb5"
+    LETTER_é    = b"\x82"
+    LETTER_É    = b"\x90"
+    LETTER_í    = b"\xa1"
+    LETTER_Í    = b"\xd6"
+    LETTER_ő    = b"\x8b"
+    LETTER_Ő    = b"\x8a"
+
+
+class Double_keys(Enum):
     ARROW_UP    = b"H"
     ARROW_DOWN  = b"P"
     ARROW_LEFT  = b"K"
@@ -44,7 +69,7 @@ class Double_Keys(Enum):
     # NUM_5       = None
     NUM_7       = b"G" # HOME
     NUM_9       = b"I" # PGUP
-    DELETE      = B"S"
+    DELETE      = b"S"
 
 
 def imput(ask="Num: ", type=int):

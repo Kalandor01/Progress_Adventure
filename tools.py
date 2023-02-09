@@ -24,9 +24,10 @@ from constants import                                                   \
     SAVES_FOLDER, SAVES_FOLDER_PATH, OLD_SAVE_NAME, SAVE_EXT,           \
     LOGGING, LOGGING_LEVEL, LOGS_FOLDER, LOGS_FOLDER_PATH, LOG_EXT,     \
     BACKUPS_FOLDER, BACKUPS_FOLDER_PATH, OLD_BACKUP_EXT, BACKUP_EXT,    \
-    SAVE_SEED, SETTINGS_SEED,                                           \
+    SAVE_SEED, SETTINGS_SEED, SETTINGS_FILE_NAME,                       \
     LOG_MS,                                                             \
     FILE_ENCODING_VERSION
+from keybinds import Action_keybinds, Action_key, keybinds_from_json, get_def_keybinds
 
 
 # random
@@ -291,25 +292,17 @@ def make_backup(save_name:str, is_temporary=False):
         return False
 
 
-def encode_keybinds(keybinds:dict[str, list[list[bytes]]]) -> dict[str, list[list[str]]]:
-    for x in keybinds:
-        if len(keybinds[x][0]) > 0:
-            keybinds[x][0][0] = keybinds[x][0][0].decode(ENCODING)
-        elif len(keybinds[x]) > 1 and len(keybinds[x][1]) > 0:
-            keybinds[x][1][0] = keybinds[x][1][0].decode(ENCODING)
-    return keybinds
+class Settings_keys(Enum):
+    AUTO_SAVE = "auto_save"
+    LOGGING_LEVEL = "logging_level"
+    KEYBINDS = "keybinds"
+    ASK_PACKAGE_CHECK_FAIL = "ask_package_check_fail"
+    ASK_DELETE_SAVE = "ask_delete_save"
+    ASK_REGENERATE_SAVE = "ask_regenerate_save"
+    DEF_BACKUP_ACTION = "def_backup_action"
 
 
-def decode_keybinds(keybinds:dict[str, list[list[str]]]) -> dict[str, list[list[bytes]]]:
-    for x in keybinds:
-        if len(keybinds[x][0]) > 0:
-            keybinds[x][0][0] = bytes(keybinds[x][0][0], ENCODING)
-        elif len(keybinds[x]) > 1 and len(keybinds[x][1]) > 0:
-            keybinds[x][1][0] = bytes(keybinds[x][1][0], ENCODING)
-    return keybinds
-
-
-def settings_manager(line_name:str, write_value:Any=None):
+def settings_manager(line_name:Settings_keys|None=None, write_value:Any=None):
     """
     STRUCTURE:\n
     - auto_save: bool
@@ -328,73 +321,76 @@ def settings_manager(line_name:str, write_value:Any=None):
     """
 
     # default values
-    settings_lines = ["auto_save", "logging_level", "keybinds", "ask_package_check_fail",
-                      "ask_delete_save", "ask_regenerate_save", "def_backup_action"]
     def_settings:dict[str, Any] = {
-        "auto_save": True,
-        "logging_level": 0,
-        "keybinds": {
-            "esc": [[b"\x1b"]],
-            "up": [[], [b"H"]],
-            "down": [[], [b"P"]],
-            "left": [[], [b"K"]],
-            "right": [[], [b"M"]],
-            "enter": [[b"\r"]]
-        },
-        "ask_package_check_fail": True,
-        "ask_delete_save": True,
-        "ask_regenerate_save": True,
-        "def_backup_action": -1
+        Settings_keys.AUTO_SAVE.value: True,
+        Settings_keys.LOGGING_LEVEL.value: 0,
+        Settings_keys.KEYBINDS.value: "[KEYBINDS OBJECT PLACEHOLDER]",
+        Settings_keys.ASK_PACKAGE_CHECK_FAIL.value: True,
+        Settings_keys.ASK_DELETE_SAVE.value: True,
+        Settings_keys.ASK_REGENERATE_SAVE.value: True,
+        Settings_keys.DEF_BACKUP_ACTION.value: -1
     }
 
     def recreate_settings():
+        """Recreates the settings file from the default values, and returns the result."""
         new_settings = deepcopy(def_settings)
-        new_settings["keybinds"] = encode_keybinds(new_settings["keybinds"])
-        encode_save_s(new_settings, os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
+        new_settings[Settings_keys.KEYBINDS.value] = get_def_keybinds().keybinds_to_json()
+        encode_save_s(new_settings, os.path.join(ROOT_FOLDER, SETTINGS_FILE_NAME), SETTINGS_SEED)
         # log
         logger("Recreated settings")
         return new_settings
 
 
     try:
-        settings = decode_save_s(os.path.join(ROOT_FOLDER, "settings"), 0, SETTINGS_SEED)
-        settings["keybinds"] = decode_keybinds(settings["keybinds"])
+        settings = decode_save_s(os.path.join(ROOT_FOLDER, SETTINGS_FILE_NAME), 0, SETTINGS_SEED)
     except (ValueError, TypeError):
         logger("Decode error", "settings", Log_type.ERROR)
         u.press_key("The settings file is corrupted, and will now be recreated!")
         settings = recreate_settings()
     except FileNotFoundError:
         settings = recreate_settings()
-    # return
-    if write_value is None:
-        if line_name is None:
-            return settings
-        else:
+    if line_name is not None:
+        # return
+        if write_value is None:
             try:
-                return settings[line_name]
+                if line_name == Settings_keys.KEYBINDS:
+                    settings[Settings_keys.KEYBINDS.value] = keybinds_from_json(settings[Settings_keys.KEYBINDS.value])
+                return settings[line_name.value]
             except KeyError:
-                if line_name in settings_lines:
-                    logger("Missing key in settings", line_name, Log_type.WARN)
-                    settings_manager(line_name, def_settings[line_name])
-                    return def_settings[line_name]
+                if line_name.name in Settings_keys._member_names_:
+                    logger("Missing key in settings", line_name.name, Log_type.WARN)
+                    if line_name == Settings_keys.KEYBINDS:
+                        def_settings[Settings_keys.KEYBINDS.value] = keybinds_from_json(def_settings[Settings_keys.KEYBINDS.value])
+                    settings_manager(line_name, def_settings[line_name.value])
+                    return def_settings[line_name.value]
                 else:
                     raise
-    # write
-    else:
-        if line_name in settings.keys():
-            if settings[line_name] != write_value:
-                logger("Changed settings", f"{line_name}: {settings[line_name]} -> {write_value}", Log_type.DEBUG)
-                settings[line_name] = write_value
-                settings["keybinds"] = encode_keybinds(settings["keybinds"])
-                encode_save_s(settings, os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
+        # write
         else:
-            if line_name in settings_lines:
-                logger("Recreating key in settings", line_name, Log_type.WARN)
-                settings[line_name] = def_settings[line_name]
-                settings["keybinds"] = encode_keybinds(settings["keybinds"])
-                encode_save_s(settings, os.path.join(ROOT_FOLDER, "settings"), SETTINGS_SEED)
+            if line_name.value in settings.keys():
+                if line_name == Settings_keys.KEYBINDS:
+                    settings[Settings_keys.KEYBINDS.value] = keybinds_from_json(settings[Settings_keys.KEYBINDS.value])
+                if settings[line_name.value] != write_value:
+                    logger("Changed settings", f"{line_name.name}: {settings[line_name.value]} -> {write_value}", Log_type.DEBUG)
+                    settings[line_name.value] = write_value
+                    if line_name == Settings_keys.KEYBINDS:
+                        keybind_value:Action_keybinds = settings[Settings_keys.KEYBINDS.value]
+                        settings[Settings_keys.KEYBINDS.value] = keybind_value.keybinds_to_json()
+                    encode_save_s(settings, os.path.join(ROOT_FOLDER, SETTINGS_FILE_NAME), SETTINGS_SEED)
             else:
-                raise KeyError(line_name)
+                if line_name.name in Settings_keys._member_names_:
+                    logger("Recreating key in settings", line_name.name, Log_type.WARN)
+                    if line_name == Settings_keys.KEYBINDS:
+                        def_settings[Settings_keys.KEYBINDS.value] = keybinds_from_json(def_settings[Settings_keys.KEYBINDS.value])
+                    settings[line_name.value] = def_settings[line_name.value]
+                    if line_name == Settings_keys.KEYBINDS:
+                        keybind_value:Action_keybinds = settings[Settings_keys.KEYBINDS.value]
+                        settings[Settings_keys.KEYBINDS.value] = keybind_value.keybinds_to_json()
+                    encode_save_s(settings, os.path.join(ROOT_FOLDER, SETTINGS_FILE_NAME), SETTINGS_SEED)
+                else:
+                    raise KeyError(line_name)
+    else:
+        return settings
 
 
 def random_state_to_json(random_state:np.random.RandomState|tuple):
@@ -462,7 +458,7 @@ def _package_response(bad_packages:list, py_good:bool):
     if len(bad_packages) == 0 and py_good:
         return True
     # BAD BUT WORKS???!
-    elif not bool(settings_manager("ask_package_check_fail")):
+    elif not bool(settings_manager(Settings_keys.ASK_PACKAGE_CHECK_FAIL)):
         return True
     else:
         ans = input("Do you want to continue?(Y/N): ")

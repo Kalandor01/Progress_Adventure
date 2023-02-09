@@ -8,6 +8,7 @@ from typing import Literal
 try:
     from utils import Color, stylized_text, getch, press_key
     import tools as ts
+    from keybinds import Action_types, Action_key, Action_keybinds
     from data_manager import Settings, Globals, Save_data, is_key
     from chunk_manager import World
     import entities as es
@@ -34,14 +35,12 @@ if __name__ == "__main__":
         if ts.check_package_versions():
             ts.logger("Preloading global variables")
             # import dev_tools as dt
-            # dt.decode_save_file(SETTINGS_SEED, "settings")
+            # dt.decode_save_file(SETTINGS_SEED, SETTINGS_FILE_NAME)
 
             # GLOBAL VARIABLES
             GOOD_PACKAGES = True
             Settings()
-            ts.change_logging_level(Settings.logging_level)
-            Settings.update_keybinds_object()
-            Globals(False, False, False, False)
+            Globals()
             
             col.init()
         else:
@@ -256,7 +255,7 @@ def quit_game():
     try:
         while True:
             if Globals.in_game_loop:
-                if is_key(Settings.keybinds["esc"]):
+                if is_key(Settings.keybinds.get_action_key(Action_types.ESCAPE)):
                     if not Globals.in_fight and not Globals.saving:
                         ts.logger("Beginning manual save", f"save name: {Save_data.save_name}")
                         Globals.exiting = True
@@ -326,7 +325,7 @@ def new_save():
 def load_save(save_name:str, is_file=False):
     backup_choice = Settings.def_backup_action == -1
     automatic_backup = bool(Settings.def_backup_action)
-    sm.load_save(save_name, Settings.keybinds_obj, is_file, backup_choice, automatic_backup)
+    sm.load_save(save_name, is_file, backup_choice, automatic_backup)
     game_loop()
 
 
@@ -334,7 +333,7 @@ def regenerate_save_file(save_name:str, is_file=False, make_backup=True):
     print(f'Regenerating "{save_name}":')
     ts.logger("Regenerating save file", f"save_name: {save_name}")
     print(f"\tLoading...", end="", flush=True)
-    sm.load_save(save_name, Settings.keybinds_obj, is_file, False, make_backup)
+    sm.load_save(save_name, is_file, False, make_backup)
     print(f"DONE!")
     if not is_file:
         ts.logger("Loading all chunks from file", f"save_name: {save_name}")
@@ -367,7 +366,7 @@ def main_menu():
         logging = ts.sfm_choice_s(logging_level_names, logging_value, "Logging: ")
         other_settings = [auto_save, logging, None, sfm.UI_list(["Done"])]
         # response
-        response = sfm.options_ui(other_settings, " Other options", keybinds=Settings.keybinds_obj)
+        response = sfm.options_ui(other_settings, " Other options", keybinds=Settings.keybinds)
         if response is not None:
             Settings.update_auto_save(bool(auto_save.value))
             Settings.update_logging_level(logging_values[logging.value])
@@ -387,48 +386,51 @@ def main_menu():
         def_backup_action = ts.sfm_choice_s(backup_action__names, backup_action_value, "On save folder backup prompt: ")
         ask_settings = [ask_package_check_fail, ask_delete_save, ask_regenerate_save, def_backup_action, None, sfm.UI_list(["Done"])]
         # response
-        response = sfm.options_ui(ask_settings, " Question popups", keybinds=Settings.keybinds_obj)
+        response = sfm.options_ui(ask_settings, " Question popups", keybinds=Settings.keybinds)
         if response is not None:
             Settings.update_ask_package_check_fail(bool(ask_package_check_fail.value))
             Settings.update_ask_delete_save(bool(ask_delete_save.value))
             Settings.update_ask_regenerate_save(bool(ask_regenerate_save.value))
             Settings.update_def_backup_action(backup_action_values[def_backup_action.value])
 
-    def set_keybind(name:str):
+    def set_keybind(keybind:Action_key):
         print("\n\nPress any key\n\n", end="")
+        normal_keys = []
+        arrow_keys = []
         key = getch()
         if key in DOUBLE_KEYS:
             key = getch()
-            key = [[], [key]]
+            arrow_keys = [key]
         else:
-            key = [[key], []]
-        Settings.keybinds[name].change(key)
+            normal_keys = [key]
+        keybind.change(normal_keys, arrow_keys)
         Settings.check_keybind_conflicts()
 
-    def get_keybind_name(key_name:str):
-        return stylized_text(Settings.keybinds[key_name].name, (Color.RED if Settings.keybinds[key_name].conflict else Color.RESET))
+    def get_keybind_name(keybinds:Action_keybinds, action_type:Action_types):
+        key = keybinds.get_action_key(action_type)
+        return stylized_text(key.name, (Color.RED if key.conflict else Color.RESET))
 
     def keybind_setting():
+        temp_keybinds = deepcopy(Settings.keybinds)
         while True:
             ans = sfm.UI_list_s([
-            f"Escape: {get_keybind_name('esc')}",
-            f"Up: {get_keybind_name('up')}",
-            f"Down: {get_keybind_name('down')}",
-            f"Left: {get_keybind_name('left')}",
-            f"Right: {get_keybind_name('right')}",
-            f"Enter: {get_keybind_name('enter')}",
+            f"Escape: {get_keybind_name(temp_keybinds, Action_types.ESCAPE)}",
+            f"Up: {get_keybind_name(temp_keybinds, Action_types.UP)}",
+            f"Down: {get_keybind_name(temp_keybinds, Action_types.DOWN)}",
+            f"Left: {get_keybind_name(temp_keybinds, Action_types.LEFT)}",
+            f"Right: {get_keybind_name(temp_keybinds, Action_types.RIGHT)}",
+            f"Enter: {get_keybind_name(temp_keybinds, Action_types.ENTER)}",
             None, "Done"
-            ], " Keybinds", False, True).display(Settings.keybinds_obj)
+            ], " Keybinds", False, True).display(Settings.keybinds)
             # exit
             if ans == -1:
-                Settings.keybinds = Settings.get_keybins()
                 break
             # done
             elif ans > 5:
-                Settings.update_keybinds_object()
+                Settings.update_keybinds(temp_keybinds)
                 break
             else:
-                set_keybind(list(Settings.keybinds)[ans])
+                set_keybind(temp_keybinds._actions[ans])
 
     files_data = sm.get_saves_data()
     in_main_menu = True
@@ -440,7 +442,7 @@ def main_menu():
                 mm_list = ["New save", "Load/Delete save", "Options"]
             else:
                 mm_list = ["New save", "Options"]
-            option = sfm.UI_list_s(mm_list, " Main menu", can_esc=True).display(Settings.keybinds_obj)
+            option = sfm.UI_list_s(mm_list, " Main menu", can_esc=True).display(Settings.keybinds)
         elif len(files_data):
             option = 1
         else:
@@ -461,15 +463,15 @@ def main_menu():
             list_data.append("Regenerate all save files")
             list_data.append("Delete file")
             list_data.append("Back")
-            option = sfm.UI_list_s(list_data, " Level select", True, True, exclude_nones=True).display(Settings.keybinds_obj)
+            option = sfm.UI_list_s(list_data, " Level select", True, True, exclude_nones=True).display(Settings.keybinds)
             # load
             if option != -1 and option < len(files_data):
                 status = (0, files_data[int(option)][0], files_data[int(option)][2])
             # regenerate
             elif option == len(files_data):
-                if not Settings.ask_regenerate_save or sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to regenerate ALL save files? This will load, delete then resave EVERY save file!", can_esc=True).display(Settings.keybinds_obj) == 1:
+                if not Settings.ask_regenerate_save or sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to regenerate ALL save files? This will load, delete then resave EVERY save file!", can_esc=True).display(Settings.keybinds) == 1:
                     if Settings.def_backup_action == -1:
-                        backup_saves = bool(sfm.UI_list_s(["Yes", "No"], f" Do you want to backup your save files before regenerating them?", can_esc=True).display(Settings.keybinds_obj) == 0)
+                        backup_saves = bool(sfm.UI_list_s(["Yes", "No"], f" Do you want to backup your save files before regenerating them?", can_esc=True).display(Settings.keybinds) == 0)
                     else:
                         backup_saves = bool(Settings.def_backup_action)
                     print("Regenerating save files...\n")
@@ -483,9 +485,9 @@ def main_menu():
                 list_data.pop(len(list_data) - 2)
                 list_data.pop(len(list_data) - 2)
                 while len(files_data) > 0:
-                    option = sfm.UI_list(list_data, " Delete mode!", DELETE_CURSOR_ICONS, True, True, exclude_nones=True).display(Settings.keybinds_obj)
+                    option = sfm.UI_list(list_data, " Delete mode!", DELETE_CURSOR_ICONS, True, True, exclude_nones=True).display(Settings.keybinds)
                     if option != -1 and option < (len(list_data) - 1) / 2:
-                        if not Settings.ask_delete_save or sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(Settings.keybinds_obj):
+                        if not Settings.ask_delete_save or sfm.UI_list_s(["No", "Yes"], f" Are you sure you want to remove Save file {files_data[option][0]}?", can_esc=True).display(Settings.keybinds):
                             ts.remove_save(files_data[option][0], files_data[option][2])
                             list_data.pop(option * 2)
                             list_data.pop(option * 2)
@@ -498,7 +500,7 @@ def main_menu():
             else:
                 in_main_menu = True
         elif (option == 2 and len(files_data)) or (option == 1 and not len(files_data)):
-            sfm.UI_list(["Keybinds", "Question popups", "Other", None, "Back"], " Options", None, False, True, [keybind_setting, ask_options, other_options], True).display(Settings.keybinds_obj)
+            sfm.UI_list(["Keybinds", "Question popups", "Other", None, "Back"], " Options", None, False, True, [keybind_setting, ask_options, other_options], True).display(Settings.keybinds)
             in_main_menu = True
 
         # action
@@ -517,7 +519,7 @@ def main_menu():
 
 
 def main():
-    # dt.decode_save_file("settings", ROOT_FOLDER, SETTINGS_SEED)
+    # dt.decode_save_file(SETTINGS_FILE_NAME, ROOT_FOLDER, SETTINGS_SEED)
     # dt.decode_save_file("new save")
     # dt.recompile_save_file("2022-07-10;16-58-51;save2", "old_save2", BACKUPS_FOLDER_PATH, SAVES_FOLDER_PATH, OLD_BACKUP_EXT, SAVE_EXT, 2, SAVE_SEED)
     # dt.encode_save_file("file_test")
