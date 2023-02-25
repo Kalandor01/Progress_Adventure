@@ -6,7 +6,7 @@ from time import sleep
 from typing import Literal
 
 try:
-    from utils import Color, stylized_text, getch, press_key
+    from utils import Color, stylized_text, getwch, press_key
     import tools as ts
     from keybinds import Action_types, Action_key, Action_keybinds
     from data_manager import Settings, Globals, Save_data, is_key
@@ -397,14 +397,13 @@ def main_menu():
         print("\n\nPress any key\n\n", end="")
         normal_keys = []
         arrow_keys = []
-        key = getch()
+        key = getwch()
         if key in DOUBLE_KEYS:
-            key = getch()
+            key = getwch()
             arrow_keys = [key]
         else:
             normal_keys = [key]
-        keybind.change(normal_keys, arrow_keys)
-        Settings.check_keybind_conflicts()
+        keybind.set_keys(normal_keys, arrow_keys)
 
     def get_keybind_name(keybinds:Action_keybinds, action_type:Action_types):
         key = keybinds.get_action_key(action_type)
@@ -431,6 +430,7 @@ def main_menu():
                 break
             else:
                 set_keybind(temp_keybinds._actions[ans])
+                Settings.check_keybind_conflicts(temp_keybinds)
 
     files_data = sm.get_saves_data()
     in_main_menu = True

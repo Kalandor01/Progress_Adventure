@@ -3,7 +3,7 @@ from enum import Enum
 from save_file_manager import Keybinds, Key_action, Get_key_modes, Keys
 
 from utils import Double_keys, Normal_keys
-from constants import DOUBLE_KEYS, ENCODING
+from constants import DOUBLE_KEYS
 
 
 class Action_types(Enum):
@@ -33,47 +33,29 @@ action_type_response_mapping:dict[Action_types, Keys] = {
 }
 
 
-_special_normal_key_name_map:dict[bytes, str] = {
+_special_normal_key_name_map:dict[str, str] = {
     Normal_keys.ENTER.value: "enter",
     Normal_keys.ESCAPE.value: "escape",
-    Normal_keys.SPACE.value: "space",
-    Normal_keys.LETTER_ö.value: "ö",
-    Normal_keys.LETTER_Ö.value: "Ö",
-    Normal_keys.LETTER_ü.value: "ü",
-    Normal_keys.LETTER_Ü.value: "Ü",
-    Normal_keys.LETTER_ó.value: "ó",
-    # Normal_keys.LETTER_Ó.value: "Ó",
-    Normal_keys.LETTER_ú.value: "ú",
-    Normal_keys.LETTER_Ú.value: "Ú",
-    Normal_keys.LETTER_ű.value: "ű",
-    Normal_keys.LETTER_Ű.value: "Ű",
-    Normal_keys.LETTER_á.value: "á",
-    Normal_keys.LETTER_Á.value: "Á",
-    Normal_keys.LETTER_é.value: "é",
-    Normal_keys.LETTER_É.value: "É",
-    Normal_keys.LETTER_í.value: "í",
-    Normal_keys.LETTER_Í.value: "Í",
-    Normal_keys.LETTER_ő.value: "ő",
-    Normal_keys.LETTER_Ő.value: "Ő"
+    Normal_keys.SPACE.value: "space"
 }
 
 
-_special_arrow_key_name_map:dict[bytes, str] = {
+_special_arrow_key_name_map:dict[str, str] = {
     Double_keys.ARROW_UP.value: "up arrow",
     Double_keys.ARROW_DOWN.value: "down arrow",
     Double_keys.ARROW_LEFT.value: "left arrow",
     Double_keys.ARROW_RIGHT.value: "right arrow",
-    Double_keys.NUM_0.value: "num 0",
-    Double_keys.NUM_1.value: "num 1",
-    Double_keys.NUM_3.value: "num 3",
-    Double_keys.NUM_7.value: "num 7",
-    Double_keys.NUM_9.value: "num 9",
+    Double_keys.NUM_0.value: "insert",
+    Double_keys.NUM_1.value: "end",
+    Double_keys.NUM_3.value: "page down",
+    Double_keys.NUM_7.value: "home",
+    Double_keys.NUM_9.value: "page up",
     Double_keys.DELETE.value: "delete"
 }
 
 
 class Action_key(Key_action):
-    def __init__(self, action_type:Action_types, normal_keys:list[bytes]|None=None, arrow_keys:list[bytes]|None=None):
+    def __init__(self, action_type:Action_types, normal_keys:list[str]|None=None, arrow_keys:list[str]|None=None):
         self.action_type = action_type
         response = action_type_response_mapping[self.action_type]
         ignore_modes = action_type_ignore_mapping[self.action_type]
@@ -87,35 +69,26 @@ class Action_key(Key_action):
             if self.normal_keys[0] in _special_normal_key_name_map.keys():
                 self.name = _special_normal_key_name_map[self.normal_keys[0]]
             else:
-                self.name = self.normal_keys[0].decode(ENCODING)
+                if self.normal_keys[0] == "":
+                    self.name = "special key"
+                else:
+                    self.name = self.normal_keys[0]
         else:
             if self.arrow_keys[0] in _special_arrow_key_name_map.keys():
                 self.name = _special_arrow_key_name_map[self.arrow_keys[0]]
             else:
-                self.name = self.arrow_keys[0].decode(ENCODING)
+                if self.arrow_keys[0] == "":
+                    self.name = "special key"
+                else:
+                    self.name = self.arrow_keys[0]
 
 
-    def set_keys(self, normal_keys:list[bytes], arrow_keys:list[bytes]):
-        try:
-            if len(normal_keys) > 0:
-                normal_keys[0].decode(ENCODING)
-            elif len(arrow_keys) > 0:
-                arrow_keys[0].decode(ENCODING)
-            else:
-                raise KeyError
-        except UnicodeDecodeError:
-            from tools import logger, Log_type
-            logger("Unknown key", "cannot decode key", Log_type.ERROR)
-            raise
-        else:
-            self.normal_keys = normal_keys
-            self.arrow_keys = arrow_keys
-            self.set_name()
-
-
-    def change(self, normal_keys:list[bytes], arrow_keys:list[bytes]):
-        try: self.set_keys(normal_keys, arrow_keys)
-        except UnicodeDecodeError: pass
+    def set_keys(self, normal_keys:list[str], arrow_keys:list[str]):
+        if len(normal_keys) == 0 and len(arrow_keys) == 0:
+            raise KeyError
+        self.normal_keys = normal_keys
+        self.arrow_keys = arrow_keys
+        self.set_name()
 
 
     def __str__(self):
@@ -140,17 +113,11 @@ class Action_keybinds(Keybinds):
         return Action_key(action_type.ESCAPE, [Normal_keys.ESCAPE.value])
     
     
-    def keybinds_to_json(self):
+    def to_json(self):
         """Turns the `Action_keybinds` objest into a json object for the settings file."""
         keybinds_json:dict[str, list[list[str]]] = {}
         for action in self._actions:
-            normal_keybinds_decoded = []
-            arrow_keybinds_decoded = []
-            for key in action.normal_keys:
-                normal_keybinds_decoded.append(key.decode(ENCODING))
-            for key in action.arrow_keys:
-                arrow_keybinds_decoded.append(key.decode(ENCODING))
-            keybinds_json[action.action_type.value] = [normal_keybinds_decoded, arrow_keybinds_decoded]
+            keybinds_json[action.action_type.value] = [action.normal_keys, action.arrow_keys]
         return keybinds_json
 
 
@@ -165,7 +132,7 @@ def get_def_keybinds():
         ])
 
 
-def keybinds_from_json(keybinds_json:dict[str, list[list[str]]]) -> Action_keybinds:
+def keybinds_from_json(keybinds_json:dict[str, list[list[str]]]):
     """Turns the settings part of the settings file into an `Action_keybinds` objest."""
     actions = []
     for action_type_str in keybinds_json:
@@ -177,16 +144,10 @@ def keybinds_from_json(keybinds_json:dict[str, list[list[str]]]) -> Action_keybi
                 normal_keys = key_list[0]
             else:
                 normal_keys = []
-            encoded_normal_keys = []
-            for key in normal_keys:
-                encoded_normal_keys.append(bytes(key, ENCODING))
             # arrow keys
             if len(key_list) > 1 and len(key_list[1]) > 0:
                 arrow_keys = key_list[1]
             else:
                 arrow_keys = []
-            encoded_arrow_keys = []
-            for key in arrow_keys:
-                encoded_arrow_keys.append(bytes(key, ENCODING))
-            actions.append(Action_key(action_type, encoded_normal_keys, encoded_arrow_keys))
+            actions.append(Action_key(action_type, normal_keys, arrow_keys))
     return Action_keybinds(actions)

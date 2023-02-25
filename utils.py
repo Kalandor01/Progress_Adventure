@@ -1,6 +1,6 @@
 from datetime import datetime as dtime
 from enum import Enum, EnumType
-from msvcrt import getch, kbhit
+from msvcrt import getwch, kbhit
 from typing import Any
 
 from constants import DOUBLE_KEYS
@@ -35,41 +35,23 @@ class Style(Enum):
 
 
 class Normal_keys(Enum):
-    ENTER       = b"\r"
-    ESCAPE      = b"\x1b"
-    SPACE       = b" "
-    LETTER_ö    = b"\x94"
-    LETTER_Ö    = b"\x99"
-    LETTER_ü    = b"\x81"
-    LETTER_Ü    = b"\x9a"
-    LETTER_ó    = b"\xa2"
-    # LETTER_Ó    = b"\xe0"
-    LETTER_ú    = b"\xa3"
-    LETTER_Ú    = b"\xe9"
-    LETTER_ű    = b"\xfb"
-    LETTER_Ű    = b"\xeb"
-    LETTER_á    = b"\xa0"
-    LETTER_Á    = b"\xb5"
-    LETTER_é    = b"\x82"
-    LETTER_É    = b"\x90"
-    LETTER_í    = b"\xa1"
-    LETTER_Í    = b"\xd6"
-    LETTER_ő    = b"\x8b"
-    LETTER_Ő    = b"\x8a"
+    ENTER       = "\r"
+    ESCAPE      = "\x1b"
+    SPACE       = " "
 
 
 class Double_keys(Enum):
-    ARROW_UP    = b"H"
-    ARROW_DOWN  = b"P"
-    ARROW_LEFT  = b"K"
-    ARROW_RIGHT = b"M"
-    NUM_0       = b"R" # INSERT
-    NUM_1       = b"O" # END
-    NUM_3       = b"Q" # PGDWN
+    ARROW_UP    = "H"
+    ARROW_DOWN  = "P"
+    ARROW_LEFT  = "K"
+    ARROW_RIGHT = "M"
+    NUM_0       = "R" # INSERT
+    NUM_1       = "O" # END
+    NUM_3       = "Q" # PGDWN
     # NUM_5       = None
-    NUM_7       = b"G" # HOME
-    NUM_9       = b"I" # PGUP
-    DELETE      = b"S"
+    NUM_7       = "G" # HOME
+    NUM_9       = "I" # PGUP
+    DELETE      = "S"
 
 
 def imput(ask="Num: ", type=int):
@@ -175,8 +157,8 @@ def press_key(text="", allow_buffered_inputs=False):
     """
     if not allow_buffered_inputs:
         while kbhit():
-            getch()
+            getwch()
     print(text, end="", flush=True)
-    if getch() in DOUBLE_KEYS:
-        getch()
+    if getwch() in DOUBLE_KEYS:
+        getwch()
     print()

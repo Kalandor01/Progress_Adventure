@@ -11,7 +11,6 @@ from PIL import Image, ImageDraw
 
 from utils import Color, make_date, make_time, stylized_text, press_key
 from constants import                                                                   \
-    ENCODING,                                                                           \
     MAIN_THREAD_NAME, TEST_THREAD_NAME, VISUALIZER_THREAD_NAME,                         \
     ROOT_FOLDER,                                                                        \
     SAVES_FOLDER_PATH, SAVE_EXT,                                                        \
@@ -32,7 +31,7 @@ def decode_save_file(save_name:str, save_name_pre=SAVES_FOLDER_PATH, save_num=SA
     Decodes a save file into a normal json.
     """
     try:
-        save_data = sfm.decode_save(save_num, join(save_name_pre, save_name), save_ext, ENCODING)
+        save_data = sfm.decode_save(save_num, join(save_name_pre, save_name), save_ext)
     except FileNotFoundError:
         print(f"decode_save_file: FILE {save_name} NOT FOUND!")
     else:
@@ -54,7 +53,7 @@ def encode_save_file(save_name:str, pre_save_name=SAVES_FOLDER_PATH, save_num=SA
     except FileNotFoundError:
         print(f"encode_save_file: FILE {save_name} NOT FOUND!")
     else:
-        sfm.encode_save(save_data_new, save_num, join(pre_save_name, save_name), save_ext, ENCODING, FILE_ENCODING_VERSION)
+        sfm.encode_save(save_data_new, save_num, join(pre_save_name, save_name), save_ext, FILE_ENCODING_VERSION)
 
 
 def recompile_save_file(save_name:str, new_save_name:str, pre_save_name=SAVES_FOLDER_PATH, new_pre_save_name=SAVES_FOLDER_PATH, save_ext=SAVE_EXT, new_save_ext=SAVE_EXT, save_num=SAVE_SEED, new_save_num=SAVE_SEED):
@@ -64,12 +63,12 @@ def recompile_save_file(save_name:str, new_save_name:str, pre_save_name=SAVES_FO
     if new_save_name is None:
         new_save_name = save_name
     try:
-        save_data = sfm.decode_save(save_num, join(pre_save_name, save_name), save_ext, ENCODING)
+        save_data = sfm.decode_save(save_num, join(pre_save_name, save_name), save_ext)
     except FileNotFoundError:
         print(f"recompile_save_file: FILE {save_name} NOT FOUND!")
         return False
     else:
-        sfm.encode_save(save_data, new_save_num, join(new_pre_save_name, new_save_name), new_save_ext, ENCODING, FILE_ENCODING_VERSION)
+        sfm.encode_save(save_data, new_save_num, join(new_pre_save_name, new_save_name), new_save_ext, FILE_ENCODING_VERSION)
         return True
 
 

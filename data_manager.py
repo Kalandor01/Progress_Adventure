@@ -4,9 +4,8 @@ from typing import Any
 from os.path import join, isfile
 from os import listdir
 
-from utils import Double_keys, getch
+from utils import Double_keys, getwch, kbhit
 from constants import                     \
-    ENCODING,                             \
     SAVES_FOLDER_PATH, SAVE_EXT,          \
     SAVE_FOLDER_NAME_CHUNKS,              \
     CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, \
@@ -136,11 +135,14 @@ class Settings:
 
 
     @staticmethod
-    def check_keybind_conflicts():
-        for key in Settings.keybinds._actions:
+    def check_keybind_conflicts(keybinds:Action_keybinds|None=None):
+        """Checks the keybinds for keybind conflicts."""
+        if keybinds is None:
+            keybinds = Settings.keybinds
+        for key in keybinds._actions:
             key.conflict = False
-        for key1 in Settings.keybinds._actions:
-            for key2 in Settings.keybinds._actions:
+        for key1 in keybinds._actions:
+            for key2 in keybinds._actions:
                 if key1 != key2:
                     if (
                         len(key1.normal_keys) > 0 and len(key2.normal_keys) > 0 and  key1.normal_keys[0] == key2.normal_keys[0]
@@ -258,16 +260,19 @@ class Save_data:
         return save_data_json
 
 
-def is_key(key:Action_key):
+def is_key(key:Action_key, allow_buffered_inputs=False):
     """
     Waits for a specific key.
     """
 
-    key_in = getch()
+    if not allow_buffered_inputs:
+        while kbhit():
+            getwch()
+    key_in = getwch()
     arrow = False
     if key_in in DOUBLE_KEYS:
         arrow = True
-        key_in = getch()
+        key_in = getwch()
     
     return ((not arrow and key_in in key.normal_keys) or
             (arrow and key_in in key.arrow_keys))

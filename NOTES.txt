@@ -74,7 +74,7 @@ Other ideas:
 
 IMPORTANT:
     - REWORK MAIN MENU LOGIC!!!!!!!!!!!!!!!!!!!!!!!!!!
-    - getch() that I can stop from other thread???
+    - getwch() that I can stop from other thread???
     - PA GUI BRANCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     - INVENTORY UPGRADE BRANCH!!!!!!!!!!!!!!!!!!!!!!!!
 

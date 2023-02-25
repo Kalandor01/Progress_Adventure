@@ -19,7 +19,6 @@ from constants import                                                   \
     PIP_NP_MIN_VERSION, PIP_COL_MIN_VERSION,                            \
     PIP_PIL_MIN_VERSION, PIP_PERLIN_MIN_VERSION,                         \
     PIP_SFM_MIN_VERSION, PIP_RS_MIN_VERSION,                            \
-    ENCODING,                                                           \
     ROOT_FOLDER,                                                        \
     SAVES_FOLDER, SAVES_FOLDER_PATH, OLD_SAVE_NAME, SAVE_EXT,           \
     LOGGING, LOGGING_LEVEL, LOGS_FOLDER, LOGS_FOLDER_PATH, LOG_EXT,     \
@@ -118,7 +117,7 @@ def encode_save_s(data:list[dict[str, Any]]|dict[str, Any], file_path:str, seed=
         for dat in data:
             json_data.append(json.dumps(dat))
     
-    sfm.encode_save(json_data, seed, file_path, extension, ENCODING, FILE_ENCODING_VERSION)
+    sfm.encode_save(json_data, seed, file_path, extension, FILE_ENCODING_VERSION)
 
 
 def decode_save_s(file_path:str, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT, can_be_old=False) -> dict[str, Any]:
@@ -127,7 +126,7 @@ def decode_save_s(file_path:str, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT,
     `line_num` is the line, that you want go get back (starting from 0).
     """
     try:
-        decoded_lines = sfm.decode_save(seed, file_path, extension, ENCODING, line_num + 1)
+        decoded_lines = sfm.decode_save(seed, file_path, extension, line_num + 1)
     except ValueError:
         safe_file_path = file_path.removeprefix(ROOT_FOLDER)
         logger("Decode error", f"file name: {safe_file_path}.{SAVE_EXT}", Log_type.ERROR)
@@ -136,7 +135,7 @@ def decode_save_s(file_path:str, line_num=0, seed=SAVE_SEED, extension=SAVE_EXT,
             save_name = str(os.path.basename(file_path))
             old_save_removable = OLD_SAVE_NAME.replace("*", "")
             file_number = int(save_name.replace(old_save_removable, ""))
-            decoded_lines = sfm.decode_save(file_number, file_path, extension, ENCODING, line_num + 1)
+            decoded_lines = sfm.decode_save(file_number, file_path, extension, line_num + 1)
         else:
             raise
     except FileNotFoundError:
@@ -307,7 +306,7 @@ def settings_manager(line_name:Settings_keys|None=None, write_value:Any=None):
     STRUCTURE:\n
     - auto_save: bool
     - logging_level: int
-    - keybinds: dict[str, list[list[bytes]]]
+    - keybinds: dict[str, list[list[str]]]
     \t- esc
     \t- up
     \t- down
@@ -334,7 +333,7 @@ def settings_manager(line_name:Settings_keys|None=None, write_value:Any=None):
     def recreate_settings():
         """Recreates the settings file from the default values, and returns the result."""
         new_settings = deepcopy(def_settings)
-        new_settings[Settings_keys.KEYBINDS.value] = get_def_keybinds().keybinds_to_json()
+        new_settings[Settings_keys.KEYBINDS.value] = get_def_keybinds().to_json()
         encode_save_s(new_settings, os.path.join(ROOT_FOLDER, SETTINGS_FILE_NAME), SETTINGS_SEED)
         # log
         logger("Recreated settings")
@@ -360,32 +359,31 @@ def settings_manager(line_name:Settings_keys|None=None, write_value:Any=None):
                 if line_name.name in Settings_keys._member_names_:
                     logger("Missing key in settings", line_name.name, Log_type.WARN)
                     if line_name == Settings_keys.KEYBINDS:
-                        def_settings[Settings_keys.KEYBINDS.value] = keybinds_from_json(def_settings[Settings_keys.KEYBINDS.value])
+                        def_settings[Settings_keys.KEYBINDS.value] = get_def_keybinds()
                     settings_manager(line_name, def_settings[line_name.value])
-                    return def_settings[line_name.value]
+                    return deepcopy(def_settings[line_name.value])
                 else:
                     raise
         # write
         else:
             if line_name.value in settings.keys():
                 if line_name == Settings_keys.KEYBINDS:
-                    settings[Settings_keys.KEYBINDS.value] = keybinds_from_json(settings[Settings_keys.KEYBINDS.value])
+                    if isinstance(write_value, Action_keybinds):
+                        write_value = write_value.to_json()
+                    else:
+                        raise TypeError(write_value)
                 if settings[line_name.value] != write_value:
+                    print(settings[line_name.value])
+                    print(write_value)
                     logger("Changed settings", f"{line_name.name}: {settings[line_name.value]} -> {write_value}", Log_type.DEBUG)
                     settings[line_name.value] = write_value
-                    if line_name == Settings_keys.KEYBINDS:
-                        keybind_value:Action_keybinds = settings[Settings_keys.KEYBINDS.value]
-                        settings[Settings_keys.KEYBINDS.value] = keybind_value.keybinds_to_json()
                     encode_save_s(settings, os.path.join(ROOT_FOLDER, SETTINGS_FILE_NAME), SETTINGS_SEED)
             else:
                 if line_name.name in Settings_keys._member_names_:
                     logger("Recreating key in settings", line_name.name, Log_type.WARN)
                     if line_name == Settings_keys.KEYBINDS:
-                        def_settings[Settings_keys.KEYBINDS.value] = keybinds_from_json(def_settings[Settings_keys.KEYBINDS.value])
+                        def_settings[Settings_keys.KEYBINDS.value] = get_def_keybinds().to_json()
                     settings[line_name.value] = def_settings[line_name.value]
-                    if line_name == Settings_keys.KEYBINDS:
-                        keybind_value:Action_keybinds = settings[Settings_keys.KEYBINDS.value]
-                        settings[Settings_keys.KEYBINDS.value] = keybind_value.keybinds_to_json()
                     encode_save_s(settings, os.path.join(ROOT_FOLDER, SETTINGS_FILE_NAME), SETTINGS_SEED)
                 else:
                     raise KeyError(line_name)

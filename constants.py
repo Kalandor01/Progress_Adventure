@@ -10,11 +10,8 @@ PIP_COL_MIN_VERSION = "0.4.6"
 PIP_PIL_MIN_VERSION = "9.4.0"
 PIP_PERLIN_MIN_VERSION = "1.12"
 
-PIP_SFM_MIN_VERSION = "1.15"
+PIP_SFM_MIN_VERSION = "1.15.3"
 PIP_RS_MIN_VERSION = "1.5.1"
-
-# language
-ENCODING = "windows-1250"
 
 # thread names
 MAIN_THREAD_NAME = "Main"
@@ -67,7 +64,7 @@ CHUNK_SIZE = 10
 CHUNK_FILE_NAME = "chunk"
 CHUNK_FILE_NAME_SEP = "_"
 SAVE_VERSION = "1.5.3"
-DOUBLE_KEYS = [b"\xe0", b"\x00"]
+DOUBLE_KEYS = ["\xe0", "\x00"]
 TILE_NOISE_RESOLUTION = 1000000000000
 
 
@@ -75,7 +72,6 @@ TILE_NOISE_RESOLUTION = 1000000000000
 #     PYTHON_MIN_VERSION,                                                     \
 #     PIP_NP_MIN_VERSION, PIP_COL_MIN_VERSION,                                \
 #     PIP_SFM_MIN_VERSION, PIP_RS_MIN_VERSION,                                \
-#     ENCODING,                                                               \
 #     MAIN_THREAD_NAME, AUTO_SAVE_THREAD_NAME, MANUAL_SAVE_THREAD_NAME,       \
 #     VISUALIZER_THREAD_NAME, TEST_THREAD_NAME,                               \
 #     ROOT_FOLDER,                                                            \
