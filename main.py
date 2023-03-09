@@ -21,7 +21,7 @@ try:
         ERROR_HANDLING,                                                     \
         AUTO_SAVE_INTERVAL, AUTO_SAVE_DELAY,                                \
         DOUBLE_KEYS
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     input(f"ERROR: {exc_info()[1]}")
     import sys
     sys.exit(1)
@@ -47,6 +47,8 @@ if __name__ == "__main__":
             GOOD_PACKAGES = False
     except:
         ts.logger("Preloading crashed", str(exc_info()), Log_type.FATAL)
+        if ERROR_HANDLING:
+            input(f"ERROR: {exc_info()[1]}")
         raise
 
 
