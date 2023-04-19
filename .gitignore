@@ -7,6 +7,7 @@ saves
 tests
 output
 visualised_saves
+exported
 
 *.log
 *.sav

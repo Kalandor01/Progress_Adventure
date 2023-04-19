@@ -18,7 +18,9 @@ from constants import                                                           
     SAVE_FILE_NAME_DATA,                                                                \
     SAVE_SEED,                                                                          \
     FILE_ENCODING_VERSION, CHUNK_SIZE,                                                  \
-    SAVE_VERSION, TILE_NOISE_RESOLUTION, DOUBLE_KEYS
+    SAVE_VERSION, TILE_NOISE_RESOLUTION, DOUBLE_KEYS,                                   \
+    CS_EXPORT_FOLDER, CS_EXPORT_FOLDER_PATH, SAVE_FOLDER_NAME_CHUNKS
+    
 import tools as ts
 from tools import sfm
 
@@ -613,6 +615,45 @@ def fill_world_simple(corners:tuple[int, int, int, int], save_name:str|None=None
     World.fill_all_chunks("Filling chunks...")
 
 
+# EXPORT
+
+
+def make_exprot_save(show_progress_text: str | None = None):
+    """
+    Creates an export save file from the save data.\n
+    If `show_progress_text` is not None, it writes out a progress percentage while saving.
+    """
+    # FOLDER
+    ts.recreate_folder(CS_EXPORT_FOLDER, ROOT_FOLDER, "export folder")
+    ts.recreate_folder(Save_data.save_name, CS_EXPORT_FOLDER_PATH, "export save file")
+    save_folder_path = join(CS_EXPORT_FOLDER_PATH, Save_data.save_name)
+    # DATA FILE
+    display_data_json = Save_data.display_data_to_json()
+    save_data_json = Save_data.main_data_to_json()
+    # create new save
+    ts.write_as_json([display_data_json, save_data_json], join(save_folder_path, SAVE_FILE_NAME_DATA))
+    
+    # CHUNKS/WORLD
+    ts.recreate_folder(SAVE_FOLDER_NAME_CHUNKS, save_folder_path)
+    ts.logger("Saving chunks")
+    World.save_all_chunks_to_files(save_folder_path, False, show_progress_text, False)
+
+
+def export_to_Csharp(save_folder_name:str):
+    """
+    Loads the save specified, by the folder name, and turns it into a format, that the `ImportFromPython` function can read.
+    """
+    import save_manager as sm
+    
+    # load save data
+    sm.load_save(save_folder_name, False, False, False)
+    World.load_all_chunks_from_folder(show_progress_text="Loading chunks...")
+    make_exprot_save("Saving chunks...")
+
+
+# EXPORT END
+
+
 """
 def gen_named_area(world:cm.World, corners:tuple[int, int, int, int], save_name:str|None=None, show_progress_text:str|None=None):
 
@@ -750,16 +791,20 @@ def gen_named_area(world:cm.World, corners:tuple[int, int, int, int], save_name:
 # save_visualizer(test_save_name)
 
 
-import save_manager as sm
-test_save_name_2 = "travel"
-test_save_name_mod_2 = "travel_2"
-sm.load_save(test_save_name_2)
-World.load_all_chunks_from_folder(show_progress_text="Loading chunks...")
-ts.remove_save(test_save_name_mod_2, False)
-fill_world_simple((-100, -100, 99, 99), Save_data.save_name)
-Save_data.save_name = test_save_name_mod_2
-sm.make_save(show_progress_text="Saving...")
-save_visualizer(test_save_name_mod_2)
+# import save_manager as sm
+# test_save_name_2 = "travel"
+# test_save_name_mod_2 = "travel_2"
+# sm.load_save(test_save_name_2)
+# World.load_all_chunks_from_folder(show_progress_text="Loading chunks...")
+# ts.remove_save(test_save_name_mod_2, False)
+# fill_world_simple((-100, -100, 99, 99), Save_data.save_name)
+# Save_data.save_name = test_save_name_mod_2
+# sm.make_save(show_progress_text="Saving...")
+# save_visualizer(test_save_name_mod_2)
+
+
+ts.log_separator()
+export_to_Csharp("test")
 
 
 

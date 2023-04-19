@@ -10,7 +10,7 @@ from constants import                                               \
     SAVE_EXT, SAVE_FOLDER_NAME_CHUNKS, CHUNK_SIZE,                  \
     CHUNK_FILE_NAME, CHUNK_FILE_NAME_SEP, TILE_NOISE_RESOLUTION,    \
     SAVES_FOLDER_PATH
-from tools import world_seed, noise_generators, logger, decode_save_s, encode_save_s, Log_type, recreate_folder
+from tools import world_seed, noise_generators, logger, decode_save_s, encode_save_s, Log_type, recreate_folder, write_as_json
 from data_manager import Save_data
 
 
@@ -651,7 +651,7 @@ class Chunk:
             return tile
 
 
-    def save_to_file(self, save_folder_path:str|None=None):
+    def save_to_file(self, save_folder_path:str|None=None, encode_data=True):
         """
         Saves the chunk's data into a file in the save folder.\n
         If `save_folder_path` is None, it will make one using the `Save_data`'s `save_name`.
@@ -660,8 +660,12 @@ class Chunk:
             save_folder_path = join(SAVES_FOLDER_PATH, Save_data.save_name)
         chunk_data = self.to_json()
         chunk_file_name = f"{CHUNK_FILE_NAME}{CHUNK_FILE_NAME_SEP}{self.base_x}{CHUNK_FILE_NAME_SEP}{self.base_y}"
-        encode_save_s(chunk_data, join(save_folder_path, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
-        logger("Saved chunk", f"{chunk_file_name}.{SAVE_EXT}")
+        if encode_data:
+            encode_save_s(chunk_data, join(save_folder_path, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
+            logger("Saved chunk", f"{chunk_file_name}.{SAVE_EXT}")
+        else:
+            write_as_json(chunk_data, join(save_folder_path, SAVE_FOLDER_NAME_CHUNKS, chunk_file_name))
+            logger("Saved unencoded chunk", f"{chunk_file_name}.json")
 
 
     def fill_chunk(self):
@@ -752,7 +756,7 @@ class World:
 
 
     @staticmethod
-    def save_all_chunks_to_files(save_folder_path:str|None=None, remove_chunks=False, show_progress_text:str|None=None):
+    def save_all_chunks_to_files(save_folder_path:str|None=None, remove_chunks=False, show_progress_text:str|None=None, encode_data=True):
         """
         Saves all chunks to the save file.\n
         If `save_folder_path` is None, it will make one using the `Save_data`'s `save_name`.\n
@@ -770,12 +774,12 @@ class World:
             cl = len(chunk_data)
             print(show_progress_text + "              ", end="", flush=True)
             for x, chunk in enumerate(chunk_data.values()):
-                chunk.save_to_file(save_folder_path)
+                chunk.save_to_file(save_folder_path, encode_data)
                 print(f"\r{show_progress_text}{round((x + 1) / cl * 100, 1)}%", end="", flush=True)
             print(f"\r{show_progress_text}DONE!                       ")
         else:
             for chunk in chunk_data.values():
-                chunk.save_to_file(save_folder_path)
+                chunk.save_to_file(save_folder_path, encode_data)
 
 
     @staticmethod

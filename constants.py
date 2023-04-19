@@ -68,6 +68,11 @@ DOUBLE_KEYS = ["\xe0", "\x00"]
 TILE_NOISE_RESOLUTION = 1000000000000
 
 
+# export
+CS_EXPORT_FOLDER = "exported"
+CS_EXPORT_FOLDER_PATH = join(ROOT_FOLDER, CS_EXPORT_FOLDER)
+
+
 # from constants import                                                       \
 #     PYTHON_MIN_VERSION,                                                     \
 #     PIP_NP_MIN_VERSION, PIP_COL_MIN_VERSION,                                \

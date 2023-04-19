@@ -105,6 +105,23 @@ class Log_type(Enum):
     OTHER   = 7
 
 
+def write_as_json(data:list[dict[str, Any]]|dict[str, Any], file_path:str):
+    """
+    Writes to unencoded file + convert from json dict to string.
+    """
+    # convert from json to string
+    if type(data) is dict:
+        json_data = [json.dumps(data)]
+    else:
+        json_data:list[str] = []
+        for dat in data:
+            json_data.append(json.dumps(dat))
+    
+    with (open(file_path + ".json", "w")) as f:
+        for line in json_data:
+            f.write(line + "\n")
+
+
 def encode_save_s(data:list[dict[str, Any]]|dict[str, Any], file_path:str, seed=SAVE_SEED, extension=SAVE_EXT):
     """
     Shorthand for `sfm.encode_save` + convert from json to string.
