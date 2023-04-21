@@ -214,9 +214,13 @@ def load_save(save_name:str, is_file=False, backup_choice=True, automatic_backup
         old_save_folder_path = save_folder_path
         save_folder_path = os.path.join(SAVES_FOLDER_PATH, save_name)
         os.rename(f"{old_save_folder_path}.{SAVE_EXT}", f"{save_folder_path}.{SAVE_EXT}")
-    else:
+    elif not is_file and os.path.isdir(save_folder_path):
         data = ts.decode_save_s(os.path.join(save_folder_path, SAVE_FILE_NAME_DATA, ), 1)
         is_file = False
+    else:
+        s_type = "file" if is_file else "folder"
+        ts.logger(f"Not a valid save {s_type}", f"{s_type} name: {save_name}", Log_type.ERROR)
+        raise FileNotFoundError
     # read data
     
     # auto backup

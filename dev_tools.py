@@ -639,14 +639,17 @@ def make_exprot_save(show_progress_text: str | None = None):
     World.save_all_chunks_to_files(save_folder_path, False, show_progress_text, False)
 
 
-def export_to_Csharp(save_folder_name:str):
+def export_to_Csharp(save_name:str, is_file=False):
     """
     Loads the save specified, by the folder name, and turns it into a format, that the `ImportFromPython` function can read.
     """
     import save_manager as sm
     
+    s_type = "file" if is_file else "folder"
+    ts.logger(f"Exporting save {s_type}", f"{s_type} name: {save_name}", ts.Log_type.INFO)
     # load save data
-    sm.load_save(save_folder_name, False, False, False)
+    dm.Settings()
+    sm.load_save(save_name, is_file)
     World.load_all_chunks_from_folder(show_progress_text="Loading chunks...")
     make_exprot_save("Saving chunks...")
 
@@ -804,7 +807,7 @@ def gen_named_area(world:cm.World, corners:tuple[int, int, int, int], save_name:
 
 
 ts.log_separator()
-export_to_Csharp("test")
+export_to_Csharp("save2", True)
 
 
 
