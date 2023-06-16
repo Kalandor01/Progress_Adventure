@@ -647,11 +647,12 @@ def export_to_Csharp(save_name:str, is_file=False):
     
     s_type = "file" if is_file else "folder"
     ts.logger(f"Exporting save {s_type}", f"{s_type} name: {save_name}", ts.Log_type.INFO)
+    print(f'Exproting save "{save_name}":')
     # load save data
     dm.Settings()
     sm.load_save(save_name, is_file)
-    World.load_all_chunks_from_folder(show_progress_text="Loading chunks...")
-    make_exprot_save("Saving chunks...")
+    World.load_all_chunks_from_folder(show_progress_text="\tLoading chunks...")
+    make_exprot_save("\tSaving chunks...")
 
 
 # EXPORT END
@@ -785,12 +786,13 @@ def gen_named_area(world:cm.World, corners:tuple[int, int, int, int], save_name:
 
 
 # import save_manager as sm
-# test_save_name = "ttest"
+# test_save_name = "big_test"
 # sd = dm.Save_data(test_save_name, "test save")
+# World()
 # ts.remove_save(test_save_name, False)
-# fill_world_simple(sd.world, (-100, -100, 99, 99), sd.save_name)
+# fill_world_simple((-200, -200, 199, 199), sd.save_name)
 # # fill_world_segmented(sd.world, join(SAVES_FOLDER_PATH, sd.save_name), (-100, -100, 99, 99), 10)
-# sm.make_save(sd, show_progress_text="Saving...")
+# sm.make_save(show_progress_text="Saving...")
 # save_visualizer(test_save_name)
 
 
@@ -806,8 +808,12 @@ def gen_named_area(world:cm.World, corners:tuple[int, int, int, int], save_name:
 # save_visualizer(test_save_name_mod_2)
 
 
-ts.log_separator()
-export_to_Csharp("save2", True)
+# ts.log_separator()
+export_to_Csharp("new save", False)
+export_to_Csharp("new save_1", False)
+export_to_Csharp("save2_1", False)
+export_to_Csharp("test", False)
+export_to_Csharp("big_test", False)
 
 
 
