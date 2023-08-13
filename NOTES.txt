@@ -20,7 +20,7 @@ Items/Inventories:
     - if key is missing from item action list, default is used: no "drop": "drop": (drop, None)
     - maybe used for Tile content as well
 
-Important Entiies:
+Important Entities:
     - human(monster type?): monster and nps
     - important: can show up more
     - named monsters (important):
